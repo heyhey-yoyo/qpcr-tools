@@ -61,7 +61,7 @@ function buildTemplate() {
   const genes = experiment.targetGenes.length ? experiment.targetGenes : ['IL6'];
   experiment.groups.forEach(group => {
     for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-      const sample = `${group.name}-${bio}`;
+      const sample = `${group.name}-BioRep${bio}`;
       genes.forEach(gene => {
         template.push({ sample, group: group.name, gene, role: 'target', reps: replicateCount, breakBefore: false });
       });
@@ -539,7 +539,7 @@ function renderBlocks() {
       <td><input data-field="sample" value="${escapeHtml(block.sample)}" /></td>
       <td><input data-field="group" value="${escapeHtml(block.group)}" /></td>
       <td><input data-field="gene" value="${escapeHtml(block.gene)}" /></td>
-      <td><select data-field="role"><option value="target" ${block.role === 'target' ? 'selected' : ''}>目标</option><option value="reference" ${block.role === 'reference' ? 'selected' : ''}>内参</option></select></td>
+      <td><span class="role-text">${block.role === 'reference' ? '内参' : '目标'}</span></td>
       <td class="action-col"><div class="block-actions">
         <button class="icon-button move-up" title="上移" ${index === 0 ? 'disabled' : ''}>↑</button>
         <button class="icon-button move-down" title="下移" ${index === blocks.length - 1 ? 'disabled' : ''}>↓</button>
@@ -557,14 +557,17 @@ function renderBlocks() {
 }
 
 function readBlocks() {
-  blocks = [...els.blocksBody.querySelectorAll('tr[data-index]')].map(row => ({
-    breakBefore: row.querySelector('[data-field="breakBefore"]').checked,
-    sample: row.querySelector('[data-field="sample"]').value.trim(),
-    group: row.querySelector('[data-field="group"]').value.trim(),
-    gene: row.querySelector('[data-field="gene"]').value.trim(),
-    role: row.querySelector('[data-field="role"]').value,
-    reps: replicateCount
-  }));
+  blocks = [...els.blocksBody.querySelectorAll('tr[data-index]')].map(row => {
+    const index = Number(row.dataset.index);
+    return {
+      breakBefore: row.querySelector('[data-field="breakBefore"]').checked,
+      sample: row.querySelector('[data-field="sample"]').value.trim(),
+      group: row.querySelector('[data-field="group"]').value.trim(),
+      gene: row.querySelector('[data-field="gene"]').value.trim(),
+      role: blocks[index]?.role || 'target',
+      reps: replicateCount
+    };
+  });
   if (blocks[0]) blocks[0].breakBefore = false;
   renderPlate();
   save();
@@ -1223,9 +1226,9 @@ function calculate() {
 
 function renderResults(controlStatsByGene) {
   const maxSpread = Number(els.spread.value) || 0.5;
-  els.desc.textContent = els.mode.value === 'ddct'
-    ? '以对照组为校准样本，按目标基因分别计算 ΔCt、ΔΔCt 和相对表达倍数。'
-    : '仅以内参基因归一化，计算每个样本的 ΔCt 和 2^-ΔCt。';
+  els.desc.innerHTML = els.mode.value === 'ddct'
+    ? `内参基因：<strong>${escapeHtml(els.ref.value || 'GAPDH')}</strong> · 对照组：<strong>${escapeHtml(els.control.value || 'NC')}</strong> — 以对照组为校准样本，按目标基因分别计算 ΔCt、ΔΔCt 和相对表达倍数。`
+    : `内参基因：<strong>${escapeHtml(els.ref.value || 'GAPDH')}</strong> — 仅以内参基因归一化，计算每个样本的 ΔCt 和 2^-ΔCt。`;
   els.formula.innerHTML = els.mode.value === 'ddct'
     ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 对照组同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），对照组样本作为基准不画误差棒。'
     : '<strong>归一化表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；归一化表达量 = 2<sup>−ΔCt</sup>。误差棒为 ΔCt 的 SEM，仅反映技术重复层面。';
