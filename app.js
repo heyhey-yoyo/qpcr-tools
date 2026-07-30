@@ -95,7 +95,7 @@ const exampleRows = [
 let blocks = buildTemplate(1);
 let rows = clone(exampleRows);
 let latest = [];
-let latestNotes = { merged: [], excluded: [] };
+let latestNotes = { merged: [], singleRep: [] };
 let latestPlate = { placements: [], overflow: false };
 
 function clone(value) {
@@ -794,17 +794,15 @@ function calculate() {
   });
 
   let output = [];
-  const excludedLabels = new Set();
+  const singleRepLabels = new Set();
   Object.values(bySample).forEach(items => {
     const reference = items.find(item => item.gene.trim().toLowerCase() === ref);
     items.filter(item => item.gene.trim().toLowerCase() !== ref).forEach(target => {
       if (!reference || !Number.isFinite(reference.s.mean) || !Number.isFinite(target.s.mean)) return;
-      // Records with fewer than 2 valid replicates never enter the formal
-      // calculation: a single well has no reproducibility support.
-      if (target.s.n < 2 || reference.s.n < 2) {
-        excludedLabels.add(`${target.name} · ${target.gene}`);
-        return;
-      }
+      // Single-replicate records still produce a point estimate, but have no
+      // replicate support: no error bar and flagged as 单孔.
+      const paired = target.s.n >= 2 && reference.s.n >= 2;
+      if (!paired) singleRepLabels.add(`${target.name} · ${target.gene}`);
       output.push({
         name: target.name,
         group: target.group,
@@ -815,17 +813,19 @@ function calculate() {
         // Target and reference replicates live in independent wells: there is
         // no real pairing, so ΔCt SEM propagates both SDs independently:
         // SE = sqrt(tSd²/tN + rSd²/rN). Never pair by array index.
-        se: Math.sqrt(
-          (target.s.sd ** 2) / Math.max(1, target.s.n) +
-          (reference.s.sd ** 2) / Math.max(1, reference.s.n)
-        ),
+        se: paired
+          ? Math.sqrt(
+            (target.s.sd ** 2) / target.s.n +
+            (reference.s.sd ** 2) / reference.s.n
+          )
+          : null,
         targetSpread: target.s.spread,
         referenceSpread: reference.s.spread,
         n: Math.min(target.s.n, reference.s.n)
       });
     });
   });
-  latestNotes = { merged: [...mergedLabels], excluded: [...excludedLabels] };
+  latestNotes = { merged: [...mergedLabels], singleRep: [...singleRepLabels] };
 
   // Control ΔCt statistics are computed per target gene, never mixed across
   // genes. Gene/group comparisons use trimmed lowercase names.
@@ -855,6 +855,7 @@ function calculate() {
   output = output.map(item => {
     const qc = Math.max(item.targetSpread, item.referenceSpread) <= maxSpread && item.n >= 2;
     if (els.mode.value !== 'ddct') {
+      const fold = Math.pow(2, -item.dct);
       return {
         ...item,
         qc,
@@ -862,9 +863,9 @@ function calculate() {
         controlMean: null,
         controlN: null,
         error: item.se,
-        fold: Math.pow(2, -item.dct),
-        foldLow: Math.pow(2, -(item.dct + item.se)),
-        foldHigh: Math.pow(2, -(item.dct - item.se))
+        fold,
+        foldLow: Number.isFinite(item.se) ? Math.pow(2, -(item.dct + item.se)) : fold,
+        foldHigh: Number.isFinite(item.se) ? Math.pow(2, -(item.dct - item.se)) : fold
       };
     }
     const controlStats = controlStatsByGene.get(item.gene.trim().toLowerCase());
@@ -937,14 +938,14 @@ function renderResults(controlStatsByGene) {
     .map(item => `<div class="summary-item"><span class="summary-label">${escapeHtml(item[0])}</span><span class="summary-value">${item[1]}</span></div>`).join('');
 
   const messages = [];
-  if (!latest.length && !latestNotes.excluded.length) {
+  if (!latest.length) {
     messages.push(['warning', '请录入成对的目标基因与内参基因 Ct 数据。']);
   }
   if (latestNotes.merged.length) {
     messages.push(['warning', `检测到重复的“样本 + 组别 + 基因”记录，已合并其技术重复：${latestNotes.merged.map(escapeHtml).join('、')}`]);
   }
-  if (latestNotes.excluded.length) {
-    messages.push(['danger', `有效重复孔不足 2 个，未参与正式计算：${latestNotes.excluded.map(escapeHtml).join('、')}`]);
+  if (latestNotes.singleRep.length) {
+    messages.push(['warning', `仅 1 个有效孔，无技术重复误差，结果请谨慎使用：${latestNotes.singleRep.map(escapeHtml).join('、')}`]);
   }
   const missingGenes = [...new Set(latest.filter(item => item.missingControl).map(item => item.gene))];
   if (missingGenes.length) {
@@ -979,7 +980,7 @@ function renderResults(controlStatsByGene) {
     <td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.group)}</td><td>${escapeHtml(item.gene)}</td>
     <td>${fmt(item.target)}</td><td>${fmt(item.reference)}</td><td>${fmt(item.dct)}</td>
     <td>${els.mode.value === 'ddct' ? fmt(item.ddct) : '—'}</td><td>${fmt(item.fold)}</td>
-    <td><span class="status ${item.missingControl || !item.qc ? 'status-warning' : 'status-ok'}">${item.missingControl ? '缺对照' : item.qc ? '通过' : '需复核'}</span></td>
+    <td><span class="status ${item.missingControl || !item.qc ? 'status-warning' : 'status-ok'}">${item.missingControl ? '缺对照' : item.n < 2 ? '单孔' : item.qc ? '通过' : '需复核'}</span></td>
   </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">暂无可计算结果</td></tr>';
 }
 
@@ -1022,7 +1023,7 @@ function resultsCsv() {
       item.name, item.group, item.gene, fmt(item.target), fmt(item.reference), fmt(item.dct),
       fmt(item.controlMean), item.controlN ?? '', fmt(item.ddct), fmt(item.fold),
       Number.isFinite(item.error) ? 'SEM' : '—', fmt(item.error), fmt(item.foldLow), fmt(item.foldHigh),
-      item.missingControl ? '缺对照' : item.qc ? '通过' : '需复核'
+      item.missingControl ? '缺对照' : item.n < 2 ? '单孔' : item.qc ? '通过' : '需复核'
     ].map(csvCell).join(','))
   ].join('\n');
 }

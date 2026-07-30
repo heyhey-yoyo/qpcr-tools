@@ -5,7 +5,7 @@ const src = fs.readFileSync('app.js', 'utf8');
 const grab = name => src.match(new RegExp(`function ${name}\\([\\s\\S]*?\\n}`))[0];
 
 let latest = [];
-let latestNotes = { merged: [], excluded: [] };
+let latestNotes = { merged: [], singleRep: [] };
 let capturedControlStats = null;
 const els = {
   ref: { value: 'GAPDH' },
@@ -132,15 +132,22 @@ check('T7 merged note recorded', latestNotes.merged.length, 1);
 const treatItem7 = latest.find(i => i.name === 'Treat');
 check('T7 treatment fold uses merged control', treatItem7.fold, 4);
 
-// --- 测试八：有效重复孔不足 2 个的记录不进入正式计算 ---
+// --- 测试八：单个有效孔仍给出点估计，但无误差棒并标记为单孔 ---
 run([
   { name: 'NC', group: 'NC', gene: 'GAPDH', cts: [20, 20, 20] },
   { name: 'NC', group: 'NC', gene: 'IL6', cts: [25, '', ''] },
   ...mk('Treat', 'Treatment', 'IL6', 3)
 ]);
-check('T8 single-well record excluded', latest.filter(i => i.name === 'NC').length, 0);
-check('T8 exclusion noted', latestNotes.excluded.length, 1);
-check('T8 treatment missing control', latest.find(i => i.name === 'Treat').missingControl, true);
+const nc8 = latest.find(i => i.name === 'NC');
+check('T8 single-well record kept', latest.filter(i => i.name === 'NC').length, 1);
+check('T8 single-well dct computed', nc8.dct, 5);
+check('T8 single-well error null', nc8.error, null);
+check('T8 single-well qc false', nc8.qc, false);
+check('T8 single-well foldLow == fold', nc8.foldLow, nc8.fold);
+check('T8 single-well note recorded', latestNotes.singleRep.length, 1);
+const treat8 = latest.find(i => i.name === 'Treat');
+check('T8 treatment computes with single-well control', treat8.fold, 4);
+check('T8 treatment not missing control', treat8.missingControl === undefined, true);
 
 // --- 测试九：多对照生物学样本时，样本间变异不混入误差棒 ---
 run([
