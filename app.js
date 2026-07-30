@@ -1089,22 +1089,14 @@ function renderResults(controlStatsByGene) {
     ? '以对照组为校准样本，按目标基因分别计算 ΔCt、ΔΔCt 和相对表达倍数。'
     : '仅以内参基因归一化，计算每个样本的 ΔCt 和 2^-ΔCt。';
   els.formula.innerHTML = els.mode.value === 'ddct'
-    ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 对照组同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），不含对照组均值不确定性，也不代表组间生物学重复统计；对照组有多个生物学样本时，其样本间变异在摘要中单独给出；对照组样本作为基准不画误差棒。'
+    ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 对照组同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），对照组样本作为基准不画误差棒。'
     : '<strong>归一化表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；归一化表达量 = 2<sup>−ΔCt</sup>。误差棒为 ΔCt 的 SEM，仅反映技术重复层面。';
 
   const summaryItems = [
     ['有效结果', latest.length],
-    ['目标基因', new Set(latest.map(item => item.gene)).size]
+    ['目标基因', new Set(latest.map(item => item.gene)).size],
+    ['需复核', latest.filter(item => !item.qc || item.missingControl).length]
   ];
-  if (els.mode.value === 'ddct') {
-    controlStatsByGene.forEach(stats => {
-      const value = stats.n > 1
-        ? `${fmt(stats.mean)} ± ${fmt(stats.se)}（n=${stats.n}，样本间 SEM）`
-        : `${fmt(stats.mean)}（n=${stats.n}）`;
-      summaryItems.push([`${stats.gene} 对照组平均 ΔCt`, value]);
-    });
-  }
-  summaryItems.push(['需复核', latest.filter(item => !item.qc || item.missingControl).length]);
   els.summary.innerHTML = summaryItems
     .map(item => `<div class="summary-item"><span class="summary-label">${escapeHtml(item[0])}</span><span class="summary-value">${item[1]}</span></div>`).join('');
 
