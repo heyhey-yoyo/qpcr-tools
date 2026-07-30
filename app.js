@@ -1210,8 +1210,8 @@ function groupChartSvg() {
   const barGap = 4;
   const clusterGap = 20;
   const barH = 136;
-  const topPad = 18;
-  const chartH = 190;
+  const topPad = 24;
+  const chartH = 200;
   const baseY = topPad + barH;
   let maxFold = 1;
   const allBars = [];
@@ -1259,7 +1259,7 @@ function groupChartSvg() {
           + `<line x1="${mx - 4}" y1="${yHi}" x2="${mx + 4}" y2="${yHi}" stroke="#475569" stroke-width="1"/>`
           + `<line x1="${mx - 4}" y1="${yLo}" x2="${mx + 4}" y2="${yLo}" stroke="#475569" stroke-width="1"/>`;
       }
-      svgParts += `<text x="${x + barW / 2}" y="${Math.max(10, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
+      svgParts += `<text x="${x + barW / 2}" y="${Math.max(16, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
     });
     offset += clusterW + clusterGap;
   });
