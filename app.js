@@ -784,6 +784,7 @@ function handleRemoveGroup(groupId) {
   if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
   if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
   const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+  const hadBlocks = affectedBlocks > 0;
   if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
   // Cascade delete blocks by stable ID
   blocks = blocks.filter(b => b.groupId !== groupId);
@@ -792,22 +793,25 @@ function handleRemoveGroup(groupId) {
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
   renderAllBlocks();
-  // Regenerate rows from remaining blocks so well positions stay in sync
-  latestPlate = generatePlacements();
-  if (blocks.length) {
-    const placementsByBlock = new Map();
-    latestPlate.placements.forEach(item => {
-      if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-      placementsByBlock.get(item.blockIndex).push(item.well);
-    });
-    rows = blocks.map((block, index) => {
-      const wells = placementsByBlock.get(index) || [];
-      return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-    });
-  } else {
-    rows = [];
+  // If blocks changed, regenerate rows so well positions stay in sync.
+  // If blocks didn't change, preserve existing rows (and their Ct data).
+  if (hadBlocks) {
+    latestPlate = generatePlacements();
+    if (blocks.length) {
+      const placementsByBlock = new Map();
+      latestPlate.placements.forEach(item => {
+        if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+        placementsByBlock.get(item.blockIndex).push(item.well);
+      });
+      rows = blocks.map((block, index) => {
+        const wells = placementsByBlock.get(index) || [];
+        return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+      });
+    } else {
+      rows = [];
+    }
+    renderAllRows();
   }
-  renderAllRows();
   renderPlate();
   calculate();
   save();
@@ -834,6 +838,7 @@ function handleRemoveTargetGene(geneId) {
   if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
   if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
   const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+  const hadBlocks = affectedBlocks > 0;
   if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
   // Cascade delete blocks by stable ID
   blocks = blocks.filter(b => b.geneId !== geneId);
@@ -841,22 +846,25 @@ function handleRemoveTargetGene(geneId) {
   experiment = expRemoveTargetGene(experiment, geneId);
   targetCount();
   renderAllBlocks();
-  // Regenerate rows from remaining blocks so well positions stay in sync
-  latestPlate = generatePlacements();
-  if (blocks.length) {
-    const placementsByBlock = new Map();
-    latestPlate.placements.forEach(item => {
-      if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-      placementsByBlock.get(item.blockIndex).push(item.well);
-    });
-    rows = blocks.map((block, index) => {
-      const wells = placementsByBlock.get(index) || [];
-      return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-    });
-  } else {
-    rows = [];
+  // If blocks changed, regenerate rows so well positions stay in sync.
+  // If blocks didn't change, preserve existing rows (and their Ct data).
+  if (hadBlocks) {
+    latestPlate = generatePlacements();
+    if (blocks.length) {
+      const placementsByBlock = new Map();
+      latestPlate.placements.forEach(item => {
+        if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+        placementsByBlock.get(item.blockIndex).push(item.well);
+      });
+      rows = blocks.map((block, index) => {
+        const wells = placementsByBlock.get(index) || [];
+        return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+      });
+    } else {
+      rows = [];
+    }
+    renderAllRows();
   }
-  renderAllRows();
   renderPlate();
   calculate();
   save();
