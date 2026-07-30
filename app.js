@@ -1159,6 +1159,14 @@ function renderResults(controlStatsByGene) {
 function resultsChartSvg() {
   const items = latest.filter(item => Number.isFinite(item.fold));
   if (!items.length) return '';
+  // Sort by experiment.groups order, then by sample name
+  const groupOrder = new Map(experiment.groups.map((g, i) => [g.name.trim().toLowerCase(), i]));
+  items.sort((a, b) => {
+    const ga = groupOrder.get(a.group.trim().toLowerCase()) ?? 99;
+    const gb = groupOrder.get(b.group.trim().toLowerCase()) ?? 99;
+    if (ga !== gb) return ga - gb;
+    return a.name.localeCompare(b.name, undefined, { numeric: true });
+  });
   const width = Math.max(240, items.length * 76 + 16);
   const height = 210;
   const baseY = height - 34;
@@ -1194,12 +1202,11 @@ function groupChartSvg() {
   if (!valid.length) return '';
   const geneList = [...new Set(valid.map(item => item.gene))];
   if (geneList.length <= 1) return ''; // single gene: individual chart is enough
-  const groupList = [...new Set(valid.map(item => item.group))];
-  const controlGroup = experiment.groups.find(g => g.isControl);
-  if (controlGroup) {
-    const ci = groupList.findIndex(n => n.trim().toLowerCase() === controlGroup.name.trim().toLowerCase());
-    if (ci > 0) { const [c] = groupList.splice(ci, 1); groupList.unshift(c); }
-  }
+  // Use experiment.groups order, only include groups that have data
+  const dataGroups = new Set(valid.map(item => item.group.trim().toLowerCase()));
+  const groupList = experiment.groups
+    .map(g => g.name)
+    .filter(name => dataGroups.has(name.trim().toLowerCase()));
   const byKey = new Map();
   valid.forEach(item => {
     const key = `${item.gene.trim().toLowerCase()}|||${item.group.trim()}`;
