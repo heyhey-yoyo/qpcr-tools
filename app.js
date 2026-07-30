@@ -197,6 +197,14 @@ function renderGroups() {
       if (chip) renameGroup(chip.dataset.id);
     });
   });
+  // Also allow clicking the chip name to rename
+  els.groupsContainer.querySelectorAll('.chip-name').forEach(nameEl => {
+    nameEl.addEventListener('click', e => {
+      e.stopPropagation();
+      const chip = nameEl.closest('.group-chip');
+      if (chip) renameGroup(chip.dataset.id);
+    });
+  });
 
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   els.targets.max = String(maxTargetCount());
