@@ -105,6 +105,7 @@ function targetCount() {
   const value = Math.max(1, Math.min(max, n));
   els.targets.value = String(value);
   els.targets.max = String(max);
+  els.geneNamesInput.textContent = experiment.targetGenes.join(';');
   return value;
 }
 
@@ -220,7 +221,6 @@ function renderGroups() {
 
   els.groupsContainer.replaceChildren(frag);
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
-  els.geneNamesInput.textContent = experiment.targetGenes.join(';');
   targetCount();
 }
 
@@ -1440,7 +1440,12 @@ $('#exampleTemplateBtn').addEventListener('click', () => {
 });
 els.targets.addEventListener('input', save);
 els.targets.addEventListener('change', () => {
-  targetCount();
+  const n = Math.max(1, Math.min(maxTargetCount(), Number(els.targets.value) || 1));
+  els.targets.value = String(n);
+  if (n !== experiment.targetGenes.length) {
+    experiment.targetGenes = Array.from({ length: n }, (_, i) => `Target-${i + 1}`);
+    els.geneNamesInput.textContent = experiment.targetGenes.join(';');
+  }
   save();
 });
 $('#clearBlocksBtn').addEventListener('click', () => {
