@@ -169,20 +169,50 @@ function escapeHtml(value) {
 }
 
 function renderGroups() {
-  const html = experiment.groups.map(g => {
-    const ctlBtn = g.isControl
-      ? '<span class="chip-badge">对照</span>'
-      : '<button class="chip-ctl" onclick="event.stopPropagation();window.__toggleControl&&window.__toggleControl(\'' + g.id + '\')">设为对照</button>';
-    const delBtn = experiment.groups.length > 1
-      ? '<button class="chip-del" onclick="event.stopPropagation();window.__removeGroup&&window.__removeGroup(\'' + g.id + '\')">&times;</button>'
-      : '';
-    return '<span class="group-chip' + (g.isControl ? ' chip-control' : '') + '" data-id="' + g.id + '">'
-      + '<span class="chip-name">' + escapeHtml(g.name) + '</span>'
-      + '<button class="chip-edit" onclick="event.stopPropagation();window.__renameGroup&&window.__renameGroup(\'' + g.id + '\')">改</button>'
-      + ctlBtn + delBtn
-      + '</span>';
-  }).join('');
-  els.groupsContainer.innerHTML = html;
+  // Clear old chips
+  while (els.groupsContainer.firstChild) els.groupsContainer.removeChild(els.groupsContainer.firstChild);
+
+  experiment.groups.forEach(g => {
+    const chip = document.createElement('span');
+    chip.className = 'group-chip' + (g.isControl ? ' chip-control' : '');
+    chip.dataset.id = g.id;
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'chip-name';
+    nameEl.textContent = g.name;
+    chip.appendChild(nameEl);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'chip-edit';
+    editBtn.textContent = '改';
+    editBtn.title = '修改分组名';
+    editBtn.addEventListener('click', e => { e.stopPropagation(); renameGroup(g.id); });
+    chip.appendChild(editBtn);
+
+    if (g.isControl) {
+      const badge = document.createElement('span');
+      badge.className = 'chip-badge';
+      badge.textContent = '对照';
+      chip.appendChild(badge);
+    } else {
+      const ctlBtn = document.createElement('button');
+      ctlBtn.className = 'chip-ctl';
+      ctlBtn.textContent = '设为对照';
+      ctlBtn.addEventListener('click', e => { e.stopPropagation(); toggleControlGroup(g.id); });
+      chip.appendChild(ctlBtn);
+    }
+
+    if (experiment.groups.length > 1) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'chip-del';
+      delBtn.innerHTML = '&times;';
+      delBtn.title = '删除分组';
+      delBtn.addEventListener('click', e => { e.stopPropagation(); removeGroup(g.id); });
+      chip.appendChild(delBtn);
+    }
+
+    els.groupsContainer.appendChild(chip);
+  });
 
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   els.targets.max = String(maxTargetCount());
@@ -1441,11 +1471,6 @@ els.plateSize.addEventListener('change', () => {
 }));
 
 els.addGroupBtn.addEventListener('click', addGroup);
-
-// Expose group actions for inline onclick handlers
-window.__renameGroup = renameGroup;
-window.__toggleControl = toggleControlGroup;
-window.__removeGroup = removeGroup;
 
 els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
