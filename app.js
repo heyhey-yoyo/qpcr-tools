@@ -472,6 +472,16 @@ function syncRowsFromBlocks() {
       match = remaining[matchIndex];
       remaining.splice(matchIndex, 1);
     }
+    // Resize cts to match new wells length (plate size, rep count, or
+    // layout changes can alter the number of wells per block).
+    let cts;
+    if (match) {
+      cts = [...match.cts];
+      while (cts.length < wells.length) cts.push('');
+      cts.length = wells.length;
+    } else {
+      cts = Array(wells.length).fill('');
+    }
     return {
       wells,
       name: block.sample,
@@ -479,7 +489,7 @@ function syncRowsFromBlocks() {
       groupId: block.groupId,
       gene: block.gene,
       geneId: block.geneId,
-      cts: match ? match.cts : Array(wells.length).fill('')
+      cts
     };
   });
   renderAllRows();
@@ -568,6 +578,16 @@ function loadPreset() {
   save();
 }
 
+// ---- Plate layout sync ----
+
+/** Re-render plate, regenerate row wells from current layout, recalc, persist. */
+function syncPlateLayout() {
+  renderPlate();
+  syncRowsFromBlocks();
+  calculate();
+  save();
+}
+
 // ---- Plate rendering ----
 
 function renderPlate() {
@@ -579,8 +599,7 @@ function renderPlate() {
       if (!parsed) return;
       els.startRow.value = parsed.row;
       els.startCol.value = String(parsed.col);
-      renderPlate();
-      save();
+      syncPlateLayout();
     }
   });
 
@@ -1115,10 +1134,10 @@ $('#templateFileInput').addEventListener('change', event => {
 
 els.plateSize.addEventListener('change', () => {
   refreshCoordinateSelects(els.startRow.value, els.startCol.value);
-  renderPlate(); save();
+  syncPlateLayout();
 });
 [els.startRow, els.startCol, els.direction, els.gap].forEach(el =>
-  el.addEventListener('change', () => { renderPlate(); save(); })
+  el.addEventListener('change', syncPlateLayout)
 );
 
 els.addGroupBtn.addEventListener('click', handleAddGroup);
@@ -1141,16 +1160,25 @@ els.repsInput.addEventListener('change', () => {
   replicateCount = normalizeReplicateCount(els.repsInput.value);
   els.repsInput.value = String(replicateCount);
   if (oldCount === replicateCount) return;
-  if (rows.length) {
-    const result = resizeReplicates(rows, oldCount, replicateCount);
-    if (result === null) { replicateCount = oldCount; els.repsInput.value = String(oldCount); return; }
-    rows = result;
+
+  // Confirm data loss when reducing replicate count
+  if (replicateCount < oldCount && rows.length) {
+    const lostCts = rows.some(row =>
+      (row.cts || []).slice(replicateCount).some(ct => String(ct ?? '').trim() !== '')
+    );
+    if (lostCts && !window.confirm(`复孔数量从 ${oldCount} 减少到 ${replicateCount}，Ct${replicateCount + 1}–Ct${oldCount} 中已有数据将被移除。确认继续？`)) {
+      replicateCount = oldCount;
+      els.repsInput.value = String(oldCount);
+      return;
+    }
   }
+
   blocks.forEach(b => { b.reps = replicateCount; });
   toggleBioGroupVisibility();
   els.targets.max = String(maxTargetCount());
   targetCount();
-  renderAllBlocks(); renderPlate(); renderAllRows(); calculate(); save();
+  renderAllBlocks();
+  syncPlateLayout();
 });
 
 $('#addSampleBtn').addEventListener('click', () => { readRows(); rows.push(blankRow()); renderAllRows(); calculate(); });
