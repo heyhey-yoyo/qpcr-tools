@@ -74,7 +74,12 @@ export function renderGroups(experiment, containers) {
       delBtn.title = '删除分组';
       delBtn.addEventListener('click', e => {
         e.stopPropagation();
-        containers.onRemoveGroup(g.id);
+        console.log('delete chip clicked, groupId:', g.id, 'callback:', typeof containers.onRemoveGroup);
+        if (typeof containers.onRemoveGroup === 'function') {
+          containers.onRemoveGroup(g.id);
+        } else {
+          console.error('onRemoveGroup is not a function:', containers);
+        }
       });
       chip.appendChild(delBtn);
     }
