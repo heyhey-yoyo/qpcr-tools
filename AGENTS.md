@@ -9,7 +9,7 @@
 | `index.html` | 页面结构，中文 UI（`lang="zh-CN"`），分 4 个步骤卡片：设计孔板模板 → 设置分析参数 → 录入 Ct 数据 → 分析结果 |
 | `app.js` | 全部应用逻辑（约 880 行，单文件、无模块系统、无框架），直接在浏览器全局作用域运行 |
 | `styles.css` | 全部样式，使用 CSS 自定义属性（`--primary` 等），以 minified/压缩风格书写（多规则单行） |
-| `README.txt` | 中文的变更说明与部署说明 |
+| `README.md` | 中文的用户说明与部署说明 |
 
 主要功能：
 
@@ -66,9 +66,9 @@
 
 ## 部署
 
-静态资源直接上传即可（见 `README.txt`）：
+静态资源直接上传即可（见 `README.md`）：
 
-- **Cloudflare Pages**：Workers & Pages → Create → Pages → Direct Upload，上传根目录（须直接包含 `index.html`、`styles.css`、`app.js`、`README.txt`）。
+- **Cloudflare Pages**：Workers & Pages → Create → Pages → Direct Upload，上传根目录（须直接包含 `index.html`、`styles.css`、`app.js`、`README.md`）。
 - **Cloudflare Workers 静态资源**上传同样可用（`workers.dev` 域名）。
 - 无环境变量、无服务端代码、无构建产物目录。
 
