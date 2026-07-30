@@ -68,5 +68,24 @@ check('T6 filtered[2]', filtered[2], 18.2);
 check('T7 CT_MIN', CT_MIN, 0);
 check('T7 CT_MAX', CT_MAX, 50);
 
+// ---- T8: Empty string treated as valid (not an error, just missing) ----
+check('T8 empty string should be treated as missing not invalid', parseCt('').valid, false);
+
+// ---- T9: Invalid values excluded from stats (via filterValidCts) ----
+const mixed2 = ['0', '-1', '51', 'NaN', 'Infinity', '25.5', '30'];
+const filtered2 = filterValidCts(mixed2);
+check('T9 only valid values in range', filtered2.length, 2);
+check('T9 filtered[0]', filtered2[0], 25.5);
+check('T9 filtered[1]', filtered2[1], 30);
+
+// ---- T10: Instant feedback: clean → dirty → clean cycle ----
+const v1 = parseCt('25.5');
+const v2 = parseCt('999');
+const v3 = parseCt('25.5');
+check('T10 valid stays valid', v1.valid, true);
+check('T10 invalid detected', v2.valid, false);
+check('T10 valid again after correction', v3.valid, true);
+check('T10 same value returned after correction', v3.value, 25.5);
+
 console.log(failures ? `\n${failures} FAILED` : '\nALL PASS');
 process.exit(failures ? 1 : 0);

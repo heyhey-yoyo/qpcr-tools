@@ -241,5 +241,72 @@ const experiment = mkExperiment(
   check('T10 rename: display gene changed', t1b.gene, 'GeneX'); // row still has old display name
 }
 
+// ---- T11: Single biological sample → bioSem === null ----
+{
+  const rows = [
+    ...mkPair('NC-1', 'NC', 'g1', 'IL6', 'tg1', 5, 'ref'),
+    ...mkPair('Treat', 'Treatment', 'g2', 'IL6', 'tg1', 3, 'ref')
+  ];
+  const { controlStatsByGene } = computeAnalysis({ rows, experiment, mode: 'ddct', maxSpread: 0.5 });
+  const cs = controlStatsByGene.get('tg1');
+  check('T11 single bio sample: n', cs.n, 1);
+  check('T11 single bio sample: bioSem null', cs.bioSem, null);
+  check('T11 single bio sample: mean exists', cs.mean, 5);
+}
+
+// ---- T12: Multiple biological samples → bioSem computed ----
+{
+  const rows = [
+    ...mkPair('NC-1', 'NC', 'g1', 'IL6', 'tg1', 4, 'ref'),
+    ...mkPair('NC-2', 'NC', 'g1', 'IL6', 'tg1', 6, 'ref'),
+    ...mkPair('NC-3', 'NC', 'g1', 'IL6', 'tg1', 5, 'ref')
+  ];
+  const { controlStatsByGene } = computeAnalysis({ rows, experiment, mode: 'ddct', maxSpread: 0.5 });
+  const cs = controlStatsByGene.get('tg1');
+  check('T12 multi bio sample: n', cs.n, 3);
+  check('T12 multi bio sample: mean', cs.mean, 5);
+  check('T12 multi bio sample: bioSem > 0', cs.bioSem > 0, true);
+}
+
+// ---- T13: Delete group — associated rows excluded ----
+{
+  const rows = [
+    ...mkPair('NC', 'NC', 'g1', 'IL6', 'tg1', 5, 'ref'),
+    ...mkPair('Treat', 'Treatment', 'g2', 'IL6', 'tg1', 3, 'ref')
+  ];
+  // Simulate deleting group 'g2' (Treatment) by filtering rows
+  const filtered = rows.filter(r => r.groupId !== 'g2');
+  const { results } = computeAnalysis({ rows: filtered, experiment, mode: 'ddct', maxSpread: 0.5 });
+  check('T13 deleted group data excluded', results.filter(i => i.groupId === 'g2').length, 0);
+  check('T13 remaining data intact', results.filter(i => i.groupId === 'g1').length, 1);
+}
+
+// ---- T14: Delete target gene — associated rows excluded ----
+{
+  const rows = [
+    ...mkPair('NC', 'NC', 'g1', 'IL6', 'tg1', 5, 'ref'),
+    ...mkPair('NC', 'NC', 'g1', 'TNF', 'tg2', 10, 'ref'),
+    ...mkPair('Treat', 'Treatment', 'g2', 'IL6', 'tg1', 3, 'ref'),
+    ...mkPair('Treat', 'Treatment', 'g2', 'TNF', 'tg2', 8, 'ref')
+  ];
+  // Simulate deleting gene 'tg2' (TNF)
+  const filtered = rows.filter(r => r.geneId !== 'tg2');
+  const { results } = computeAnalysis({ rows: filtered, experiment, mode: 'ddct', maxSpread: 0.5 });
+  check('T14 deleted gene data excluded', results.filter(i => i.geneId === 'tg2').length, 0);
+  check('T14 remaining gene intact', results.filter(i => i.geneId === 'tg1').length > 0, true);
+}
+
+// ---- T15: Delete without associated data — no side effects ----
+{
+  const rows = [
+    ...mkPair('NC', 'NC', 'g1', 'IL6', 'tg1', 5, 'ref'),
+    ...mkPair('Treat', 'Treatment', 'g2', 'IL6', 'tg1', 3, 'ref')
+  ];
+  // Simulate deleting a group that has no rows (g3 doesn't exist in rows)
+  const filtered = rows.filter(r => r.groupId !== 'g3');
+  const { results } = computeAnalysis({ rows: filtered, experiment, mode: 'ddct', maxSpread: 0.5 });
+  check('T15 no side effects on unrelated data', results.length, 2);
+}
+
 console.log(failures ? `\n${failures} FAILED` : '\nALL PASS');
 process.exit(failures ? 1 : 0);

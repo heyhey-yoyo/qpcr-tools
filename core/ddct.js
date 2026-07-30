@@ -122,19 +122,18 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
   controlByGene.forEach((items, geneKey) => {
     const dcts = items.map(item => item.dct);
     const avg = mean(dcts);
-    let seVal;
+    // bioSem is between-sample SEM: requires ≥2 biological samples.
+    // When n=1, bioSem is null — do NOT use techSem as a substitute.
+    let bioSem = null;
     if (items.length > 1) {
       const variance = dcts.reduce((sum, v) => sum + (v - avg) ** 2, 0) / (dcts.length - 1);
-      seVal = Math.sqrt(variance / dcts.length);
-    } else {
-      seVal = items[0].techSem;
+      bioSem = Math.sqrt(variance / dcts.length);
     }
     controlStatsByGene.set(geneKey, {
       gene: items[0].gene,
       geneId: items[0].geneId,
       mean: avg,
-      // Between-sample SEM of control ΔCt (biological variation)
-      bioSem: seVal,
+      bioSem,
       n: items.length
     });
   });

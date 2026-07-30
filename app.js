@@ -778,10 +778,22 @@ function handleRemoveGroup(groupId) {
   if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
   const target = experiment.groups.find(g => g.id === groupId);
   if (!target) return;
-  if (!window.confirm(`确定删除分组"${target.name}"？`)) return;
+  const affectedBlocks = blocks.filter(b => b.groupId === groupId).length;
+  const affectedRows = rows.filter(r => r.groupId === groupId).length;
+  const parts = [];
+  if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
+  if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
+  const detail = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
+  if (!window.confirm(`确定删除分组"${target.name}"？${detail}`)) return;
+  // Cascade delete associated data
+  blocks = blocks.filter(b => b.groupId !== groupId);
+  rows = rows.filter(r => r.groupId !== groupId);
   experiment = expRemoveGroup(experiment, groupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+  renderAllBlocks();
+  renderAllRows();
+  renderPlate();
   calculate();
   save();
 }
@@ -799,8 +811,23 @@ function handleRenameTargetGene(geneId, newName) {
 
 function handleRemoveTargetGene(geneId) {
   if (experiment.targetGenes.length <= 1) { window.alert('至少需要一个目标基因。'); return; }
+  const target = experiment.targetGenes.find(g => g.id === geneId);
+  const targetName = target ? target.name : geneId;
+  const affectedBlocks = blocks.filter(b => b.geneId === geneId).length;
+  const affectedRows = rows.filter(r => r.geneId === geneId).length;
+  const parts = [];
+  if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
+  if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
+  const detail = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
+  if (!window.confirm(`确定删除目标基因"${targetName}"？${detail}`)) return;
+  // Cascade delete associated data
+  blocks = blocks.filter(b => b.geneId !== geneId);
+  rows = rows.filter(r => r.geneId !== geneId);
   experiment = expRemoveTargetGene(experiment, geneId);
   targetCount();
+  renderAllBlocks();
+  renderAllRows();
+  renderPlate();
   calculate();
   save();
 }

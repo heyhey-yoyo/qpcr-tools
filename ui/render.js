@@ -377,6 +377,20 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
   containerEl.querySelectorAll('input').forEach(input => {
     input.addEventListener('input', callbacks.onReadRows);
   });
+  // Instant per-Ct-input validation feedback
+  containerEl.querySelectorAll('.ct-input').forEach(input => {
+    input.addEventListener('input', () => {
+      const parsed = parseCt(input.value);
+      const isEmpty = input.value.trim() === '';
+      if (isEmpty || parsed.valid) {
+        input.classList.remove('ct-invalid');
+        input.title = '';
+      } else {
+        input.classList.add('ct-invalid');
+        input.title = 'Ct 值必须在 0–50 之间';
+      }
+    });
+  });
   containerEl.querySelectorAll('.remove-row').forEach(btn => {
     btn.addEventListener('click', event => {
       const index = Number(event.currentTarget.closest('tr').dataset.index);
