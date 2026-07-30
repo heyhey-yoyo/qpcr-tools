@@ -3,6 +3,9 @@
 const KEY = 'qpcr-demo-v4';
 const LEGACY_KEY = 'qpcr-demo-v3';
 const MAX_REPS = 12;
+const DEFAULT_REPS = 3;
+const MIN_REPS = 1;
+const MAX_REPS_GLOBAL = 6;
 const PLATES = {
   '96': { size: '96', rows: 'ABCDEFGH'.split(''), cols: 12, label: '96 孔板' },
   '384': { size: '384', rows: 'ABCDEFGHIJKLMNOP'.split(''), cols: 24, label: '384 孔板' }
@@ -39,26 +42,26 @@ const els = {
   paste: $('#pasteArea'),
   ctColumnPanel: $('#ctColumnPanel'),
   ctColumnArea: $('#ctColumnArea'),
-  ctPasteStatus: $('#ctPasteStatus')
+  ctPasteStatus: $('#ctPasteStatus'),
+  repsInput: $('#replicateCount')
 };
 
 // Build a plate template: 2 samples (NC / Treatment) × N targets + 1 fixed
-// reference, 3 replicates each. N is bounded by maxTargetCount().
+// reference. N is bounded by maxTargetCount().
 function buildTemplate(count) {
   const template = [];
   [['NC-1', 'NC'], ['Treat-1', 'Treatment']].forEach(([sample, group]) => {
     for (let index = 1; index <= count; index += 1) {
-      template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: 3, breakBefore: false });
+      template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
     }
-    template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: 3, breakBefore: false });
+    template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: replicateCount, breakBefore: false });
   });
   return template;
 }
 
 function maxTargetCount() {
   const plate = currentPlate();
-  // Each gene takes 2 samples × 3 replicates = 6 wells, plus 1 fixed reference.
-  return Math.max(1, Math.floor((plate.rows.length * plate.cols) / 6) - 1);
+  return Math.max(1, Math.floor((plate.rows.length * plate.cols) / (2 * replicateCount)) - 1);
 }
 
 // Demo template for the current plate size: two batches (NC-x / Treat-x) of
@@ -70,9 +73,9 @@ function exampleTemplate() {
   [1, 2].forEach(batch => {
     [['NC', `NC-${batch}`], ['Treatment', `Treat-${batch}`]].forEach(([group, sample]) => {
       for (let index = 1; index <= targets; index += 1) {
-        template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: 3, breakBefore: false });
+        template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
       }
-      template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: 3, breakBefore: false });
+      template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: replicateCount, breakBefore: false });
     });
   });
   template[(targets + 1) * 2].breakBefore = true;
@@ -94,12 +97,44 @@ const exampleRows = [
 
 let blocks = buildTemplate(1);
 let rows = clone(exampleRows);
+let replicateCount = DEFAULT_REPS;
 let latest = [];
 let latestNotes = { merged: [], singleRep: [] };
 let latestPlate = { placements: [], overflow: false };
 
 function clone(value) {
   return JSON.parse(JSON.stringify(value));
+}
+
+function normalizeReplicateCount(value) {
+  const num = Number(value);
+  if (!Number.isFinite(num) || num < MIN_REPS) return DEFAULT_REPS;
+  return Math.min(MAX_REPS_GLOBAL, Math.max(MIN_REPS, Math.round(num)));
+}
+
+function resizeReplicates(rows, oldCount, newCount) {
+  if (oldCount === newCount) return rows;
+  if (newCount > oldCount) {
+    return rows.map(row => ({
+      ...row,
+      cts: [...row.cts, ...Array(newCount - oldCount).fill('')],
+      wells: [...(row.wells || []), ...Array(Math.max(0, newCount - (row.wells || []).length)).fill('')]
+    }));
+  }
+  // newCount < oldCount: check for data loss in truncated Ct values
+  const lostCts = rows.some(row =>
+    (row.cts || []).slice(newCount).some(ct => String(ct ?? '').trim() !== '')
+  );
+  if (lostCts && !window.confirm(
+    `复孔数量从 ${oldCount} 减少到 ${newCount}，Ct${newCount + 1}–Ct${oldCount} 中已有数据将被移除。确认继续？`
+  )) {
+    return null;
+  }
+  return rows.map(row => ({
+    ...row,
+    cts: (row.cts || []).slice(0, newCount),
+    wells: (row.wells || []).slice(0, newCount)
+  }));
 }
 
 function escapeHtml(value) {
@@ -128,7 +163,7 @@ function refreshCoordinateSelects(preferredRow = els.startRow.value, preferredCo
 }
 
 function blankBlock() {
-  return { sample: 'Sample-1', group: 'Treatment', gene: 'IL6', role: 'target', reps: 3, breakBefore: false };
+  return { sample: 'Sample-1', group: 'Treatment', gene: 'IL6', role: 'target', reps: replicateCount, breakBefore: false };
 }
 
 function normalizeBlock(block) {
@@ -137,24 +172,24 @@ function normalizeBlock(block) {
     group: block?.group || 'Treatment',
     gene: block?.gene || 'IL6',
     role: block?.role === 'reference' ? 'reference' : 'target',
-    reps: Math.max(1, Math.min(MAX_REPS, Number(block?.reps) || 3)),
+    reps: Math.max(MIN_REPS, Math.min(MAX_REPS_GLOBAL, Number(block?.reps) || replicateCount)),
     breakBefore: Boolean(block?.breakBefore)
   };
 }
 
 function blankRow() {
-  return { wells: ['', '', ''], name: 'Sample-1', group: 'NC', gene: 'GAPDH', cts: ['', '', ''] };
+  return { wells: Array(replicateCount).fill(''), name: 'Sample-1', group: 'NC', gene: 'GAPDH', cts: Array(replicateCount).fill('') };
 }
 
 function normalizeRow(row) {
-  const cts = Array.isArray(row?.cts) ? row.cts : ['', '', ''];
+  const cts = Array.isArray(row?.cts) ? row.cts : Array(replicateCount).fill('');
   const wells = Array.isArray(row?.wells) ? row.wells : [];
   return {
-    wells: wells.length ? wells : Array(cts.length || 3).fill(''),
+    wells: wells.length ? wells : Array(cts.length || replicateCount).fill(''),
     name: row?.name || 'Sample-1',
     group: row?.group || 'NC',
     gene: row?.gene || 'GAPDH',
-    cts: cts.length ? cts : ['', '', '']
+    cts: cts.length ? cts : Array(replicateCount).fill('')
   };
 }
 
@@ -162,6 +197,7 @@ function save() {
   localStorage.setItem(KEY, JSON.stringify({
     blocks,
     rows,
+    replicateCount,
     plate: {
       size: els.plateSize.value,
       startRow: els.startRow.value,
@@ -187,8 +223,20 @@ function load() {
       refreshCoordinateSelects('A', '1');
       return;
     }
+    // Restore replicateCount before normalizing blocks/rows (they depend on it)
+    if (state.replicateCount !== undefined) {
+      replicateCount = normalizeReplicateCount(state.replicateCount);
+    } else if (Array.isArray(state.blocks) && state.blocks.length) {
+      const repsValues = [...new Set(state.blocks.map(b => Number(b.reps) || 3))];
+      replicateCount = repsValues.length === 1 && repsValues[0] >= MIN_REPS && repsValues[0] <= MAX_REPS_GLOBAL
+        ? repsValues[0]
+        : DEFAULT_REPS;
+    } else {
+      replicateCount = DEFAULT_REPS;
+    }
     blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate(1);
     rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : clone(exampleRows);
+    els.repsInput.value = String(replicateCount);
     const plateSize = PLATES[state.plate?.size] ? state.plate.size : '96';
     els.plateSize.value = plateSize;
     refreshCoordinateSelects(state.plate?.startRow || 'A', state.plate?.startCol || '1');
@@ -218,7 +266,7 @@ function refreshOptionLists() {
 function renderBlocks() {
   refreshOptionLists();
   if (!blocks.length) {
-    els.blocksBody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#64748b;padding:22px">当前是空模板，请载入预设或添加点板区块。</td></tr>';
+    els.blocksBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:22px">当前是空模板，请载入预设或添加点板区块。</td></tr>';
     return;
   }
 
@@ -229,7 +277,6 @@ function renderBlocks() {
       <td><input data-field="group" value="${escapeHtml(block.group)}" /></td>
       <td><input data-field="gene" value="${escapeHtml(block.gene)}" /></td>
       <td><select data-field="role"><option value="target" ${block.role === 'target' ? 'selected' : ''}>目标</option><option value="reference" ${block.role === 'reference' ? 'selected' : ''}>内参</option></select></td>
-      <td><input class="repeat-input" data-field="reps" type="number" min="1" max="${MAX_REPS}" step="1" value="${Number(block.reps) || 3}" /></td>
       <td class="action-col"><div class="block-actions">
         <button class="icon-button move-up" title="上移" ${index === 0 ? 'disabled' : ''}>↑</button>
         <button class="icon-button move-down" title="下移" ${index === blocks.length - 1 ? 'disabled' : ''}>↓</button>
@@ -253,7 +300,7 @@ function readBlocks() {
     group: row.querySelector('[data-field="group"]').value.trim(),
     gene: row.querySelector('[data-field="gene"]').value.trim(),
     role: row.querySelector('[data-field="role"]').value,
-    reps: Math.max(1, Math.min(MAX_REPS, Number(row.querySelector('[data-field="reps"]').value) || 3))
+    reps: replicateCount
   }));
   if (blocks[0]) blocks[0].breakBefore = false;
   renderPlate();
@@ -384,8 +431,7 @@ function generatePlacements() {
       }
     }
 
-    const reps = Math.max(1, Math.min(MAX_REPS, Number(block.reps) || 3));
-    for (let rep = 0; rep < reps; rep += 1) {
+    for (let rep = 0; rep < replicateCount; rep += 1) {
       if (row < 0 || col < 0 || row >= plate.rows.length || col >= plate.cols) {
         overflow = true;
         continue;
@@ -518,7 +564,7 @@ function renderPlate() {
   els.plateLegend.innerHTML = groups.map((group, index) => `<span class="legend-item"><span class="legend-dot group-${index % 6}"></span>${escapeHtml(group)}</span>`).join('') +
     (latestPlate.placements.length ? '<span class="legend-item"><span class="legend-line"></span>虚线边框 = 内参</span><span class="legend-item"><span class="legend-frame"></span>浅框 = 同一区块（一组技术重复）</span>' : '');
 
-  const total = blocks.reduce((sum, block) => sum + (Number(block.reps) || 3), 0);
+  const total = blocks.length * replicateCount;
   if (latestPlate.overflow) {
     els.plateAlert.innerHTML = `<div class="alert alert-warning">模板需要 ${total} 个孔，但当前位置无法全部放入 ${plate.label}。请提前起始位置、减少空孔或调整“另起一行”。</div>`;
   } else if (blocks.length) {
@@ -584,7 +630,7 @@ function fillExampleCts() {
 
 function renderRows() {
   refreshOptionLists();
-  const maxReps = Math.max(3, ...rows.map(row => Math.max(row.cts?.length || 0, row.wells?.length || 0)));
+  const maxReps = Math.max(replicateCount, ...rows.map(row => Math.max(row.cts?.length || 0, row.wells?.length || 0)));
   els.head.innerHTML = `<tr><th>孔位</th><th>样本名称</th><th>组别</th><th>基因</th>${Array.from({ length: maxReps }, (_, index) => `<th>Ct ${index + 1}</th>`).join('')}<th class="action-col">操作</th></tr>`;
 
   els.body.innerHTML = rows.map((row, index) => {
@@ -627,7 +673,7 @@ function readRows() {
 
 function rowSlotCount(row) {
   const wellCount = (row.wells || []).filter(Boolean).length;
-  return wellCount || Math.max(1, row.cts?.length || 3);
+  return wellCount || Math.max(1, row.cts?.length || replicateCount);
 }
 
 function parseCtColumn(text) {
@@ -1061,7 +1107,7 @@ function loadPreset() {
 
 function exportTemplate() {
   readBlocks();
-  const payload = { app: 'qpcr-tools', kind: 'plate-template', version: 1, blocks };
+  const payload = { app: 'qpcr-tools', kind: 'plate-template', version: 2, replicateCount, blocks };
   const link = document.createElement('a');
   link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }));
   link.download = 'qpcr-plate-template.json';
@@ -1076,6 +1122,18 @@ function importTemplate(file) {
       const data = JSON.parse(reader.result);
       const list = Array.isArray(data) ? data : data?.blocks;
       if (!Array.isArray(list) || !list.length) throw new Error('invalid template');
+      // Handle replicateCount: version 2 has it at top level, version 1 infers from block.reps
+      if (data.version >= 2 && data.replicateCount !== undefined) {
+        replicateCount = normalizeReplicateCount(data.replicateCount);
+      } else if (list.some(b => b.reps !== undefined)) {
+        const repsValues = [...new Set(list.map(b => Number(b.reps) || 3))];
+        if (repsValues.length === 1 && repsValues[0] >= MIN_REPS && repsValues[0] <= MAX_REPS_GLOBAL) {
+          replicateCount = repsValues[0];
+        } else {
+          replicateCount = DEFAULT_REPS;
+          window.alert('导入的旧模板包含混合复孔设置，已使用默认值 3。请确认模板布局后再应用。');
+        }
+      }
       blocks = list.map(normalizeBlock);
       if (blocks[0]) blocks[0].breakBefore = false;
       renderBlocks();
@@ -1102,13 +1160,13 @@ function parseFullTable(text) {
       });
       const offset = hasWellColumn ? 1 : 0;
       if (parts.length < 4 + offset) return null;
-      const cts = parts.slice(3 + offset).map(value => value.trim());
+      const cts = parts.slice(3 + offset).map(value => value.trim()).slice(0, replicateCount);
       return {
-        wells: hasWellColumn ? wells : Array(Math.max(3, cts.length)).fill(''),
+        wells: hasWellColumn ? wells : Array(Math.max(replicateCount, cts.length)).fill(''),
         name: parts[offset].trim(),
         group: parts[offset + 1].trim(),
         gene: parts[offset + 2].trim(),
-        cts: cts.length ? cts : ['', '', '']
+        cts: cts.length ? cts : Array(replicateCount).fill('')
       };
     }).filter(Boolean);
 }
@@ -1172,6 +1230,32 @@ els.plateSize.addEventListener('change', () => {
   save();
 }));
 
+els.repsInput.addEventListener('change', () => {
+  const oldCount = replicateCount;
+  replicateCount = normalizeReplicateCount(els.repsInput.value);
+  els.repsInput.value = String(replicateCount);
+  if (oldCount === replicateCount) return;
+  // Non-destructive resize rows
+  if (rows.length) {
+    const result = resizeReplicates(rows, oldCount, replicateCount);
+    if (result === null) {
+      replicateCount = oldCount;
+      els.repsInput.value = String(oldCount);
+      return;
+    }
+    rows = result;
+  }
+  // Sync block reps to global setting and re-validate
+  blocks.forEach(b => { b.reps = replicateCount; });
+  els.targets.max = String(maxTargetCount());
+  targetCount();
+  renderBlocks();
+  renderPlate();
+  renderRows();
+  calculate();
+  save();
+});
+
 $('#addSampleBtn').addEventListener('click', () => {
   readRows();
   rows.push(blankRow());
@@ -1192,6 +1276,8 @@ $('#clearDataBtn').addEventListener('click', () => {
 $('#resetBtn').addEventListener('click', () => {
   localStorage.removeItem(KEY);
   localStorage.removeItem(LEGACY_KEY);
+  replicateCount = DEFAULT_REPS;
+  els.repsInput.value = String(DEFAULT_REPS);
   els.targets.value = '1';
   els.appendCount.value = '1';
   els.appendNewLine.checked = false;

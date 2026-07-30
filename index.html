@@ -49,6 +49,10 @@
           </label>
           <button id="clearBlocksBtn" class="button button-ghost" title="移除当前所有点板区块">清空</button>
           <button id="loadPresetBtn" class="button button-ghost" title="按当前目标数重新生成模板，覆盖当前所有区块">载入</button>
+          <label class="reps-global-label" title="同一样本同一基因的技术重复孔数，全局统一设置；修改会影响已有 Ct 数据">
+            <span>复孔数</span>
+            <input id="replicateCount" class="reps-global-input" type="number" min="1" max="6" step="1" value="3" />
+          </label>
           <div class="append-group">
             <label class="append-count-label" title="一次连续追加多少份模板">
               <span>追加份数</span>
@@ -73,7 +77,7 @@
 
     <div class="table-wrap block-table-wrap">
       <table class="block-table">
-        <thead><tr><th>另起一行</th><th>样本名称</th><th>组别</th><th>基因</th><th>类型</th><th>重复孔</th><th class="action-col">排序 / 删除</th></tr></thead>
+        <thead><tr><th>另起一行</th><th>样本名称</th><th>组别</th><th>基因</th><th>类型</th><th class="action-col">排序 / 删除</th></tr></thead>
         <tbody id="blocksBody"></tbody>
       </table>
     </div>
