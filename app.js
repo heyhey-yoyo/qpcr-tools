@@ -1206,7 +1206,7 @@ function groupChartSvg() {
   const colors = ['#0d9488', '#6366f1', '#d946ef', '#f59e0b', '#14b8a6', '#8b5cf6'];
   const barW = 32;
   const barGap = 4;
-  const groupsPerRow = 3;
+  const groupsPerRow = groupList.length <= 4 ? groupList.length : 3;
   const rowGap = 48;
   const barH = 130;
   const topPad = 18;
