@@ -458,8 +458,12 @@ function removeBlock(event) {
   const index = Number(event.currentTarget.closest('tr').dataset.index);
   blocks.splice(index, 1);
   if (blocks[0]) blocks[0].breakBefore = false;
+  // Sync: also remove the corresponding row
+  if (index < rows.length) rows.splice(index, 1);
   renderAllBlocks();
+  renderAllRows();
   renderPlate();
+  calculate();
   save();
 }
 
@@ -587,8 +591,16 @@ function readRows() {
 
 function removeRow(index) {
   rows.splice(index, 1);
+  // Sync: also remove the corresponding block
+  if (index < blocks.length) {
+    blocks.splice(index, 1);
+    if (blocks[0]) blocks[0].breakBefore = false;
+    renderAllBlocks();
+    renderPlate();
+  }
   renderAllRows();
   calculate();
+  save();
 }
 
 function rowSlotCount(row) {

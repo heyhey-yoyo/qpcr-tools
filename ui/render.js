@@ -25,9 +25,6 @@ export function escapeHtml(value) {
 // ---- Group chips ----
 
 export function renderGroups(experiment, containers) {
-  console.log('renderGroups called, groups:', experiment.groups.length, 'groups:', experiment.groups.map(g => g.id + ':' + g.name));
-  console.log('containers keys:', Object.keys(containers));
-  console.log('onRemoveGroup type:', typeof containers.onRemoveGroup);
   const { groupsContainer, bioRepsInput } = containers;
   const frag = document.createDocumentFragment();
 
@@ -71,19 +68,13 @@ export function renderGroups(experiment, containers) {
     }
 
     if (experiment.groups.length > 1) {
-      console.log('creating delete button for group:', g.id, g.name);
       const delBtn = document.createElement('button');
       delBtn.className = 'chip-del';
       delBtn.innerHTML = '&times;';
       delBtn.title = '删除分组';
       delBtn.addEventListener('click', e => {
         e.stopPropagation();
-        console.log('delete chip clicked, groupId:', g.id, 'callback:', typeof containers.onRemoveGroup);
-        if (typeof containers.onRemoveGroup === 'function') {
-          containers.onRemoveGroup(g.id);
-        } else {
-          console.error('onRemoveGroup is not a function:', containers);
-        }
+        containers.onRemoveGroup(g.id);
       });
       chip.appendChild(delBtn);
     }
