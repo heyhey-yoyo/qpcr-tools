@@ -783,16 +783,30 @@ function handleRemoveGroup(groupId) {
   const parts = [];
   if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
   if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-  const detail = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
-  if (!window.confirm(`确定删除分组"${target.name}"？${detail}`)) return;
-  // Cascade delete associated data
+  const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+  if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
+  // Cascade delete blocks by stable ID
   blocks = blocks.filter(b => b.groupId !== groupId);
-  rows = rows.filter(r => r.groupId !== groupId);
   if (blocks[0]) blocks[0].breakBefore = false;
   experiment = expRemoveGroup(experiment, groupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
   renderAllBlocks();
+  // Regenerate rows from remaining blocks so well positions stay in sync
+  latestPlate = generatePlacements();
+  if (blocks.length) {
+    const placementsByBlock = new Map();
+    latestPlate.placements.forEach(item => {
+      if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+      placementsByBlock.get(item.blockIndex).push(item.well);
+    });
+    rows = blocks.map((block, index) => {
+      const wells = placementsByBlock.get(index) || [];
+      return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+    });
+  } else {
+    rows = [];
+  }
   renderAllRows();
   renderPlate();
   calculate();
@@ -819,15 +833,29 @@ function handleRemoveTargetGene(geneId) {
   const parts = [];
   if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
   if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-  const detail = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
-  if (!window.confirm(`确定删除目标基因"${targetName}"？${detail}`)) return;
-  // Cascade delete associated data
+  const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+  if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
+  // Cascade delete blocks by stable ID
   blocks = blocks.filter(b => b.geneId !== geneId);
-  rows = rows.filter(r => r.geneId !== geneId);
   if (blocks[0]) blocks[0].breakBefore = false;
   experiment = expRemoveTargetGene(experiment, geneId);
   targetCount();
   renderAllBlocks();
+  // Regenerate rows from remaining blocks so well positions stay in sync
+  latestPlate = generatePlacements();
+  if (blocks.length) {
+    const placementsByBlock = new Map();
+    latestPlate.placements.forEach(item => {
+      if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+      placementsByBlock.get(item.blockIndex).push(item.well);
+    });
+    rows = blocks.map((block, index) => {
+      const wells = placementsByBlock.get(index) || [];
+      return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+    });
+  } else {
+    rows = [];
+  }
   renderAllRows();
   renderPlate();
   calculate();
