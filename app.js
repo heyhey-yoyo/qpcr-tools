@@ -775,46 +775,50 @@ function handleToggleControl(groupId) {
 }
 
 function handleRemoveGroup(groupId) {
-  if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
-  const target = experiment.groups.find(g => g.id === groupId);
-  if (!target) return;
-  const affectedBlocks = blocks.filter(b => b.groupId === groupId).length;
-  const affectedRows = rows.filter(r => r.groupId === groupId).length;
-  const parts = [];
-  if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
-  if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-  const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
-  const hadBlocks = affectedBlocks > 0;
-  if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
-  // Cascade delete blocks by stable ID
-  blocks = blocks.filter(b => b.groupId !== groupId);
-  if (blocks[0]) blocks[0].breakBefore = false;
-  experiment = expRemoveGroup(experiment, groupId);
-  renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
-  renderAllBlocks();
-  // If blocks changed, regenerate rows so well positions stay in sync.
-  // If blocks didn't change, preserve existing rows (and their Ct data).
-  if (hadBlocks) {
-    latestPlate = generatePlacements();
-    if (blocks.length) {
-      const placementsByBlock = new Map();
-      latestPlate.placements.forEach(item => {
-        if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-        placementsByBlock.get(item.blockIndex).push(item.well);
-      });
-      rows = blocks.map((block, index) => {
-        const wells = placementsByBlock.get(index) || [];
-        return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-      });
-    } else {
-      rows = [];
+  try {
+    if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
+    const target = experiment.groups.find(g => g.id === groupId);
+    if (!target) return;
+    const affectedBlocks = blocks.filter(b => b.groupId === groupId).length;
+    const affectedRows = rows.filter(r => r.groupId === groupId).length;
+    const parts = [];
+    if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
+    if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
+    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+    const hadBlocks = affectedBlocks > 0;
+    if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
+    // Cascade delete blocks by stable ID
+    blocks = blocks.filter(b => b.groupId !== groupId);
+    if (blocks[0]) blocks[0].breakBefore = false;
+    experiment = expRemoveGroup(experiment, groupId);
+    renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
+      onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    renderAllBlocks();
+    // If blocks changed, regenerate rows so well positions stay in sync.
+    // If blocks didn't change, preserve existing rows (and their Ct data).
+    if (hadBlocks) {
+      latestPlate = generatePlacements();
+      if (blocks.length) {
+        const placementsByBlock = new Map();
+        latestPlate.placements.forEach(item => {
+          if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+          placementsByBlock.get(item.blockIndex).push(item.well);
+        });
+        rows = blocks.map((block, index) => {
+          const wells = placementsByBlock.get(index) || [];
+          return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+        });
+      } else {
+        rows = [];
+      }
+      renderAllRows();
     }
-    renderAllRows();
+    renderPlate();
+    calculate();
+    save();
+  } catch (e) {
+    console.error('handleRemoveGroup error:', e);
   }
-  renderPlate();
-  calculate();
-  save();
 }
 
 function handleRenameTargetGene(geneId, newName) {
@@ -829,45 +833,49 @@ function handleRenameTargetGene(geneId, newName) {
 }
 
 function handleRemoveTargetGene(geneId) {
-  if (experiment.targetGenes.length <= 1) { window.alert('至少需要一个目标基因。'); return; }
-  const target = experiment.targetGenes.find(g => g.id === geneId);
-  const targetName = target ? target.name : geneId;
-  const affectedBlocks = blocks.filter(b => b.geneId === geneId).length;
-  const affectedRows = rows.filter(r => r.geneId === geneId).length;
-  const parts = [];
-  if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
-  if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-  const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
-  const hadBlocks = affectedBlocks > 0;
-  if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
-  // Cascade delete blocks by stable ID
-  blocks = blocks.filter(b => b.geneId !== geneId);
-  if (blocks[0]) blocks[0].breakBefore = false;
-  experiment = expRemoveTargetGene(experiment, geneId);
-  targetCount();
-  renderAllBlocks();
-  // If blocks changed, regenerate rows so well positions stay in sync.
-  // If blocks didn't change, preserve existing rows (and their Ct data).
-  if (hadBlocks) {
-    latestPlate = generatePlacements();
-    if (blocks.length) {
-      const placementsByBlock = new Map();
-      latestPlate.placements.forEach(item => {
-        if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-        placementsByBlock.get(item.blockIndex).push(item.well);
-      });
-      rows = blocks.map((block, index) => {
-        const wells = placementsByBlock.get(index) || [];
-        return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-      });
-    } else {
-      rows = [];
+  try {
+    if (experiment.targetGenes.length <= 1) { window.alert('至少需要一个目标基因。'); return; }
+    const target = experiment.targetGenes.find(g => g.id === geneId);
+    const targetName = target ? target.name : geneId;
+    const affectedBlocks = blocks.filter(b => b.geneId === geneId).length;
+    const affectedRows = rows.filter(r => r.geneId === geneId).length;
+    const parts = [];
+    if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
+    if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
+    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
+    const hadBlocks = affectedBlocks > 0;
+    if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
+    // Cascade delete blocks by stable ID
+    blocks = blocks.filter(b => b.geneId !== geneId);
+    if (blocks[0]) blocks[0].breakBefore = false;
+    experiment = expRemoveTargetGene(experiment, geneId);
+    targetCount();
+    renderAllBlocks();
+    // If blocks changed, regenerate rows so well positions stay in sync.
+    // If blocks didn't change, preserve existing rows (and their Ct data).
+    if (hadBlocks) {
+      latestPlate = generatePlacements();
+      if (blocks.length) {
+        const placementsByBlock = new Map();
+        latestPlate.placements.forEach(item => {
+          if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+          placementsByBlock.get(item.blockIndex).push(item.well);
+        });
+        rows = blocks.map((block, index) => {
+          const wells = placementsByBlock.get(index) || [];
+          return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
+        });
+      } else {
+        rows = [];
+      }
+      renderAllRows();
     }
-    renderAllRows();
+    renderPlate();
+    calculate();
+    save();
+  } catch (e) {
+    console.error('handleRemoveTargetGene error:', e);
   }
-  renderPlate();
-  calculate();
-  save();
 }
 
 function handleRenameRefGene(newName) {
