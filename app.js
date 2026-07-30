@@ -173,38 +173,10 @@ function renderGroups() {
     <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}">
       <span class="chip-name">${escapeHtml(g.name)}</span>
       <button class="chip-edit" data-action="rename" title="修改分组名">改</button>
-      ${g.isControl ? '<span class="chip-badge">对照</span>' : `<button class="chip-ctl" data-action="control" data-id="${g.id}" title="设为对照组">设为对照</button>`}
-      ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
+      ${g.isControl ? '<span class="chip-badge">对照</span>' : `<button class="chip-ctl" data-action="control" title="设为对照组">设为对照</button>`}
+      ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" title="删除分组">&times;</button>` : ''}
     </span>
   `).join('');
-
-  els.groupsContainer.querySelectorAll('[data-action="control"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      toggleControlGroup(btn.dataset.id);
-    });
-  });
-  els.groupsContainer.querySelectorAll('.chip-del').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      removeGroup(btn.dataset.id);
-    });
-  });
-  els.groupsContainer.querySelectorAll('[data-action="rename"]').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      const chip = btn.closest('.group-chip');
-      if (chip) renameGroup(chip.dataset.id);
-    });
-  });
-  // Also allow clicking the chip name to rename
-  els.groupsContainer.querySelectorAll('.chip-name').forEach(nameEl => {
-    nameEl.addEventListener('click', e => {
-      e.stopPropagation();
-      const chip = nameEl.closest('.group-chip');
-      if (chip) renameGroup(chip.dataset.id);
-    });
-  });
 
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   els.targets.max = String(maxTargetCount());
@@ -1463,6 +1435,24 @@ els.plateSize.addEventListener('change', () => {
 }));
 
 els.addGroupBtn.addEventListener('click', addGroup);
+
+// Delegated group chip actions — single listener, never replaced
+els.groupsContainer.addEventListener('click', e => {
+  const chip = e.target.closest('.group-chip');
+  if (!chip) return;
+  if (e.target.closest('[data-action="rename"]') || e.target.closest('.chip-name')) {
+    renameGroup(chip.dataset.id);
+    return;
+  }
+  if (e.target.closest('[data-action="control"]')) {
+    toggleControlGroup(chip.dataset.id);
+    return;
+  }
+  if (e.target.closest('.chip-del')) {
+    removeGroup(chip.dataset.id);
+    return;
+  }
+});
 
 els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
