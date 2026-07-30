@@ -47,20 +47,22 @@ const els = {
   repsInput: $('#replicateCount'),
   groupsContainer: $('#groupsContainer'),
   addGroupBtn: $('#addGroupBtn'),
-  bioRepsInput: $('#biologicalReplicates')
+  bioRepsInput: $('#biologicalReplicates'),
+  geneNamesInput: $('#targetGeneNames')
 };
 
 // Build a plate template: groups × biological replicates × (N targets + 1 reference).
 // N is bounded by maxTargetCount().
-function buildTemplate(count) {
+function buildTemplate() {
   const template = [];
   const refGene = els.ref.value || 'GAPDH';
+  const genes = experiment.targetGenes.length ? experiment.targetGenes : ['IL6'];
   experiment.groups.forEach(group => {
     for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
       const sample = `${group.name}-${bio}`;
-      for (let index = 1; index <= count; index += 1) {
-        template.push({ sample, group: group.name, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
-      }
+      genes.forEach(gene => {
+        template.push({ sample, group: group.name, gene, role: 'target', reps: replicateCount, breakBefore: false });
+      });
       template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
     }
   });
@@ -79,27 +81,30 @@ function maxTargetCount() {
 // second batch starts on a fresh row.
 function exampleTemplate() {
   const plate = currentPlate();
-  const targets = plate.size === '384' ? 7 : 3;
   const refGene = els.ref.value || 'GAPDH';
+  const genes = plate.size === '384' ? ['IL6', 'TNF', 'IL1B', 'IFNG', 'TGFB1', 'GAPDH_ex', 'ACTB_ex'] : ['IL6', 'TNF', 'IL1B'];
   const template = [];
   const groups = experiment.groups;
   [1, 2].forEach(batch => {
     groups.forEach(group => {
       const sample = `${group.name}-${batch}`;
-      for (let index = 1; index <= targets; index += 1) {
-        template.push({ sample, group: group.name, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
-      }
+      genes.forEach(gene => {
+        template.push({ sample, group: group.name, gene, role: 'target', reps: replicateCount, breakBefore: false });
+      });
       template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
     });
   });
-  const perBatch = groups.length * (targets + 1);
+  const perBatch = groups.length * (genes.length + 1);
   if (perBatch < template.length) template[perBatch].breakBefore = true;
   return template;
 }
 
 function targetCount() {
-  const value = Math.max(1, Math.min(maxTargetCount(), Number(els.targets.value) || 1));
+  const n = experiment.targetGenes.length || 1;
+  const max = maxTargetCount();
+  const value = Math.max(1, Math.min(max, n));
   els.targets.value = String(value);
+  els.targets.max = String(max);
   return value;
 }
 
@@ -116,9 +121,10 @@ let experiment = {
     { id: 'g1', name: 'NC', isControl: true },
     { id: 'g2', name: 'Treatment', isControl: false }
   ],
-  biologicalReplicates: 1
+  biologicalReplicates: 1,
+  targetGenes: ['IL6']
 };
-let blocks = buildTemplate(1);
+let blocks = buildTemplate();
 let rows = clone(exampleRows);
 let latest = [];
 let latestNotes = { merged: [], singleRep: [] };
@@ -214,7 +220,7 @@ function renderGroups() {
 
   els.groupsContainer.replaceChildren(frag);
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
-  els.targets.max = String(maxTargetCount());
+  els.geneNamesInput.textContent = experiment.targetGenes.join(';');
   targetCount();
 }
 
@@ -365,16 +371,20 @@ function load() {
     // Restore experiment config (provide default for legacy data)
     if (state.experiment && Array.isArray(state.experiment.groups) && state.experiment.groups.length) {
       experiment = state.experiment;
+      if (!Array.isArray(experiment.targetGenes) || !experiment.targetGenes.length) {
+        experiment.targetGenes = ['IL6'];
+      }
     } else {
       experiment = {
         groups: [
           { id: 'g1', name: 'NC', isControl: true },
           { id: 'g2', name: 'Treatment', isControl: false }
         ],
-        biologicalReplicates: 1
+        biologicalReplicates: 1,
+        targetGenes: ['IL6']
       };
     }
-    blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate(1);
+    blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate();
     rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : clone(exampleRows);
     els.repsInput.value = String(replicateCount);
     renderGroups();
@@ -493,7 +503,7 @@ function uniqueSampleName(original) {
 
 function appendPreset() {
   readBlocks();
-  const preset = buildTemplate(targetCount());
+  const preset = buildTemplate();
   const copies = Math.max(1, Math.min(24, Number(els.appendCount?.value) || 1));
 
   if (generatePlacements().overflow) {
@@ -1320,7 +1330,7 @@ function downloadCsv(filename, content) {
 }
 
 function loadPreset() {
-  blocks = buildTemplate(targetCount());
+  blocks = buildTemplate();
   els.startRow.value = currentPlate().rows[0];
   els.startCol.value = '1';
   els.direction.value = 'horizontal';
@@ -1368,8 +1378,12 @@ function importTemplate(file) {
             { id: 'g1', name: 'NC', isControl: true },
             { id: 'g2', name: 'Treatment', isControl: false }
           ],
-          biologicalReplicates: 1
+          biologicalReplicates: 1,
+          targetGenes: ['IL6']
         };
+      }
+      if (!Array.isArray(experiment.targetGenes) || !experiment.targetGenes.length) {
+        experiment.targetGenes = ['IL6'];
       }
       blocks = list.map(normalizeBlock);
       if (blocks[0]) blocks[0].breakBefore = false;
@@ -1471,6 +1485,20 @@ els.plateSize.addEventListener('change', () => {
 
 els.addGroupBtn.addEventListener('click', addGroup);
 
+els.geneNamesInput.addEventListener('click', () => {
+  const current = experiment.targetGenes.join(';');
+  const input = window.prompt('目标基因名（英文分号分隔）：', current);
+  if (input === null) return;
+  const names = input.split(';').map(s => s.trim()).filter(Boolean);
+  if (!names.length) { window.alert('至少需要一个目标基因。'); return; }
+  const max = maxTargetCount();
+  if (names.length > max) { window.alert(`当前孔板最多支持 ${max} 个目标基因。`); return; }
+  experiment.targetGenes = names;
+  els.geneNamesInput.textContent = names.join(';');
+  targetCount();
+  save();
+});
+
 els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
@@ -1532,7 +1560,8 @@ $('#resetBtn').addEventListener('click', () => {
       { id: 'g1', name: 'NC', isControl: true },
       { id: 'g2', name: 'Treatment', isControl: false }
     ],
-    biologicalReplicates: 1
+    biologicalReplicates: 1,
+    targetGenes: ['IL6']
   };
   els.targets.value = '1';
   els.appendCount.value = '1';
@@ -1545,7 +1574,7 @@ $('#resetBtn').addEventListener('click', () => {
   els.ref.value = 'GAPDH';
   els.control.value = 'NC';
   els.spread.value = 0.5;
-  blocks = buildTemplate(1);
+  blocks = buildTemplate();
   rows = clone(exampleRows);
   els.ctColumnArea.value = '';
   els.ctColumnPanel.classList.add('hidden');

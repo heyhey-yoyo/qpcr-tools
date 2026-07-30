@@ -49,9 +49,10 @@
           </div>
           <div class="experiment-row">
             <label class="append-count-label" title="每份模板包含的目标基因数量；内参固定 1 个。上限随孔板容量自动限制">
-              <input id="targetCount" class="append-count" type="number" min="1" max="15" step="1" value="1" aria-label="目标数" />
+              <input id="targetCount" class="append-count" type="number" min="1" max="15" step="1" value="1" aria-label="目标数" readonly />
               <span>个目标 + 1 个内参</span>
             </label>
+            <button id="targetGeneNames" class="gene-names-btn" title="点击编辑目标基因名，英文分号分隔">IL6</button>
           </div>
           <div class="experiment-row">
             <label class="append-count-label" title="每个分组的独立生物学样本数量">
