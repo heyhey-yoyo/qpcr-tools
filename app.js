@@ -172,7 +172,7 @@ function renderGroups() {
   els.groupsContainer.innerHTML = experiment.groups.map(g => `
     <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}">
       <span class="chip-name">${escapeHtml(g.name)}</span>
-      <button class="chip-edit" data-action="rename" data-id="${g.id}" title="修改分组名">✎</button>
+      <button class="chip-edit" data-action="rename" title="修改分组名">改</button>
       ${g.isControl ? '<span class="chip-badge">对照</span>' : `<button class="chip-ctl" data-action="control" data-id="${g.id}" title="设为对照组">设为对照</button>`}
       ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
     </span>
@@ -193,7 +193,8 @@ function renderGroups() {
   els.groupsContainer.querySelectorAll('[data-action="rename"]').forEach(btn => {
     btn.addEventListener('click', e => {
       e.stopPropagation();
-      renameGroup(btn.dataset.id);
+      const chip = btn.closest('.group-chip');
+      if (chip) renameGroup(chip.dataset.id);
     });
   });
 
