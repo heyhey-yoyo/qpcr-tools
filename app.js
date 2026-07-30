@@ -1206,13 +1206,11 @@ function groupChartSvg() {
   const colors = ['#0d9488', '#6366f1', '#d946ef', '#f59e0b', '#14b8a6', '#8b5cf6'];
   const barW = 32;
   const barGap = 4;
-  const groupsPerRow = groupList.length <= 4 ? groupList.length : 3;
-  const rowGap = 48;
-  const barH = 130;
+  const clusterGap = 20;
+  const barH = 136;
   const topPad = 18;
-  const labelH = 30;
-  const rowH = barH + labelH;
-  // Compute fold values
+  const chartH = 190;
+  const baseY = topPad + barH;
   let maxFold = 1;
   const allBars = [];
   groupList.forEach(groupName => {
@@ -1237,23 +1235,16 @@ function groupChartSvg() {
   if (!allBars.length) return '';
   const nGenes = geneList.length;
   const clusterW = nGenes * (barW + barGap) - barGap;
-  const nRows = Math.ceil(groupList.length / groupsPerRow);
-  const perRow = Math.min(groupsPerRow, groupList.length);
-  const totalW = Math.max(280, perRow * (clusterW + 28) + 20);
-  const totalH = nRows * rowH + topPad + rowGap;
+  const totalW = Math.max(280, groupList.length * (clusterW + clusterGap) + 20);
   const scale = v => (barH - 4) * (v / maxFold);
   let svgParts = '';
-  // Row baseline: topPad + barH for each row
-  groupList.forEach((groupName, idx) => {
-    const row = Math.floor(idx / groupsPerRow);
-    const col = idx % groupsPerRow;
-    const baseY = topPad + barH + row * (rowH + rowGap);
-    const x0 = 14 + col * (clusterW + 28);
+  let offset = 14;
+  groupList.forEach(groupName => {
     const bars = allBars.filter(b => b.group === groupName);
-    const cx = x0 + clusterW / 2;
+    const cx = offset + clusterW / 2;
     svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">${escapeHtml(groupName)}</text>`;
     bars.forEach(b => {
-      const x = x0 + b.gi * (barW + barGap);
+      const x = offset + b.gi * (barW + barGap);
       const y = baseY - scale(b.fold);
       const hasErr = b.foldHigh > b.foldLow;
       const yHi = hasErr ? baseY - scale(b.foldHigh) : y;
@@ -1268,18 +1259,14 @@ function groupChartSvg() {
       }
       svgParts += `<text x="${x + barW / 2}" y="${Math.max(10, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
     });
+    offset += clusterW + clusterGap;
   });
-  // Baselines per row
-  for (let r = 0; r < nRows; r++) {
-    const by = topPad + barH + r * (rowH + rowGap);
-    svgParts += `<line x1="4" y1="${by}" x2="${totalW - 4}" y2="${by}" stroke="#cbd5e1" stroke-width="1"/>`;
-  }
-  // Legend
+  svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
   svgParts += geneList.map((g, i) =>
     `<rect x="${8 + i * 80}" y="4" width="10" height="10" rx="2" fill="${colors[i % colors.length]}" fill-opacity="0.85"/>`
     + `<text x="${22 + i * 80}" y="13" font-size="9" fill="#475569">${escapeHtml(g)}</text>`
   ).join('');
-  return `<svg viewBox="0 0 ${totalW} ${totalH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图">${svgParts}</svg>`;
+  return `<svg viewBox="0 0 ${totalW} ${chartH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图">${svgParts}</svg>`;
 }
 
 function resultsCsv() {
