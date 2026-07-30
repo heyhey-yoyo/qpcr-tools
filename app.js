@@ -1191,6 +1191,7 @@ function groupChartSvg() {
   const valid = latest.filter(item => Number.isFinite(item.ddct) && !item.missingControl);
   if (!valid.length) return '';
   const geneList = [...new Set(valid.map(item => item.gene))];
+  if (geneList.length <= 1) return ''; // single gene: individual chart is enough
   const groupList = [...new Set(valid.map(item => item.group))];
   const controlGroup = experiment.groups.find(g => g.isControl);
   if (controlGroup) {
