@@ -525,10 +525,8 @@ function renderPlate() {
   const total = blocks.length * replicateCount;
   if (latestPlate.overflow) {
     els.plateAlert.innerHTML = `<div class="alert alert-warning">模板需要 ${total} 个孔，但当前位置无法全部放入 ${plate.label}。请提前起始位置、减少空孔或调整"另起一行"。</div>`;
-  } else if (blocks.length) {
-    els.plateAlert.innerHTML = `<div class="alert alert-success">${plate.label}已规划 ${latestPlate.placements.length} 个孔、${blocks.length} 个区块。可继续点击"追加模板"。</div>`;
   } else {
-    els.plateAlert.innerHTML = '<div class="alert alert-warning">当前模板为空。</div>';
+    els.plateAlert.innerHTML = '';
   }
 }
 
