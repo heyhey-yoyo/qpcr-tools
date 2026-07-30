@@ -656,8 +656,117 @@ function setCtPasteStatus(message, kind) {
   els.ctPasteStatus.className = `paste-status ${kind ? `paste-status-${kind}` : ''}`;
 }
 
+/**
+ * Try to parse Well + Ct value pairs from two-column clipboard data.
+ * Format: "Pos\\tCp\\nA1\\t25.12\\nA2\\tUndetermined\\n..."
+ * Returns Map<well, number|null> or null if no well+value pairs detected.
+ */
+function parseWellValuePairs(text) {
+  const lines = String(text).replaceAll('\r', '').split('\n')
+    .map(l => l.trim()).filter(Boolean);
+  if (!lines.length) return null;
+
+  const missingPattern = /^(undetermined|undefined|no\s*cq|no\s*ct|no\s*cp|n\/a|na|nan|null|failed|invalid|—|–|-)$/i;
+  const headerPattern = /^(pos|position|well|sample|ct|cq|cp|ct\s*value|cq\s*value|crossing\s*point|name)$/i;
+
+  const map = new Map();
+  let pairCount = 0;
+
+  lines.forEach(line => {
+    const parts = line.split('\t');
+    if (parts.length < 2) return;
+    const well = parts[0].trim().toUpperCase();
+    if (!/^[A-P]\d{1,2}$/.test(well)) {
+      // Skip known header columns without counting as failure
+      if (headerPattern.test(parts[0].trim().toLowerCase())) return;
+      return;
+    }
+    const ctText = parts[1].trim().replace(/^"|"$/g, '');
+
+    if (missingPattern.test(ctText) || ctText === '') {
+      map.set(well, null);
+      pairCount += 1;
+      return;
+    }
+
+    const normalized = ctText.replace(/，/g, ',').replace(',', '.');
+    const parsed = parseCt(normalized);
+    map.set(well, parsed.valid ? parsed.value : null);
+    pairCount += 1;
+  });
+
+  return pairCount >= 1 ? map : null;
+}
+
+/**
+ * Build a flat list of all Ct slots sorted by physical well position
+ * (A1, A2, ..., B1, B2, ...).  This matches the order most instruments export.
+ */
+function buildWellSortedSlots() {
+  const slots = [];
+  rows.forEach((row, rowIndex) => {
+    const count = rowSlotCount(row);
+    for (let i = 0; i < count; i += 1) {
+      const well = (row.wells && row.wells[i]) || '';
+      const wellRow = well.charAt(0) || '￿';
+      const wellCol = parseInt(well.slice(1), 10) || 9999;
+      slots.push({ rowIndex, ctIndex: i, well, wellRow, wellCol });
+    }
+  });
+  slots.sort((a, b) => {
+    if (a.wellRow !== b.wellRow) return a.wellRow.localeCompare(b.wellRow);
+    return a.wellCol - b.wellCol;
+  });
+  return slots;
+}
+
 function applyCtColumnText(text) {
   if (els.body.querySelector('tr[data-index]')) readRows();
+
+  const slots = buildWellSortedSlots();
+  const totalSlots = slots.length;
+  if (!totalSlots) {
+    setCtPasteStatus('当前数据表没有可填入的位置，请先应用点板模板。', 'warning');
+    els.ctColumnPanel.classList.remove('hidden');
+    return false;
+  }
+
+  // Clear all Ct values
+  const clearCts = () => {
+    rows = rows.map(row => ({ ...row, cts: Array(rowSlotCount(row)).fill('') }));
+  };
+
+  // Try well+value pair matching first (two-column clipboard data)
+  const wellMap = parseWellValuePairs(text);
+  if (wellMap) {
+    clearCts();
+    let filled = 0;
+    let missing = 0;
+    slots.forEach(slot => {
+      if (wellMap.has(slot.well)) {
+        const value = wellMap.get(slot.well);
+        if (value !== null) {
+          rows[slot.rowIndex].cts[slot.ctIndex] = String(value);
+          filled += 1;
+        }
+      } else {
+        missing += 1;
+      }
+    });
+
+    renderAllRows();
+    calculate();
+    save();
+
+    const extraWells = [...wellMap.keys()].filter(w => !slots.some(s => s.well === w)).length;
+    let message = `已按孔号匹配填入 ${filled} / ${totalSlots} 个位置。`;
+    if (missing) message += ` ${missing} 个孔位在数据中缺失。`;
+    if (extraWells) message += ` ${extraWells} 个孔号不在当前模板中。`;
+    setCtPasteStatus(message, missing || extraWells ? 'warning' : 'success');
+    return true;
+  }
+
+  // Fallback: fill in physical well order (A1, A2, ..., B1, ...)
   const parsed = parseCtColumn(text);
   if (!parsed.values.length || !parsed.numeric) {
     setCtPasteStatus('没有识别到 Ct 数值，请检查剪贴板内容。', 'warning');
@@ -665,23 +774,13 @@ function applyCtColumnText(text) {
     return false;
   }
 
-  const totalSlots = rows.reduce((sum, row) => sum + rowSlotCount(row), 0);
-  if (!totalSlots) {
-    setCtPasteStatus('当前数据表没有可填入的位置，请先应用点板模板。', 'warning');
-    els.ctColumnPanel.classList.remove('hidden');
-    return false;
-  }
-
-  let cursor = 0;
-  rows = rows.map(row => {
-    const count = rowSlotCount(row);
-    const cts = Array(count).fill('');
-    for (let i = 0; i < count && cursor < parsed.values.length; i += 1) {
-      cts[i] = parsed.values[cursor] !== null ? String(parsed.values[cursor]) : '';
-      cursor += 1;
+  clearCts();
+  for (let i = 0; i < slots.length && i < parsed.values.length; i += 1) {
+    const value = parsed.values[i];
+    if (value !== null) {
+      rows[slots[i].rowIndex].cts[slots[i].ctIndex] = String(value);
     }
-    return { ...row, cts };
-  });
+  }
 
   renderAllRows();
   calculate();
@@ -689,12 +788,12 @@ function applyCtColumnText(text) {
 
   const used = Math.min(parsed.values.length, totalSlots);
   const extra = Math.max(0, parsed.values.length - totalSlots);
-  const missing = Math.max(0, totalSlots - parsed.values.length);
-  let message = `已按点板顺序填入 ${used} / ${totalSlots} 个位置。`;
-  if (missing) message += ` 后面 ${missing} 个位置保持空白。`;
+  const mt = Math.max(0, totalSlots - parsed.values.length);
+  let message = `已按物理孔序填入 ${used} / ${totalSlots} 个位置。`;
+  if (mt) message += ` 后面 ${mt} 个位置保持空白。`;
   if (extra) message += ` 多出的 ${extra} 个值未使用。`;
   if (parsed.skipped) message += ` 已忽略 ${parsed.skipped} 行标题或非 Ct 内容。`;
-  setCtPasteStatus(message, missing || extra ? 'warning' : 'success');
+  setCtPasteStatus(message, mt || extra ? 'warning' : 'success');
   return true;
 }
 
@@ -797,6 +896,9 @@ function importTemplate(file) {
       targetCount();
       renderAllBlocks();
       renderPlate();
+      syncRowsFromBlocks();
+      renderAllRows();
+      calculate();
       save();
     } catch {
       window.alert('无法导入：文件不是有效的点板模板 JSON。');
