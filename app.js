@@ -1069,6 +1069,12 @@ function fmt(value, digits = 3) {
   return Number.isFinite(value) ? value.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '') : '—';
 }
 
+function truncateLabel(text, maxLen = 12) {
+  const s = String(text || '');
+  if (s.length <= maxLen) return s;
+  return s.slice(0, maxLen - 1) + '…';
+}
+
 function stats(row) {
   const values = row.cts.map(Number).filter(value => Number.isFinite(value) && value > 0);
   const avg = values.length ? mean(values) : null;
@@ -1304,15 +1310,19 @@ function resultsChartSvg() {
     if (ga !== gb) return ga - gb;
     return a.name.localeCompare(b.name, undefined, { numeric: true });
   });
-  const width = Math.max(240, items.length * 76 + 16);
+  // Dynamically size per-bar slot based on longest sample name
+  const maxNameLen = Math.max(...items.map(item => String(item.name || '').length), 4);
+  const perItem = Math.max(76, Math.min(140, maxNameLen * 7 + 12));
+  const barW = Math.max(40, perItem - 30);
+  const width = Math.max(240, items.length * perItem + 16);
   const height = 210;
   const baseY = height - 34;
   const top = 14;
   const maxValue = Math.max(...items.map(item => (Number.isFinite(item.foldHigh) ? item.foldHigh : item.fold))) || 1;
   const scale = value => (baseY - top) * (value / maxValue);
   const bars = items.map((item, index) => {
-    const x = 8 + index * 76;
-    const cx = x + 23;
+    const x = 8 + index * perItem;
+    const cx = x + barW / 2;
     const y = baseY - scale(item.fold);
     const hasError = Number.isFinite(item.foldLow) && Number.isFinite(item.foldHigh) && item.foldHigh > item.foldLow;
     const yHigh = hasError ? baseY - scale(item.foldHigh) : y;
@@ -1323,11 +1333,13 @@ function resultsChartSvg() {
         + `<line x1="${cx - 6}" y1="${yLow}" x2="${cx + 6}" y2="${yLow}" stroke="#64748b" stroke-width="1.2"/>`
       : '';
     const color = item.qc ? '#0d9488' : '#b45309';
-    return `<rect x="${x}" y="${y}" width="46" height="${Math.max(1, baseY - y)}" rx="4" fill="${color}"/>`
+    const shortName = truncateLabel(item.name, 14);
+    const shortGene = truncateLabel(item.gene, 12);
+    return `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="4" fill="${color}"/>`
       + error
       + `<text x="${cx}" y="${Math.max(10, yHigh - 5)}" text-anchor="middle" font-size="10" fill="#334155">${fmt(item.fold)}</text>`
-      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b">${escapeHtml(item.name)}</text>`
-      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#94a3b8">${escapeHtml(item.gene)}</text>`;
+      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b"><title>${escapeHtml(item.name)}</title>${escapeHtml(shortName)}</text>`
+      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#94a3b8"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
   }).join('');
   const axis = `<line x1="4" y1="${baseY}" x2="${width - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
   return `<svg viewBox="0 0 ${width} ${height}" style="width:${width}px;max-width:none" role="img" aria-label="相对表达量柱状图（含误差棒）">${axis}${bars}</svg>`;
@@ -1382,14 +1394,18 @@ function groupChartSvg() {
   if (!allBars.length) return '';
   const nGenes = geneList.length;
   const clusterW = nGenes * (barW + barGap) - barGap;
-  const totalW = Math.max(280, groupList.length * (clusterW + clusterGap) + 20);
+  // Dynamically size cluster gap based on longest group name
+  const maxGroupLen = Math.max(...groupList.map(n => String(n).length), 4);
+  const dynClusterGap = Math.max(clusterGap, maxGroupLen * 7 + 8);
+  const totalW = Math.max(280, groupList.length * (clusterW + dynClusterGap) + 20);
   const scale = v => (barH - 4) * (v / maxFold);
   let svgParts = '';
   let offset = 14;
   groupList.forEach(groupName => {
     const bars = allBars.filter(b => b.group === groupName);
     const cx = offset + clusterW / 2;
-    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">${escapeHtml(groupName)}</text>`;
+    const shortGroup = truncateLabel(groupName, 14);
+    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600"><title>${escapeHtml(groupName)}</title>${escapeHtml(shortGroup)}</text>`;
     bars.forEach(b => {
       const x = offset + b.gi * (barW + barGap);
       const y = baseY - scale(b.fold);
@@ -1406,7 +1422,7 @@ function groupChartSvg() {
       }
       svgParts += `<text x="${x + barW / 2}" y="${Math.max(16, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
     });
-    offset += clusterW + clusterGap;
+    offset += clusterW + dynClusterGap;
   });
   svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
   svgParts += geneList.map((g, i) =>
