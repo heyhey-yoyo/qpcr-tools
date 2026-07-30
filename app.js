@@ -95,9 +95,9 @@ const exampleRows = [
   { wells: ['A10', 'A11', 'A12'], name: 'Treat-1', group: 'Treatment', gene: 'GAPDH', cts: [20.14, 20.19, 20.11] }
 ];
 
+let replicateCount = DEFAULT_REPS;
 let blocks = buildTemplate(1);
 let rows = clone(exampleRows);
-let replicateCount = DEFAULT_REPS;
 let latest = [];
 let latestNotes = { merged: [], singleRep: [] };
 let latestPlate = { placements: [], overflow: false };
