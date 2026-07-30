@@ -374,6 +374,7 @@ function load() {
     els.appendNewLine.checked = Boolean(state.plate?.appendNewLine);
     els.bioGroupReplicates.checked = Boolean(state.plate?.bioGroupReplicates);
     toggleBioGroupVisibility();
+    commitLayout(snapshotLayout());
   } catch (error) {
     console.warn('无法读取本地数据：', error);
     refreshCoordinateSelects('A', '1');
@@ -580,23 +581,67 @@ function loadPreset() {
 
 // ---- Plate layout sync ----
 
+/** Last known-good layout snapshot.  Saved on commit, restored on cancel/overflow. */
+let lastGoodLayout = null;
+
+function snapshotLayout() {
+  return {
+    plateSize: els.plateSize.value,
+    startRow: els.startRow.value,
+    startCol: els.startCol.value,
+    direction: els.direction.value,
+    gap: els.gap.value,
+    replicateCount,
+    blocksReps: blocks.map(b => b.reps),
+    bioGroupReplicates: els.bioGroupReplicates.checked
+  };
+}
+
+function commitLayout(snap) {
+  lastGoodLayout = snap;
+}
+
+function rollbackLayout(snap) {
+  if (!snap) return;
+  const s = snap;
+  if (els.plateSize.value !== s.plateSize) {
+    els.plateSize.value = s.plateSize;
+  }
+  refreshCoordinateSelects(s.startRow, s.startCol);
+  els.direction.value = s.direction;
+  els.gap.value = s.gap;
+  replicateCount = s.replicateCount;
+  els.repsInput.value = String(s.replicateCount);
+  blocks.forEach((b, i) => {
+    if (i < s.blocksReps.length) b.reps = s.blocksReps[i];
+  });
+  els.bioGroupReplicates.checked = s.bioGroupReplicates;
+  toggleBioGroupVisibility();
+  els.targets.max = String(maxTargetCount());
+  targetCount();
+  renderAllBlocks();
+}
+
 /**
  * Called on every plate-layout change (size, start, direction, gap,
  * empty-well click, replicate count).  Checks overflow first, confirms
  * with user when Ct data exists, then maps Ct values by physical well
- * position — NOT by array index — so values follow their wells.
+ * position.  Returns true on success, false if rolled back.
  */
 function syncPlateLayout() {
+  const oldSnap = lastGoodLayout ? { ...lastGoodLayout } : snapshotLayout();
+
   // Generate with current settings to check overflow before touching data
   latestPlate = generatePlacements();
   if (latestPlate.overflow) {
-    renderPlate(); // Show overflow warning banner in plate preview
+    rollbackLayout(oldSnap);
+    latestPlate = generatePlacements();
+    renderPlate();
     window.alert(
-      `当前布局超出${currentPlate().label}容量。\n\n` +
-      '请调整起始孔、减少区块间隔、减少复孔数或改用更大孔板。\n\n' +
-      'Ct 数据未修改，布局未保存。'
+      `当前布局超出${currentPlate().label}容量，已恢复到修改前的设置。\n\n` +
+      '请调整起始孔、减少区块间隔、减少复孔数或改用更大孔板。'
     );
-    return;
+    return false;
   }
 
   // Confirm when Ct data already exists — layout change will remap wells
@@ -608,15 +653,15 @@ function syncPlateLayout() {
       '修改孔板布局将重新生成孔位。程序会尝试按原物理孔号保留 Ct 值。\n\n' +
       '建议在修改布局前导出数据备份。确认继续？'
     )) {
-      // Re-render plate with current settings so preview stays accurate
+      rollbackLayout(oldSnap);
       latestPlate = generatePlacements();
       renderPlate();
-      return;
+      renderAllRows();
+      return false;
     }
   }
 
   // Build well→Ct map from current rows BEFORE regenerating.
-  // Ct values are keyed by physical well so they survive reordering.
   const wellCtMap = new Map();
   rows.forEach(row => {
     (row.wells || []).forEach((well, i) => {
@@ -649,10 +694,12 @@ function syncPlateLayout() {
     };
   });
 
+  commitLayout(snapshotLayout());
   renderPlate();
   renderAllRows();
   calculate();
   save();
+  return true;
 }
 
 // ---- Plate rendering ----
@@ -940,13 +987,26 @@ function calculate() {
 
 function exportTemplate() {
   readBlocks();
-  const json = exportTemplateJson(blocks, experiment, replicateCount);
+  const plateSettings = {
+    size: els.plateSize.value,
+    startRow: els.startRow.value,
+    startCol: els.startCol.value,
+    direction: els.direction.value,
+    gap: els.gap.value
+  };
+  const json = exportTemplateJson(blocks, experiment, replicateCount, plateSettings);
   downloadFile('qpcr-plate-template.json', json, 'application/json;charset=utf-8');
 }
 
 function importTemplate(file) {
   const reader = new FileReader();
   reader.onload = () => {
+    // Snapshot current state before touching anything, so we can revert on overflow
+    const preImportSnap = snapshotLayout();
+    const preImportBlocks = blocks;
+    const preImportExperiment = experiment;
+    const preImportReps = replicateCount;
+
     try {
       const data = JSON.parse(reader.result);
       const list = Array.isArray(data) ? data : data?.blocks;
@@ -973,18 +1033,44 @@ function importTemplate(file) {
         experiment = createExperiment();
       }
 
+      // Restore plate layout from template (v5+), keep current settings for older versions
+      if (data.version >= 5 && data.plate && data.plate.size) {
+        els.plateSize.value = PLATES[data.plate.size] ? data.plate.size : '96';
+        refreshCoordinateSelects(data.plate.startRow || 'A', data.plate.startCol || '1');
+        els.direction.value = data.plate.direction || 'horizontal';
+        els.gap.value = data.plate.gap || '0';
+      }
+
       blocks = list.map(normalizeBlock);
       if (blocks[0]) blocks[0].breakBefore = false;
       els.repsInput.value = String(replicateCount);
+
+      // Check overflow BEFORE committing — revert everything if it fails
+      latestPlate = generatePlacements();
+      if (latestPlate.overflow) {
+        blocks = preImportBlocks;
+        experiment = preImportExperiment;
+        replicateCount = preImportReps;
+        els.repsInput.value = String(replicateCount);
+        rollbackLayout(preImportSnap);
+        latestPlate = generatePlacements();
+        renderPlate();
+        renderAllBlocks();
+        window.alert(
+          `导入的模板超出${currentPlate().label}容量（${blocks.length * replicateCount} 个孔），已恢复到导入前的设置。\n\n` +
+          '请先切换到模板原有的孔板规格（96/384）或将起始孔设为 A1 后再导入。'
+        );
+        return;
+      }
 
       renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
         onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
       targetCount();
       renderAllBlocks();
-      renderPlate();
       rows = [];
       syncRowsFromBlocks();
       calculate();
+      commitLayout(snapshotLayout());
       save();
     } catch {
       window.alert('无法导入：文件不是有效的点板模板 JSON。');
@@ -1277,6 +1363,7 @@ $('#resetBtn').addEventListener('click', () => {
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
   targetCount();
+  commitLayout(snapshotLayout());
   renderAllBlocks(); renderPlate(); renderAllRows(); calculate();
 });
 

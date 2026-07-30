@@ -74,15 +74,16 @@ export function downloadFile(filename, content, mimeType) {
 }
 
 /**
- * Generate template export JSON.
+ * Generate template export JSON (version 5: includes plate layout settings).
  */
-export function exportTemplateJson(blocks, experiment, replicateCount) {
+export function exportTemplateJson(blocks, experiment, replicateCount, plateSettings) {
   return JSON.stringify({
     app: 'qpcr-tools',
     kind: 'plate-template',
-    version: 4,
+    version: 5,
     replicateCount,
     experiment,
+    plate: plateSettings || {},
     blocks
   }, null, 2);
 }
