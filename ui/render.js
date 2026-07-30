@@ -508,8 +508,9 @@ export function buildAlertsHtml(results, notes, experiment, maxSpread) {
     messages.push(['danger', `无法计算 ${missingGenes.map(escapeHtml).join('、')} 的 ΔΔCt：对照组中没有对应基因的有效数据。`]);
   }
 
+  // Only flag real QC failures (spread exceeds threshold), not single-replicate (n<2)
   const controlQcIssues = [...new Set(
-    results.filter(item => !item.missingControl && !item.qc && normalizeKey(item.group) === controlNameKey)
+    results.filter(item => !item.missingControl && !item.qc && item.n >= 2 && normalizeKey(item.group) === controlNameKey)
       .map(item => `${item.name} · ${item.gene}`)
   )];
   if (controlQcIssues.length) {
@@ -517,7 +518,7 @@ export function buildAlertsHtml(results, notes, experiment, maxSpread) {
   }
 
   const targetIssues = [...new Set(
-    results.filter(item => !item.missingControl && item.targetSpread > maxSpread)
+    results.filter(item => !item.missingControl && item.n >= 2 && item.targetSpread > maxSpread)
       .map(item => `${item.name} · ${item.gene}`)
   )];
   if (targetIssues.length) {
@@ -525,7 +526,7 @@ export function buildAlertsHtml(results, notes, experiment, maxSpread) {
   }
 
   const referenceIssues = [...new Set(
-    results.filter(item => !item.missingControl && item.referenceSpread > maxSpread)
+    results.filter(item => !item.missingControl && item.n >= 2 && item.referenceSpread > maxSpread)
       .map(item => `${item.name} · ${item.gene}`)
   )];
   if (referenceIssues.length) {
