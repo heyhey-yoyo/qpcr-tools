@@ -1170,72 +1170,69 @@ function groupChartSvg() {
   const valid = latest.filter(item => Number.isFinite(item.ddct) && !item.missingControl);
   if (!valid.length) return '';
   // Aggregate: per gene, per group — mean ddct and SEM across biological replicates
-  const byGene = new Map();
+  const geneList = [...new Set(valid.map(item => item.gene))];
+  const groupList = [...new Set(valid.map(item => item.group))];
+  // Ensure control group comes first
+  const controlGroup = experiment.groups.find(g => g.isControl);
+  if (controlGroup) {
+    const ci = groupList.findIndex(n => n.trim().toLowerCase() === controlGroup.name.trim().toLowerCase());
+    if (ci > 0) { const [c] = groupList.splice(ci, 1); groupList.unshift(c); }
+  }
+  const byKey = new Map();
   valid.forEach(item => {
-    const geneKey = item.gene.trim().toLowerCase();
-    if (!byGene.has(geneKey)) byGene.set(geneKey, { gene: item.gene, groups: new Map() });
-    const gene = byGene.get(geneKey);
-    const groupKey = item.group.trim();
-    if (!gene.groups.has(groupKey)) gene.groups.set(groupKey, []);
-    gene.groups.get(groupKey).push(item.ddct);
+    const key = `${item.gene.trim().toLowerCase()}|||${item.group.trim()}`;
+    if (!byKey.has(key)) byKey.set(key, []);
+    byKey.get(key).push(item.ddct);
   });
-  // Compute stats per gene+group: mean ddct, SEM, fold
-  const geneGroups = [];
-  byGene.forEach((geneData) => {
-    const stats = [];
-    geneData.groups.forEach((ddcts, groupName) => {
+  // One cluster per group, one bar per gene within cluster
+  const colors = ['#0d9488', '#6366f1', '#d946ef', '#f59e0b', '#14b8a6', '#8b5cf6'];
+  const barW = 32;
+  const barGap = 4;
+  const clusterGap = 24;
+  const baseY = 176;
+  const chartH = 190;
+  const top = 14;
+  // Compute all fold values for scaling
+  let maxFold = 1;
+  const allBars = [];
+  groupList.forEach(groupName => {
+    geneList.forEach((geneName, gi) => {
+      const key = `${geneName.trim().toLowerCase()}|||${groupName.trim()}`;
+      const ddcts = byKey.get(key) || [];
+      if (!ddcts.length) return;
       const n = ddcts.length;
       const meanDdct = mean(ddcts);
       let sem = 0;
       if (n > 1) {
-        const variance = ddcts.reduce((s, v) => s + (v - meanDdct) ** 2, 0) / (n - 1);
-        sem = Math.sqrt(variance / n);
+        const v = ddcts.reduce((s, v) => s + (v - meanDdct) ** 2, 0) / (n - 1);
+        sem = Math.sqrt(v / n);
       }
       const fold = Math.pow(2, -meanDdct);
-      stats.push({
-        group: groupName,
-        n,
-        meanDdct,
-        sem,
-        fold,
-        foldLow: sem ? Math.pow(2, -(meanDdct + sem)) : fold,
-        foldHigh: sem ? Math.pow(2, -(meanDdct - sem)) : fold,
-        isControl: experiment.groups.some(g => g.name.trim().toLowerCase() === groupName.trim().toLowerCase() && g.isControl)
-      });
+      const fLo = sem ? Math.pow(2, -(meanDdct + sem)) : fold;
+      const fHi = sem ? Math.pow(2, -(meanDdct - sem)) : fold;
+      maxFold = Math.max(maxFold, fHi);
+      allBars.push({ group: groupName, gene: geneName, gi, n, fold, foldLow: fLo, foldHigh: fHi });
     });
-    geneGroups.push({ gene: geneData.gene, stats });
   });
-  if (!geneGroups.length) return '';
-  // Build grouped bar chart: one cluster per gene
-  const colors = ['#0d9488', '#6366f1', '#d946ef', '#f59e0b', '#14b8a6', '#8b5cf6'];
-  const barW = 40;
-  const gap = 6;
-  const clusterGap = 30;
-  const maxFold = Math.max(...geneGroups.flatMap(g => g.stats.map(s => s.foldHigh || s.fold))) || 1;
-  const baseY = 176;
-  const chartH = 210;
-  const top = 14;
-  const scale = v => (baseY - top) * (v / Math.max(maxFold, 1));
-  let totalW = 0;
-  geneGroups.forEach(g => {
-    const cw = g.stats.length * (barW + gap) - gap;
-    totalW += cw + clusterGap;
-  });
-  totalW = Math.max(240, totalW + 16);
-  let offset = 8;
+  if (!allBars.length) return '';
+  const nGenes = geneList.length;
+  const scale = v => (baseY - top) * (v / maxFold);
+  const clusterW = nGenes * (barW + barGap) - barGap;
+  const totalW = Math.max(240, groupList.length * (clusterW + clusterGap) + 16);
+  let offset = 12;
   let svgParts = '';
-  geneGroups.forEach((gData, gi) => {
-    const nGroups = gData.stats.length;
-    const cw = nGroups * (barW + gap) - gap;
-    const cx = offset + cw / 2;
-    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b">${escapeHtml(gData.gene)}</text>`;
-    gData.stats.forEach((s, si) => {
-      const x = offset + si * (barW + gap);
-      const y = baseY - scale(s.fold);
-      const hasErr = s.foldHigh > s.foldLow;
-      const yHi = hasErr ? baseY - scale(s.foldHigh) : y;
-      const yLo = hasErr ? baseY - scale(s.foldLow) : y;
-      const color = colors[gi % colors.length];
+  groupList.forEach(groupName => {
+    const bars = allBars.filter(b => b.group === groupName);
+    const cx = offset + clusterW / 2;
+    // Group label below cluster
+    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600">${escapeHtml(groupName)}</text>`;
+    bars.forEach(b => {
+      const x = offset + b.gi * (barW + barGap);
+      const y = baseY - scale(b.fold);
+      const hasErr = b.foldHigh > b.foldLow;
+      const yHi = hasErr ? baseY - scale(b.foldHigh) : y;
+      const yLo = hasErr ? baseY - scale(b.foldLow) : y;
+      const color = colors[b.gi % colors.length];
       svgParts += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="3" fill="${color}" fill-opacity="0.85"/>`;
       if (hasErr) {
         const mx = x + barW / 2;
@@ -1243,21 +1240,15 @@ function groupChartSvg() {
           + `<line x1="${mx - 4}" y1="${yHi}" x2="${mx + 4}" y2="${yHi}" stroke="#475569" stroke-width="1"/>`
           + `<line x1="${mx - 4}" y1="${yLo}" x2="${mx + 4}" y2="${yLo}" stroke="#475569" stroke-width="1"/>`;
       }
-      svgParts += `<text x="${x + barW / 2}" y="${Math.max(10, yHi - 4)}" text-anchor="middle" font-size="9" fill="#334155">${fmt(s.fold)}</text>`;
+      svgParts += `<text x="${x + barW / 2}" y="${Math.max(10, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
     });
-    // Legend row: group names
-    gData.stats.forEach((s, si) => {
-      const lx = offset + si * (barW + gap) + barW / 2;
-      svgParts += `<text x="${lx}" y="${baseY + 27}" text-anchor="middle" font-size="8.5" fill="#94a3b8">${escapeHtml(s.group)}${s.n > 1 ? ' n=' + s.n : ''}</text>`;
-    });
-    offset += cw + clusterGap;
+    offset += clusterW + clusterGap;
   });
   svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
-  // Legend at top
-  const legendY = 6;
-  svgParts += geneGroups.map((g, i) =>
-    `<rect x="${8 + i * 90}" y="${legendY}" width="10" height="10" rx="2" fill="${colors[i % colors.length]}" fill-opacity="0.85"/>`
-    + `<text x="${22 + i * 90}" y="${legendY + 9}" font-size="9" fill="#64748b">${escapeHtml(g.gene)}</text>`
+  // Legend
+  svgParts += geneList.map((g, i) =>
+    `<rect x="${8 + i * 80}" y="6" width="10" height="10" rx="2" fill="${colors[i % colors.length]}" fill-opacity="0.85"/>`
+    + `<text x="${22 + i * 80}" y="15" font-size="9" fill="#475569">${escapeHtml(g)}</text>`
   ).join('');
   return `<svg viewBox="0 0 ${totalW} ${chartH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图">${svgParts}</svg>`;
 }
