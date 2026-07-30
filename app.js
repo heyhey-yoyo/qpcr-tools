@@ -169,9 +169,7 @@ function escapeHtml(value) {
 }
 
 function renderGroups() {
-  // Clear old chips
-  while (els.groupsContainer.firstChild) els.groupsContainer.removeChild(els.groupsContainer.firstChild);
-
+  const frag = document.createDocumentFragment();
   experiment.groups.forEach(g => {
     const chip = document.createElement('span');
     chip.className = 'group-chip' + (g.isControl ? ' chip-control' : '');
@@ -211,9 +209,10 @@ function renderGroups() {
       chip.appendChild(delBtn);
     }
 
-    els.groupsContainer.appendChild(chip);
+    frag.appendChild(chip);
   });
 
+  els.groupsContainer.replaceChildren(frag);
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   els.targets.max = String(maxTargetCount());
   targetCount();
@@ -1583,7 +1582,6 @@ $('#exportBtn').addEventListener('click', () => downloadCsv('qpcr-results.csv', 
 
 refreshCoordinateSelects('A', '1');
 load();
-renderGroups();
 renderBlocks();
 renderPlate();
 renderRows();
