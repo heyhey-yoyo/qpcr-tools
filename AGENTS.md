@@ -2,89 +2,144 @@
 
 ## 项目概览
 
-这是一个**纯前端静态网页 Demo**：qPCR（实时荧光定量 PCR）孔板模板设计与 ΔCt / ΔΔCt 相对表达分析工具。无后端、无构建步骤、无任何 npm 依赖，整个项目只有 4 个文件，全部位于仓库根目录：
+这是一个**纯前端静态网页 Demo**：qPCR（实时荧光定量 PCR）孔板模板设计与 ΔCt / ΔΔCt 相对表达分析工具。无后端、无构建步骤、无任何 npm 依赖。数据完全在浏览器本地计算，不上传任何服务器。
 
-| 文件 | 作用 |
-| --- | --- |
-| `index.html` | 页面结构，中文 UI（`lang="zh-CN"`），分 4 个步骤卡片：设计孔板模板 → 设置分析参数 → 录入 Ct 数据 → 分析结果 |
-| `app.js` | 全部应用逻辑（约 880 行，单文件、无模块系统、无框架），直接在浏览器全局作用域运行 |
-| `styles.css` | 全部样式，使用 CSS 自定义属性（`--primary` 等），以 minified/压缩风格书写（多规则单行） |
-| `README.md` | 中文的用户说明与部署说明 |
+## 文件结构
 
-主要功能：
-
-- 96 孔板（8×12）/ 384 孔板（16×24）模板设计，支持横向/纵向点板、起始孔、区块间空孔、“另起一行”、预设模板连续追加（样本编号自动递增）
-- 孔位排布预览图（`renderPlate` / `generatePlacements`），点击空孔可设为模板起点
-- 一键读取剪贴板中的罗氏单列 Ct / Cp / Cq 数据（`navigator.clipboard.readText`），失败时降级为手动粘贴（`parseCtColumn` / `applyCtColumnText`），支持 Ct/Cq/Cp 表头与 Undetermined、No Ct 等缺失值
-- ΔCt / ΔΔCt 计算、2^-ΔΔCt / 2^-ΔCt 相对表达量、技术重复质控（Ct 最大差值阈值，`calculate`）
-- 点板清单 CSV 与分析结果 CSV 导出（带 BOM，便于 Excel 打开）
-- 全部状态持久化到浏览器 `localStorage`（键 `qpcr-demo-v4`，兼容旧键 `qpcr-demo-v3`）
+```
+qpcr-tools/
+├── index.html              # 页面结构，中文 UI，4 步卡片流程
+├── app.js                  # 应用入口/协调器，ES module，全局事件绑定与状态管理
+├── styles.css              # 全部样式（压缩风格）
+│
+├── core/                   # 纯计算模块（无 DOM、无 localStorage、无全局变量）
+│   ├── ct.js               # Ct 值校验：parseCt(), isValidCt(), filterValidCts()
+│   ├── statistics.js       # 统计函数：mean(), sd(), sem(), spread(), rowStats()
+│   ├── normalize.js        # 字符串归一化：normalizeKey()
+│   └── ddct.js             # 核心分析：computeAnalysis() — ΔCt/ΔΔCt 纯计算
+│
+├── state/                  # 状态管理模块
+│   ├── experiment.js       # 实验配置：组别/基因的稳定 ID 模型、CRUD、名称解析
+│   └── migration.js        # localStorage 数据迁移（v5→v6），向后兼容旧版
+│
+├── ui/                     # UI 渲染模块
+│   ├── render.js           # DOM 渲染：renderGroups, renderBlocks, renderRows, renderResults 等
+│   └── charts.js           # SVG 图表生成（纯函数）：resultsChartSvg(), groupChartSvg()
+│
+├── io/                     # 输入/输出模块
+│   ├── import.js           # 数据导入：parseCtColumn(), parseFullTable()
+│   └── export.js           # 数据导出：resultsCsv(), plateCsv(), downloadFile()
+│
+├── test/                   # 单元测试（Node.js ES module, .mjs）
+│   ├── ct.mjs              # Ct 校验测试
+│   ├── ddct.mjs            # ΔΔCt 计算回归测试
+│   └── migration.mjs       # localStorage 迁移测试
+│
+├── README.md               # 用户文档（中文）
+└── AGENTS.md               # 本文件：AI 代理文档
+```
 
 ## 技术栈与运行架构
 
-- **技术栈**：原生 HTML + CSS + JavaScript（ES2020+ 语法，如 `replaceAll`、可选链、逻辑赋值 `||=`）。无框架、无打包器、无转译。
-- **运行时**：完全在浏览器端运行。数据仅在本地计算，不会上传服务器；状态存 `localStorage`。
-- **配置/清单文件**：**不存在** `package.json`、`pyproject.toml`、`Cargo.toml` 等任何配置或依赖清单文件，也没有 CI 配置。
-- **缓存策略**：`index.html` 中通过查询串 `?v=4.1` 引用 `styles.css` 和 `app.js`，修改这两个文件后需同步提升该版本号以避免浏览器缓存。
+- **技术栈**：原生 HTML + CSS + JavaScript ES Modules（`import`/`export`）。无框架、无打包器、无 npm 依赖。
+- **运行时**：浏览器 `<script type="module">` 加载，需要 HTTP 服务器（`python -m http.server`）。
+- **缓存策略**：`index.html` 中通过查询串 `?v=9.0` 引用 CSS 和 JS，修改后需提升版本号。
+- **无 package.json** — 测试通过 Node.js `.mjs` 文件直接运行，无需项目配置。
 
-## 本地运行与构建
+## 本地运行
 
-无构建过程。本地预览任选其一：
+```bash
+python -m http.server 8000
+# → http://localhost:8000
+```
 
-- 直接用浏览器打开 `index.html`（注意：Clipboard API 需要安全上下文，`file://` 下“一键粘贴单列 Ct”可能不可用，会降级为手动粘贴）
-- 或起一个静态服务器，例如在项目根目录运行 `python -m http.server` 后访问 `http://localhost:8000`
+> ⚠️ ES Module 需要 HTTP(S) 协议，`file://` 下无法使用。
 
 ## 测试
 
-- **项目没有测试框架、没有测试文件、没有 lint/格式化配置。**
-- 验证方式：本地打开页面，人工走完四步流程（载入预设 → 应用到 Ct 数据表 → 粘贴示例/单列 Ct → 检查结果与 CSV 导出）。页面内置“示例 Ct 数据”按钮可用于快速自检。
-- 修改 `app.js` 后至少应检查：浏览器控制台无报错、刷新后 localStorage 状态能正确恢复（`load()` 中所有字段都有兜底默认值，新增持久化字段时务必同样处理）。
+```bash
+node test/ct.mjs        # Ct 校验测试
+node test/ddct.mjs      # ΔΔCt 计算回归测试
+node test/migration.mjs # 数据迁移测试
+```
 
-## 代码组织（`app.js`）
+测试直接 `import` 模块，无需正则提取或 `eval()`。
 
-单文件、按功能分段的函数式结构，无模块导入。关键区段：
+## 数据模型（v6）
 
-- 顶部常量与 DOM 引用：`KEY`/`LEGACY_KEY`、`MAX_REPS`、`PLATES`、`els`、`presets`、`exampleRows`
-- 工具函数：`clone`、`escapeHtml`、`fmt`、`mean`、`stats`
-- 模板区块 CRUD：`renderBlocks` / `readBlocks` / `moveBlock` / `removeBlock` / `appendPreset` / `uniqueSampleName`
-- 孔板布局：`generatePlacements`（核心排布算法）、`parseWell`、`renderPlate`、`applyPlateToRows`
-- Ct 数据表：`renderRows` / `readRows` / `rowSlotCount` / `parseFullTable`（整表粘贴）
-- 单列 Ct 粘贴：`parseCtColumn` / `applyCtColumnText` / `pasteCtColumnFromClipboard`
-- 计算与结果：`calculate`（ΔCt/ΔΔCt/质控）、`renderResults`
-- 导出：`resultsCsv` / `plateCsv` / `csvCell` / `downloadCsv`
-- 底部：所有事件绑定与初始化调用（`refreshCoordinateSelects` → `load` → `renderBlocks` → `renderPlate` → `renderRows` → `calculate`）
+### 稳定 ID 体系
 
-全局可变状态只有三个：`blocks`（模板区块）、`rows`（Ct 数据行）、`latest` / `latestPlate`（最近一次计算结果）。典型数据流是「渲染函数重建 innerHTML → 给新元素绑定事件 → 输入事件触发 read* 函数把 DOM 读回状态 → 重新计算并 `save()`」。
+组别、目标基因和内参基因使用不可变 ID 关联，名称仅用于显示：
 
-## 代码风格约定
+```javascript
+// 实验配置
+experiment = {
+  groups: [{ id: 'g_xxx', name: 'NC', isControl: true }, ...],
+  targetGenes: [{ id: 'tg_xxx', name: 'IL6' }, ...],
+  refGene: { id: 'ref', name: 'GAPDH' },    // 内参基因，ID 固定为 'ref'
+  biologicalReplicates: 1
+}
 
-- `app.js` 开头 `'use strict';`，2 空格缩进、单引号、行尾分号，函数声明式（`function foo()`），箭头函数用于短回调。
-- UI 文案、alert、CSV 表头均为**中文**；标识符（变量/函数名）为英文。`app.js` 中少量注释为英文，README 与页面文档为中文——新增面向用户的文案请用中文。
-- 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义；新增渲染代码请沿用此约定。
-- `styles.css` 为压缩风格（多条规则写在同一行），修改时保持该风格，不要重新格式化整个文件。
-- 表单控件的事件监听通常同时绑 `input` 和 `change`；任何状态变更后调用 `save()` 持久化。
+// 区块（同时存储 ID 和显示名称）
+block = { groupId: 'g_xxx', group: 'NC', geneId: 'tg_xxx', gene: 'IL6', ... }
+
+// 数据行
+row = { groupId: 'g_xxx', group: 'NC', geneId: 'tg_xxx', gene: 'IL6', cts: [...], ... }
+```
+
+- **内部匹配**使用 ID（对照组检测、内参检测、基因分组）。
+- **名称用于显示**，通过 `resolveGroupName()` / `resolveGeneName()` 解析。
+- **改名**时只更新 `name` 字段，ID 不变，已有数据关联不受影响。
+- **旧数据迁移**：`migration.js` 按名称匹配恢复 ID，兼容 v3/v4/v5 格式。
+
+### Ct 校验
+
+所有 Ct 数据入口统一调用 `parseCt(value)`，规则：
+- 必须是有限数字，`0 < Ct ≤ 50`
+- NaN、空值、无穷大、负数、0、超过 50 均拒绝
+- 无效值不参与计算，在界面上红色边框标记
+
+```javascript
+parseCt(50)      // → { valid: true, value: 50 }
+parseCt(50.01)   // → { valid: false, value: null }
+parseCt('25.12') // → { valid: true, value: 25.12 }
+```
+
+### 误差字段语义
+
+- `techSem`：样本技术重复 SEM（ΔCt 层面，由目标+内参独立孔的 SD 传播）
+- `bioSem`：对照组生物学重复 SEM（不同对照样本间的 ΔCt 变异）
+- 图表误差棒 = `techSem`（仅样本技术重复误差）
+- 对照组无误差棒，CSV 中显式标记"技术重复SEM（ΔCt层面，不含对照均值误差）"
+
+## 代码风格
+
+- 2 空格缩进、单引号、行尾分号
+- ES Module `import`/`export`
+- 核心计算函数必须是纯函数（不读 DOM、localStorage 或全局变量）
+- UI 文案、CSV 表头为中文；标识符为英文
+- 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义
+- `styles.css` 为压缩风格（多规则单行），修改时保持该风格
+- 修改 `app.js` 或 `styles.css` 后同步提升 `index.html` 中的 `?v=` 版本号
 
 ## 部署
 
-静态资源直接上传即可（见 `README.md`）：
+静态资源直接上传（Cloudflare Pages / Workers 等），无环境变量、无服务端代码。
 
-- **Cloudflare Pages**：Workers & Pages → Create → Pages → Direct Upload，上传根目录（须直接包含 `index.html`、`styles.css`、`app.js`、`README.md`）。
-- **Cloudflare Workers 静态资源**上传同样可用（`workers.dev` 域名）。
-- 无环境变量、无服务端代码、无构建产物目录。
+## 数据与隐私
 
-## 安全与数据注意事项
-
-- 数据不出浏览器：仅 `localStorage` 持久化，无任何网络请求。不要引入会上传数据的功能。
-- 依赖浏览器 API：`navigator.clipboard`（需用户授权/安全上下文）、`URL.createObjectURL`。剪贴板读取失败有降级路径，改动时请保留。
-- localStorage 读取有版本键迁移（v3 → v4）和 try/catch 兜底；修改存储结构时保持向后兼容或升级 `KEY`。
+- 所有数据仅在浏览器本地处理，不上传任何服务器
+- 状态存储在 `localStorage`（键 `qpcr-demo-v6`，兼容 `qpcr-demo-v5`/`v4`/`v3`）
+- 无网络请求或远程依赖
 
 ---
 
 ## AI 维护提醒
 
-> **⚠️ 任何修改此项目的 AI 代理（包括未来的你自己）都必须遵守：**
+> **⚠️ 任何修改此项目的 AI 代理都必须遵守：**
 >
-> - **修改代码后必须同步更新本 AGENTS.md 与 README.md** — 新增文件、架构变更、功能增删、部署方式变更都需要在两份文档中体现
-> - README.md 面向**人类用户**（功能介绍、运行方法、部署步骤），AGENTS.md 面向 **AI 代理**（架构、代码组织、测试策略、开发约定）
-> - 两份文件**不可互相替代**，各有所众
-> - 项目的实际文件结构必须与 AGENTS.md 中列出的文件清单保持一致
+> - **修改代码后必须同步更新本文件与 README.md**
+> - README.md 面向人类用户，AGENTS.md 面向 AI 代理，两份文件不可互相替代
+> - 新模块文件需在本文的文件结构中列出
+> - localStorage 键升级需在 migration.js 中处理
+> - 核心计算逻辑的修改需要更新 test/ddct.mjs

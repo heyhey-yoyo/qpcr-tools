@@ -28,23 +28,27 @@
 
 ## 技术栈
 
-原生 HTML + CSS + JavaScript（ES2020+），无框架、无打包器、无 npm 依赖，仅 4 个文件：
+原生 HTML + CSS + JavaScript（ES Modules），无框架、无打包器、无 npm 依赖。
 
-| 文件 | 用途 |
+| 目录/文件 | 用途 |
 | --- | --- |
 | `index.html` | 页面结构，中文 UI，4 步卡片流程 |
-| `app.js` | 全部应用逻辑（约 880 行，单文件） |
+| `app.js` | 应用入口/协调器 |
 | `styles.css` | 全部样式 |
-| `README.md` | 本文件 |
+| `core/` | 纯计算模块：Ct 校验、统计、ΔΔCt 分析 |
+| `state/` | 状态管理：实验配置（稳定 ID）、数据迁移 |
+| `ui/` | 界面渲染：DOM 渲染、SVG 图表 |
+| `io/` | 输入输出：数据导入、CSV 导出 |
+| `test/` | Node.js 单元测试（`.mjs`） |
 
 ## 本地运行
 
-无需构建。任选其一：
+无需构建。起静态服务器（ES Module 需要 HTTP 协议）：
 
-- 直接用浏览器打开 `index.html`
-- 或起静态服务器：`python -m http.server 8000` → 访问 `http://localhost:8000`
-
-> ⚠️ Clipboard API 需要安全上下文（HTTPS 或 localhost），`file://` 协议下一键粘贴 Ct 将降级为手动粘贴。
+```bash
+python -m http.server 8000
+# → http://localhost:8000
+```
 
 ## 部署
 

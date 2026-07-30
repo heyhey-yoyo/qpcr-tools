@@ -6,7 +6,7 @@
   <meta name="description" content="qPCR 96/384 孔板模板、罗氏单列 Ct 粘贴、技术重复质控、ΔCt、ΔΔCt 与相对表达分析工具。" />
   <meta name="theme-color" content="#0d9488" />
   <title>qPCR 分析工具</title>
-  <link rel="stylesheet" href="./styles.css?v=8.0" />
+  <link rel="stylesheet" href="./styles.css?v=9.0" />
 </head>
 <body>
 <header class="site-header">
@@ -125,8 +125,6 @@
         <option value="dct">归一化表达量（2^-ΔCt）</option>
       </select>
     </label>
-    <input id="referenceGene" type="hidden" value="GAPDH" />
-    <input id="controlGroup" type="hidden" value="NC" />
     <p id="modeDescription" class="mode-description"></p>
     <div class="form-grid">
       <label class="field"><span>技术重复 Ct 最大差值</span><div class="input-with-unit"><input id="maxSpread" type="number" min="0.1" step="0.1" value="0.5" /><span>Ct</span></div></label>
@@ -201,6 +199,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="container">qPCR 分析工具 · 数据不会离开当前浏览器</div></footer>
-<script src="./app.js?v=8.0"></script>
+<script type="module" src="./app.js?v=9.0"></script>
 </body>
 </html>
