@@ -48,7 +48,9 @@ const els = {
   groupsContainer: $('#groupsContainer'),
   addGroupBtn: $('#addGroupBtn'),
   bioRepsInput: $('#biologicalReplicates'),
-  geneNamesInput: $('#targetGeneNames')
+  targetGenesContainer: $('#targetGenesContainer'),
+  refGeneContainer: $('#refGeneContainer'),
+  addTargetGeneBtn: $('#addTargetGeneBtn')
 };
 
 // Build a plate template: groups × biological replicates × (N targets + 1 reference).
@@ -105,7 +107,8 @@ function targetCount() {
   const value = Math.max(1, Math.min(max, n));
   els.targets.value = String(value);
   els.targets.max = String(max);
-  els.geneNamesInput.textContent = experiment.targetGenes.join(';');
+  renderTargetGenes();
+  renderRefGene();
   return value;
 }
 
@@ -222,6 +225,115 @@ function renderGroups() {
   els.groupsContainer.replaceChildren(frag);
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   targetCount();
+}
+
+function renderTargetGenes() {
+  const max = maxTargetCount();
+  const frag = document.createDocumentFragment();
+  experiment.targetGenes.forEach((gene, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'group-chip';
+
+    const nameEl = document.createElement('span');
+    nameEl.className = 'chip-name';
+    nameEl.textContent = gene;
+    chip.appendChild(nameEl);
+
+    const editBtn = document.createElement('button');
+    editBtn.className = 'chip-edit';
+    editBtn.textContent = '改';
+    editBtn.title = '修改基因名';
+    editBtn.addEventListener('click', e => { e.stopPropagation(); renameTargetGene(i); });
+    chip.appendChild(editBtn);
+
+    if (experiment.targetGenes.length > 1) {
+      const delBtn = document.createElement('button');
+      delBtn.className = 'chip-del';
+      delBtn.innerHTML = '&times;';
+      delBtn.title = '删除目标基因';
+      delBtn.addEventListener('click', e => { e.stopPropagation(); removeTargetGene(i); });
+      chip.appendChild(delBtn);
+    }
+
+    frag.appendChild(chip);
+  });
+
+  els.targetGenesContainer.replaceChildren(frag);
+  // Disable add button at max
+  if (els.addTargetGeneBtn) {
+    els.addTargetGeneBtn.disabled = experiment.targetGenes.length >= max;
+    els.addTargetGeneBtn.title = experiment.targetGenes.length >= max ? `当前孔板最多支持 ${max} 个目标基因` : '添加目标基因';
+  }
+}
+
+function renderRefGene() {
+  const refGene = els.ref.value || 'GAPDH';
+  const frag = document.createDocumentFragment();
+
+  const chip = document.createElement('span');
+  chip.className = 'group-chip ref-chip';
+
+  const nameEl = document.createElement('span');
+  nameEl.className = 'chip-name';
+  nameEl.textContent = refGene;
+  chip.appendChild(nameEl);
+
+  const editBtn = document.createElement('button');
+  editBtn.className = 'chip-edit';
+  editBtn.textContent = '改';
+  editBtn.title = '修改内参基因名';
+  editBtn.addEventListener('click', e => { e.stopPropagation(); renameRefGene(); });
+  chip.appendChild(editBtn);
+
+  const badge = document.createElement('span');
+  badge.className = 'chip-badge';
+  badge.textContent = '内参';
+  chip.appendChild(badge);
+
+  frag.appendChild(chip);
+  els.refGeneContainer.replaceChildren(frag);
+}
+
+function addTargetGene() {
+  const max = maxTargetCount();
+  if (experiment.targetGenes.length >= max) {
+    window.alert(`当前孔板最多支持 ${max} 个目标基因。`);
+    return;
+  }
+  const name = `Target-${experiment.targetGenes.length + 1}`;
+  experiment.targetGenes.push(name);
+  targetCount();
+  save();
+}
+
+function removeTargetGene(index) {
+  if (experiment.targetGenes.length <= 1) { window.alert('至少需要一个目标基因。'); return; }
+  experiment.targetGenes.splice(index, 1);
+  targetCount();
+  save();
+}
+
+function renameTargetGene(index) {
+  const current = experiment.targetGenes[index];
+  const name = (window.prompt('修改基因名：', current) || '').trim();
+  if (!name || name === current) return;
+  if (experiment.targetGenes.some((g, i) => i !== index && g === name)) {
+    window.alert('基因名不能重复。');
+    return;
+  }
+  experiment.targetGenes[index] = name;
+  targetCount();
+  save();
+}
+
+function renameRefGene() {
+  const current = els.ref.value || 'GAPDH';
+  const name = (window.prompt('修改内参基因名：', current) || '').trim();
+  if (!name || name === current) return;
+  els.ref.value = name;
+  targetCount();
+  calculate();
+  save();
 }
 
 function addGroup() {
@@ -387,6 +499,10 @@ function load() {
     blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate();
     rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : clone(exampleRows);
     els.repsInput.value = String(replicateCount);
+    els.mode.value = state.mode || 'ddct';
+    els.ref.value = state.ref || 'GAPDH';
+    els.control.value = state.control || 'NC';
+    els.spread.value = state.spread || 0.5;
     renderGroups();
     const plateSize = PLATES[state.plate?.size] ? state.plate.size : '96';
     els.plateSize.value = plateSize;
@@ -397,10 +513,6 @@ function load() {
     targetCount();
     els.appendCount.value = String(Math.max(1, Math.min(24, Number(state.plate?.appendCount) || 1)));
     els.appendNewLine.checked = Boolean(state.plate?.appendNewLine);
-    els.mode.value = state.mode || 'ddct';
-    els.ref.value = state.ref || 'GAPDH';
-    els.control.value = state.control || 'NC';
-    els.spread.value = state.spread || 0.5;
   } catch (error) {
     console.warn('无法读取本地数据：', error);
     refreshCoordinateSelects('A', '1');
@@ -1444,7 +1556,7 @@ els.targets.addEventListener('change', () => {
   els.targets.value = String(n);
   if (n !== experiment.targetGenes.length) {
     experiment.targetGenes = Array.from({ length: n }, (_, i) => `Target-${i + 1}`);
-    els.geneNamesInput.textContent = experiment.targetGenes.join(';');
+    targetCount();
   }
   save();
 });
@@ -1490,19 +1602,7 @@ els.plateSize.addEventListener('change', () => {
 
 els.addGroupBtn.addEventListener('click', addGroup);
 
-els.geneNamesInput.addEventListener('click', () => {
-  const current = experiment.targetGenes.join(';');
-  const input = window.prompt('目标基因名（英文分号分隔）：', current);
-  if (input === null) return;
-  const names = input.split(';').map(s => s.trim()).filter(Boolean);
-  if (!names.length) { window.alert('至少需要一个目标基因。'); return; }
-  const max = maxTargetCount();
-  if (names.length > max) { window.alert(`当前孔板最多支持 ${max} 个目标基因。`); return; }
-  experiment.targetGenes = names;
-  els.geneNamesInput.textContent = names.join(';');
-  targetCount();
-  save();
-});
+els.addTargetGeneBtn.addEventListener('click', addTargetGene);
 
 els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
@@ -1613,6 +1713,7 @@ $('#copyBtn').addEventListener('click', async () => {
 });
 $('#exportBtn').addEventListener('click', () => downloadCsv('qpcr-results.csv', resultsCsv()));
 [els.mode, els.ref, els.control, els.spread].forEach(control => control.addEventListener('input', calculate));
+els.ref.addEventListener('input', renderRefGene);
 
 refreshCoordinateSelects('A', '1');
 load();

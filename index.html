@@ -6,7 +6,7 @@
   <meta name="description" content="qPCR 96/384 孔板模板、罗氏单列 Ct 粘贴、技术重复质控、ΔCt、ΔΔCt 与相对表达分析工具。" />
   <meta name="theme-color" content="#0d9488" />
   <title>qPCR 分析工具</title>
-  <link rel="stylesheet" href="./styles.css?v=6.0" />
+  <link rel="stylesheet" href="./styles.css?v=7.0" />
 </head>
 <body>
 <header class="site-header">
@@ -47,12 +47,15 @@
             <div id="groupsContainer" class="group-chip-list"></div>
             <button id="addGroupBtn" class="button button-ghost button-sm">＋</button>
           </div>
+          <input id="targetCount" type="hidden" value="1" />
           <div class="experiment-row">
-            <label class="append-count-label" title="每份模板包含的目标基因数量；内参固定 1 个。上限随孔板容量自动限制">
-              <input id="targetCount" class="append-count" type="number" min="1" max="15" step="1" value="1" aria-label="目标数" />
-              <span>个目标 + 1 个内参</span>
-            </label>
-            <button id="targetGeneNames" class="gene-names-btn" title="点击编辑目标基因名，英文分号分隔">IL6</button>
+            <span class="experiment-label">目标基因</span>
+            <div id="targetGenesContainer" class="group-chip-list"></div>
+            <button id="addTargetGeneBtn" class="button button-ghost button-sm" title="添加目标基因">＋</button>
+          </div>
+          <div class="experiment-row">
+            <span class="experiment-label">内参基因</span>
+            <div id="refGeneContainer" class="group-chip-list"></div>
           </div>
           <div class="experiment-row">
             <label class="append-count-label" title="每个分组的独立生物学样本数量">
@@ -200,6 +203,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="container">qPCR 分析工具 · 数据不会离开当前浏览器</div></footer>
-<script src="./app.js?v=6.0"></script>
+<script src="./app.js?v=7.0"></script>
 </body>
 </html>
