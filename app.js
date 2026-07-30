@@ -169,18 +169,17 @@ function escapeHtml(value) {
 
 function renderGroups() {
   els.groupsContainer.innerHTML = experiment.groups.map(g => `
-    <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}" title="${g.isControl ? '对照组（点击切换）' : '点击设为对照组'}">
+    <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}">
       <span class="chip-name">${escapeHtml(g.name)}</span>
-      <span class="chip-badge">${g.isControl ? '对照' : ''}</span>
+      ${g.isControl ? '<span class="chip-badge">对照</span>' : `<button class="chip-ctl" data-action="control" data-id="${g.id}" title="设为对照组">设为对照</button>`}
       ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
     </span>
   `).join('');
 
-  els.groupsContainer.querySelectorAll('.group-chip').forEach(chip => {
-    chip.addEventListener('click', e => {
-      if (e.target.closest('[data-action="remove"]')) return;
-      const id = chip.dataset.id;
-      if (id) toggleControlGroup(id);
+  els.groupsContainer.querySelectorAll('[data-action="control"]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      toggleControlGroup(btn.dataset.id);
     });
   });
   els.groupsContainer.querySelectorAll('.chip-del').forEach(btn => {
@@ -209,6 +208,9 @@ function addGroup() {
 
 function removeGroup(groupId) {
   if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
+  const target = experiment.groups.find(g => g.id === groupId);
+  if (!target) return;
+  if (!window.confirm(`确定删除分组"${target.name}"？`)) return;
   experiment.groups = experiment.groups.filter(g => g.id !== groupId);
   if (!experiment.groups.some(g => g.isControl)) experiment.groups[0].isControl = true;
   renderGroups();
