@@ -79,25 +79,44 @@ function maxTargetCount() {
   return Math.max(1, Math.floor((plate.rows.length * plate.cols) / wellsPerGene) - 1);
 }
 
-// Demo template: two batches of experiment groups × (N targets + 1 reference),
-// second batch starts on a fresh row.
+// Demo template: 4 groups (NC/24H/48H/96H) × 2 bio reps × (3 targets + 1 ref).
+// 96-well: 1 batch = 96 wells (full plate). 384-well: 2 batches.
 function exampleTemplate() {
   const plate = currentPlate();
-  const refGene = els.ref.value || 'GAPDH';
-  const genes = plate.size === '384' ? ['IL6', 'TNF', 'IL1B', 'IFNG', 'TGFB1', 'GAPDH_ex', 'ACTB_ex'] : ['IL6', 'TNF', 'IL1B'];
+  const refGene = 'ACTB';
+  const genes = ['IL-1B', 'SP1', 'AKT'];
+  // Override experiment config for the demo
+  experiment.groups = [
+    { id: 'ex1', name: 'NC', isControl: true },
+    { id: 'ex2', name: '24H', isControl: false },
+    { id: 'ex3', name: '48H', isControl: false },
+    { id: 'ex4', name: '96H', isControl: false }
+  ];
+  experiment.biologicalReplicates = 2;
+  experiment.targetGenes = [...genes];
+  els.ref.value = refGene;
+  els.control.value = 'NC';
+  renderGroups(); // refresh chips to match demo config
+
   const template = [];
   const groups = experiment.groups;
-  [1, 2].forEach(batch => {
+  const batches = plate.size === '384' ? [1, 2] : [1];
+  batches.forEach(batch => {
     groups.forEach(group => {
-      const sample = `${group.name}-${batch}`;
-      genes.forEach(gene => {
-        template.push({ sample, group: group.name, gene, role: 'target', reps: replicateCount, breakBefore: false });
-      });
-      template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
+      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+        const sample = `${group.name}-BioRep${bio}`;
+        genes.forEach(gene => {
+          template.push({ sample, group: group.name, gene, role: 'target', reps: replicateCount, breakBefore: false });
+        });
+        template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
+      }
     });
   });
-  const perBatch = groups.length * (genes.length + 1);
-  if (perBatch < template.length) template[perBatch].breakBefore = true;
+  // Second batch starts on a fresh row
+  if (batches.length > 1) {
+    const perBatch = groups.length * experiment.biologicalReplicates * (genes.length + 1);
+    if (perBatch < template.length) template[perBatch].breakBefore = true;
+  }
   return template;
 }
 
