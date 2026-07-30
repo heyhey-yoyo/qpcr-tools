@@ -224,6 +224,9 @@ function renderGroups() {
 
   els.groupsContainer.replaceChildren(frag);
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
+  // Keep hidden control-group input in sync with experiment state
+  const ctrl = experiment.groups.find(g => g.isControl);
+  if (ctrl) els.control.value = ctrl.name;
   targetCount();
 }
 
