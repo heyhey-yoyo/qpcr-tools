@@ -186,7 +186,7 @@ function renderGroups() {
     editBtn.className = 'chip-edit';
     editBtn.textContent = '改';
     editBtn.title = '修改分组名';
-    editBtn.addEventListener('click', e => { e.stopPropagation(); console.log('改 button clicked, id:', g.id); renameGroup(g.id); });
+    editBtn.addEventListener('click', e => { e.stopPropagation(); renameGroup(g.id); });
     chip.appendChild(editBtn);
 
     if (g.isControl) {
@@ -243,9 +243,8 @@ function removeGroup(groupId) {
 }
 
 function renameGroup(groupId) {
-  console.trace('renameGroup called with id:', groupId);
   const target = experiment.groups.find(g => g.id === groupId);
-  if (!target) { console.warn('renameGroup: no target for id', groupId); return; }
+  if (!target) return;
   const name = (window.prompt('修改分组名称：', target.name) || '').trim();
   if (!name || name === target.name) return;
   if (experiment.groups.some(g => g.id !== groupId && g.name === name)) {
@@ -1471,7 +1470,7 @@ els.plateSize.addEventListener('change', () => {
   save();
 }));
 
-els.addGroupBtn.addEventListener('click', () => { console.log('＋ addGroup clicked'); addGroup(); });
+els.addGroupBtn.addEventListener('click', addGroup);
 
 els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
