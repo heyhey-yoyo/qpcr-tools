@@ -1438,20 +1438,12 @@ els.addGroupBtn.addEventListener('click', addGroup);
 
 // Delegated group chip actions — single listener, never replaced
 els.groupsContainer.addEventListener('click', e => {
+  if (!(e.target instanceof Element)) return;
   const chip = e.target.closest('.group-chip');
-  if (!chip) return;
-  if (e.target.closest('[data-action="rename"]') || e.target.closest('.chip-name')) {
-    renameGroup(chip.dataset.id);
-    return;
-  }
-  if (e.target.closest('[data-action="control"]')) {
-    toggleControlGroup(chip.dataset.id);
-    return;
-  }
-  if (e.target.closest('.chip-del')) {
-    removeGroup(chip.dataset.id);
-    return;
-  }
+  if (!chip || !chip.dataset.id) return;
+  if (e.target.closest('[data-action="rename"]')) { renameGroup(chip.dataset.id); return; }
+  if (e.target.closest('[data-action="control"]')) { toggleControlGroup(chip.dataset.id); return; }
+  if (e.target.closest('.chip-del')) { removeGroup(chip.dataset.id); return; }
 });
 
 els.bioRepsInput.addEventListener('change', () => {
