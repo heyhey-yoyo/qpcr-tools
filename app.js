@@ -112,11 +112,6 @@ function exampleTemplate() {
       }
     });
   });
-  // Second batch starts on a fresh row
-  if (batches.length > 1) {
-    const perBatch = groups.length * experiment.biologicalReplicates * (genes.length + 1);
-    if (perBatch < template.length) template[perBatch].breakBefore = true;
-  }
   return template;
 }
 
