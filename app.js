@@ -1,7 +1,7 @@
 'use strict';
 
-const KEY = 'qpcr-demo-v4';
-const LEGACY_KEY = 'qpcr-demo-v3';
+const KEY = 'qpcr-demo-v5';
+const LEGACY_KEYS = ['qpcr-demo-v4', 'qpcr-demo-v3'];
 const MAX_REPS = 12;
 const DEFAULT_REPS = 3;
 const MIN_REPS = 1;
@@ -43,42 +43,56 @@ const els = {
   ctColumnPanel: $('#ctColumnPanel'),
   ctColumnArea: $('#ctColumnArea'),
   ctPasteStatus: $('#ctPasteStatus'),
-  repsInput: $('#replicateCount')
+  repsInput: $('#replicateCount'),
+  groupsContainer: $('#groupsContainer'),
+  addGroupBtn: $('#addGroupBtn'),
+  bioRepsInput: $('#biologicalReplicates')
 };
 
-// Build a plate template: 2 samples (NC / Treatment) × N targets + 1 fixed
-// reference. N is bounded by maxTargetCount().
+// Build a plate template: groups × biological replicates × (N targets + 1 reference).
+// N is bounded by maxTargetCount().
 function buildTemplate(count) {
   const template = [];
-  [['NC-1', 'NC'], ['Treat-1', 'Treatment']].forEach(([sample, group]) => {
-    for (let index = 1; index <= count; index += 1) {
-      template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
+  const refGene = els.ref.value || 'GAPDH';
+  experiment.groups.forEach(group => {
+    for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+      const sample = `${group.name}-${bio}`;
+      for (let index = 1; index <= count; index += 1) {
+        template.push({ sample, group: group.name, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
+      }
+      template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
     }
-    template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: replicateCount, breakBefore: false });
   });
   return template;
 }
 
 function maxTargetCount() {
   const plate = currentPlate();
-  return Math.max(1, Math.floor((plate.rows.length * plate.cols) / (2 * replicateCount)) - 1);
+  const groupCount = experiment.groups.length;
+  const bioReps = experiment.biologicalReplicates;
+  const wellsPerGene = groupCount * bioReps * replicateCount;
+  return Math.max(1, Math.floor((plate.rows.length * plate.cols) / wellsPerGene) - 1);
 }
 
-// Demo template for the current plate size: two batches (NC-x / Treat-x) of
-// targets + 1 reference, second batch starts on a fresh row.
+// Demo template: two batches of experiment groups × (N targets + 1 reference),
+// second batch starts on a fresh row.
 function exampleTemplate() {
   const plate = currentPlate();
   const targets = plate.size === '384' ? 7 : 3;
+  const refGene = els.ref.value || 'GAPDH';
   const template = [];
+  const groups = experiment.groups;
   [1, 2].forEach(batch => {
-    [['NC', `NC-${batch}`], ['Treatment', `Treat-${batch}`]].forEach(([group, sample]) => {
+    groups.forEach(group => {
+      const sample = `${group.name}-${batch}`;
       for (let index = 1; index <= targets; index += 1) {
-        template.push({ sample, group, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
+        template.push({ sample, group: group.name, gene: `Target-${index}`, role: 'target', reps: replicateCount, breakBefore: false });
       }
-      template.push({ sample, group, gene: 'GAPDH', role: 'reference', reps: replicateCount, breakBefore: false });
+      template.push({ sample, group: group.name, gene: refGene, role: 'reference', reps: replicateCount, breakBefore: false });
     });
   });
-  template[(targets + 1) * 2].breakBefore = true;
+  const perBatch = groups.length * (targets + 1);
+  if (perBatch < template.length) template[perBatch].breakBefore = true;
   return template;
 }
 
@@ -96,6 +110,13 @@ const exampleRows = [
 ];
 
 let replicateCount = DEFAULT_REPS;
+let experiment = {
+  groups: [
+    { id: 'g1', name: 'NC', isControl: true },
+    { id: 'g2', name: 'Treatment', isControl: false }
+  ],
+  biologicalReplicates: 1
+};
 let blocks = buildTemplate(1);
 let rows = clone(exampleRows);
 let latest = [];
@@ -144,6 +165,61 @@ function escapeHtml(value) {
     .replaceAll('>', '&gt;')
     .replaceAll('"', '&quot;')
     .replaceAll("'", '&#039;');
+}
+
+function renderGroups() {
+  els.groupsContainer.innerHTML = experiment.groups.map(g => `
+    <span class="group-chip${g.isControl ? ' chip-control' : ''}" title="${g.isControl ? '对照组（点击切换）' : '点击设为对照组'}">
+      <span class="chip-name">${escapeHtml(g.name)}</span>
+      <span class="chip-badge">${g.isControl ? '对照' : ''}</span>
+      ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
+    </span>
+  `).join('');
+
+  els.groupsContainer.querySelectorAll('.group-chip').forEach(chip => {
+    chip.addEventListener('click', e => {
+      if (e.target.closest('[data-action="remove"]')) return;
+      toggleControlGroup(chip.querySelector('.chip-del')?.dataset.id || experiment.groups.find(g => g.name === chip.querySelector('.chip-name').textContent)?.id);
+    });
+  });
+  els.groupsContainer.querySelectorAll('.chip-del').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      removeGroup(btn.dataset.id);
+    });
+  });
+
+  els.bioRepsInput.value = String(experiment.biologicalReplicates);
+  els.targets.max = String(maxTargetCount());
+  targetCount();
+}
+
+function addGroup() {
+  const name = (window.prompt('分组名称：') || '').trim();
+  if (!name) return;
+  if (experiment.groups.some(g => g.name === name)) {
+    window.alert('分组名称不能重复。');
+    return;
+  }
+  experiment.groups.push({ id: 'g' + Date.now(), name, isControl: experiment.groups.length === 0 });
+  renderGroups();
+  save();
+}
+
+function removeGroup(groupId) {
+  if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
+  experiment.groups = experiment.groups.filter(g => g.id !== groupId);
+  if (!experiment.groups.some(g => g.isControl)) experiment.groups[0].isControl = true;
+  renderGroups();
+  save();
+}
+
+function toggleControlGroup(groupId) {
+  const target = experiment.groups.find(g => g.id === groupId);
+  if (!target) return;
+  experiment.groups.forEach(g => { g.isControl = (g.id === groupId); });
+  renderGroups();
+  save();
 }
 
 function currentPlate() {
@@ -198,6 +274,7 @@ function save() {
     blocks,
     rows,
     replicateCount,
+    experiment,
     plate: {
       size: els.plateSize.value,
       startRow: els.startRow.value,
@@ -217,10 +294,18 @@ function save() {
 
 function load() {
   try {
-    const raw = localStorage.getItem(KEY) || localStorage.getItem(LEGACY_KEY);
-    const state = raw ? JSON.parse(raw) : null;
+    let raw = localStorage.getItem(KEY);
+    let state = raw ? JSON.parse(raw) : null;
+    // Fallback to legacy keys
+    if (!state) {
+      for (const legacyKey of LEGACY_KEYS) {
+        raw = localStorage.getItem(legacyKey);
+        if (raw) { state = JSON.parse(raw); break; }
+      }
+    }
     if (!state) {
       refreshCoordinateSelects('A', '1');
+      renderGroups();
       return;
     }
     // Restore replicateCount before normalizing blocks/rows (they depend on it)
@@ -234,9 +319,22 @@ function load() {
     } else {
       replicateCount = DEFAULT_REPS;
     }
+    // Restore experiment config (provide default for legacy data)
+    if (state.experiment && Array.isArray(state.experiment.groups) && state.experiment.groups.length) {
+      experiment = state.experiment;
+    } else {
+      experiment = {
+        groups: [
+          { id: 'g1', name: 'NC', isControl: true },
+          { id: 'g2', name: 'Treatment', isControl: false }
+        ],
+        biologicalReplicates: 1
+      };
+    }
     blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate(1);
     rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : clone(exampleRows);
     els.repsInput.value = String(replicateCount);
+    renderGroups();
     const plateSize = PLATES[state.plate?.size] ? state.plate.size : '96';
     els.plateSize.value = plateSize;
     refreshCoordinateSelects(state.plate?.startRow || 'A', state.plate?.startCol || '1');
@@ -604,9 +702,9 @@ function applyPlateToRows() {
   });
 
   const referenceBlock = blocks.find(block => block.role === 'reference');
-  const firstGroup = blocks[0]?.group;
   if (referenceBlock) els.ref.value = referenceBlock.gene;
-  if (firstGroup) els.control.value = firstGroup;
+  const controlGroup = experiment.groups.find(g => g.isControl);
+  if (controlGroup) els.control.value = controlGroup.name;
   renderRows();
   calculate();
   save();
@@ -1107,7 +1205,7 @@ function loadPreset() {
 
 function exportTemplate() {
   readBlocks();
-  const payload = { app: 'qpcr-tools', kind: 'plate-template', version: 2, replicateCount, blocks };
+  const payload = { app: 'qpcr-tools', kind: 'plate-template', version: 3, replicateCount, experiment, blocks };
   const link = document.createElement('a');
   link.href = URL.createObjectURL(new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json;charset=utf-8' }));
   link.download = 'qpcr-plate-template.json';
@@ -1122,7 +1220,7 @@ function importTemplate(file) {
       const data = JSON.parse(reader.result);
       const list = Array.isArray(data) ? data : data?.blocks;
       if (!Array.isArray(list) || !list.length) throw new Error('invalid template');
-      // Handle replicateCount: version 2 has it at top level, version 1 infers from block.reps
+      // Handle replicateCount: version 2+ has it at top level, version 1 infers from block.reps
       if (data.version >= 2 && data.replicateCount !== undefined) {
         replicateCount = normalizeReplicateCount(data.replicateCount);
       } else if (list.some(b => b.reps !== undefined)) {
@@ -1134,8 +1232,22 @@ function importTemplate(file) {
           window.alert('导入的旧模板包含混合复孔设置，已使用默认值 3。请确认模板布局后再应用。');
         }
       }
+      // Handle experiment config (version 3+)
+      if (data.version >= 3 && data.experiment && Array.isArray(data.experiment.groups) && data.experiment.groups.length) {
+        experiment = data.experiment;
+      } else {
+        experiment = {
+          groups: [
+            { id: 'g1', name: 'NC', isControl: true },
+            { id: 'g2', name: 'Treatment', isControl: false }
+          ],
+          biologicalReplicates: 1
+        };
+      }
       blocks = list.map(normalizeBlock);
       if (blocks[0]) blocks[0].breakBefore = false;
+      els.repsInput.value = String(replicateCount);
+      renderGroups();
       renderBlocks();
       renderPlate();
       save();
@@ -1230,6 +1342,16 @@ els.plateSize.addEventListener('change', () => {
   save();
 }));
 
+els.addGroupBtn.addEventListener('click', addGroup);
+
+els.bioRepsInput.addEventListener('change', () => {
+  experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
+  els.bioRepsInput.value = String(experiment.biologicalReplicates);
+  els.targets.max = String(maxTargetCount());
+  targetCount();
+  save();
+});
+
 els.repsInput.addEventListener('change', () => {
   const oldCount = replicateCount;
   replicateCount = normalizeReplicateCount(els.repsInput.value);
@@ -1275,9 +1397,16 @@ $('#clearDataBtn').addEventListener('click', () => {
 });
 $('#resetBtn').addEventListener('click', () => {
   localStorage.removeItem(KEY);
-  localStorage.removeItem(LEGACY_KEY);
+  LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
   replicateCount = DEFAULT_REPS;
   els.repsInput.value = String(DEFAULT_REPS);
+  experiment = {
+    groups: [
+      { id: 'g1', name: 'NC', isControl: true },
+      { id: 'g2', name: 'Treatment', isControl: false }
+    ],
+    biologicalReplicates: 1
+  };
   els.targets.value = '1';
   els.appendCount.value = '1';
   els.appendNewLine.checked = false;
@@ -1294,6 +1423,7 @@ $('#resetBtn').addEventListener('click', () => {
   els.ctColumnArea.value = '';
   els.ctColumnPanel.classList.add('hidden');
   els.paste.classList.add('hidden');
+  renderGroups();
   renderBlocks();
   renderPlate();
   renderRows();
@@ -1325,6 +1455,7 @@ $('#exportBtn').addEventListener('click', () => downloadCsv('qpcr-results.csv', 
 
 refreshCoordinateSelects('A', '1');
 load();
+renderGroups();
 renderBlocks();
 renderPlate();
 renderRows();

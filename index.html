@@ -42,10 +42,21 @@
       <label class="field field-wide">
         <span>模板构成</span>
         <div class="inline-control template-control">
-          <label class="append-count-label" title="每份模板包含的目标基因数量；内参固定 1 个。上限随孔板容量自动限制">
-            <input id="targetCount" class="append-count" type="number" min="1" max="15" step="1" value="1" aria-label="目标数" />
-            <span>个目标 + 1 个内参</span>
-          </label>
+          <div class="experiment-row">
+            <span class="experiment-label">分组</span>
+            <div id="groupsContainer" class="group-chip-list"></div>
+            <button id="addGroupBtn" class="button button-ghost button-sm">＋</button>
+          </div>
+          <div class="experiment-row">
+            <label class="append-count-label" title="每个分组的独立生物学样本数量">
+              <span>生物学重复</span>
+              <input id="biologicalReplicates" class="append-count" type="number" min="1" max="24" step="1" value="1" />
+            </label>
+            <label class="append-count-label" title="每份模板包含的目标基因数量；内参固定 1 个。上限随孔板容量自动限制">
+              <input id="targetCount" class="append-count" type="number" min="1" max="15" step="1" value="1" aria-label="目标数" />
+              <span>个目标 + 1 个内参</span>
+            </label>
+          </div>
           <button id="loadPresetBtn" class="button button-ghost" title="按当前目标数重新生成模板，覆盖当前所有区块">载入预设</button>
           <label class="reps-global-label" title="同一样本同一基因的技术重复孔数，全局统一设置；修改会影响已有 Ct 数据">
             <span>复孔数</span>
