@@ -10,7 +10,7 @@
 qpcr-tools/
 ├── index.html              # 页面结构，中文 UI，4 步卡片流程
 ├── app.js                  # 应用入口/协调器，ES module，全局事件绑定与状态管理
-├── styles.css              # 全部样式（压缩风格）
+├── styles.css              # 全部样式（压缩风格，单行规则）
 │
 ├── core/                   # 纯计算模块（无 DOM、无 localStorage、无全局变量）
 │   ├── ct.js               # Ct 值校验：parseCt(), isValidCt(), filterValidCts()
@@ -19,16 +19,18 @@ qpcr-tools/
 │   └── ddct.js             # 核心分析：computeAnalysis() — ΔCt/ΔΔCt 纯计算
 │
 ├── state/                  # 状态管理模块
-│   ├── experiment.js       # 实验配置：组别/基因的稳定 ID 模型、CRUD、名称解析
-│   └── migration.js        # localStorage 数据迁移（v5→v6），向后兼容旧版
+│   ├── experiment.js       # 实验配置：组别/基因的稳定 ID 模型、CRUD、名称解析、display name 同步
+│   └── migration.js        # localStorage 数据迁移（v3→v4→v5→v6），向后兼容旧版
 │
-├── ui/                     # UI 渲染模块
-│   ├── render.js           # DOM 渲染：renderGroups, renderBlocks, renderRows, renderResults 等
+├── ui/                     # UI 渲染模块（读/写 DOM，但不访问全局变量）
+│   ├── render.js           # DOM 渲染：renderGroups, renderTargetGenes, renderRefGene,
+│   │                       #   renderBlocks, renderPlateGrid, renderRows, renderResults,
+│   │                       #   readBlocksFromDom, readRowsFromDom, buildAlertsHtml, escapeHtml
 │   └── charts.js           # SVG 图表生成（纯函数）：resultsChartSvg(), groupChartSvg()
 │
 ├── io/                     # 输入/输出模块
-│   ├── import.js           # 数据导入：parseCtColumn(), parseFullTable()
-│   └── export.js           # 数据导出：resultsCsv(), plateCsv(), downloadFile()
+│   ├── import.js           # 数据导入：parseCtColumn()（罗氏单列）, parseFullTable()（完整表格粘贴）
+│   └── export.js           # 数据导出：resultsCsv(), plateCsv(), downloadFile(), exportTemplateJson()
 │
 ├── test/                   # 单元测试（Node.js ES module, .mjs）
 │   ├── ct.mjs              # Ct 校验测试
@@ -97,7 +99,8 @@ row = { groupId: 'g_xxx', group: 'NC', geneId: 'tg_xxx', gene: 'IL6', cts: [...]
 所有 Ct 数据入口统一调用 `parseCt(value)`，规则：
 - 必须是有限数字，`0 < Ct ≤ 50`
 - NaN、空值、无穷大、负数、0、超过 50 均拒绝
-- 无效值不参与计算，在界面上红色边框标记
+- 无效值不参与计算，在界面上红色边框标记（CSS class `ct-invalid`）
+- Ct 输入框即时校验：每次 `input` 事件都调用 `parseCt()` 并更新视觉状态
 
 ```javascript
 parseCt(50)      // → { valid: true, value: 50 }
@@ -113,25 +116,94 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 - 对照组无误差棒，CSV 中显式标记"技术重复SEM（ΔCt层面，不含对照均值误差）"
 - `bioSem === null` 时 CSV 和界面显示为空或"—"，不显示为 0
 
+### 两种分析模式
+
+- **ddct**（相对表达量 2^-ΔΔCt）：以对照组为校准样本，按目标基因分别计算 ΔCt、ΔΔCt 和相对表达倍数
+- **dct**（归一化表达量 2^-ΔCt）：仅以内参基因归一化，计算每个样本的 ΔCt 和 2^-ΔCt
+
 ## 关键行为
 
-### 联动删除
+### 实验配置管理
+
+- **分组芯片**（`renderGroups`）：每个分组渲染为 chip 组件，显示名称 + "改"按钮 + 对照组操作按钮 + 删除按钮（仅 >1 组时显示）
+- **目标基因芯片**（`renderTargetGenes`）：每个基因渲染为 chip，显示名称 + "改"按钮 + 删除按钮（仅 >1 个时显示）。添加按钮在达到孔板上限时自动禁用
+- **内参基因芯片**（`renderRefGene`）：显示名称 + "改"按钮 + "内参"徽章
+- **生物学重复数**：独立 `<input>` 控件，范围 1–24
+- **技术复孔数**：全局 `<input>` 控件，范围 1–6，修改时联动更新 blocks 和 rows
+
+### 联动删除（级联删除）
 
 - **删除组别/基因**：级联删除通过稳定 ID 关联的 blocks 和 rows，弹窗确认并提示受影响数量，删除后自动重建孔位
 - **删除单个区块**：同步删除同行号的行，剩余行的孔位按新布局刷新，保留 Ct 值
 - **删除单个数据行**：同步删除同行号的区块，孔板预览同步更新
+- 所有级联删除操作包裹在 try/catch 中防止崩溃
 
 ### Blocks ↔ Rows 自动同步
 
-- 第一步（孔板模板）和第三步（Ct 数据表）**始终保持联动**，无需手动触发
-- blocks 的任何结构变化（载入预设、追加、添加、删除、移动、切换生物重复排列）都会自动生成 rows，通过匹配 `样本+组别+基因ID` 保留已有 Ct 值
+- 第一步（孔板模板）和第三步（Ct 数据表）**始终保持联动**，无需手动触发（v2 已移除"应用"按钮）
+- blocks 的任何结构变化（载入预设、追加、添加、删除、移动、切换生物重复排列）都会自动调用 `syncRowsFromBlocks()`
+- `syncRowsFromBlocks()` 通过匹配 `样本 + groupId + geneId` 保留已有 Ct 值，新行 Ct 为空
 - 编辑区块的样本/组别/基因名称会自动同步到对应行
+
+### 模板预设系统
+
+- **将预设载入孔板**（`loadPreset`）：按当前实验配置调用 `buildTemplate()` 生成模板，覆盖所有区块，起始位置重置为 A1
+- **追加预设**（`appendPreset`）：在现有区块后追加，支持设置追加份数（1–24）和"每份另起一行"。样本编号自动递增且唯一。若孔板容量不足则弹窗拒绝并回滚
+- **功能演示**（`exampleTemplate`）：4 组（NC/24H/48H/96H）× 3 目标基因（IL-1B/SP1/AKT）× 2 生物学重复，384 孔板时双份
+- **生物学重复相邻排列**（`bioGroupReplicates`）：仅复孔数 = 1 时显示，勾选后同一基因的生物学重复排列在相邻孔位
+
+### 模板导入/导出
+
+- **导出模板**：`exportTemplateJson()` 生成 JSON（含 version: 4, replicateCount, experiment, blocks）
+- **导入模板**（`importTemplate`）：支持 version 1–4，自动恢复 experiment 配置和复孔数，旧版混合复孔数据降级处理
+
+### Ct 数据导入
+
+- **罗氏单列 Ct 粘贴**（`parseCtColumn`）：从剪贴板读取或手动粘贴。检测并跳过标题行（Ct/Cq/Cp/Ct Value 等）、缺失值行（Undetermined/No Ct/N/A 等）、孔位 ID 行。严格按孔位顺序从上到下依次填入。显示详细状态消息（填入数/剩余数/多出数/跳过数）
+- **完整表格粘贴**（`parseFullTable`）：支持 TAB 或逗号分隔，自动识别孔位列（可选）。Ct 值通过 `parseCt()` 校验
+
+### 分析计算流程
+
+1. `rowStats()` 对每行 Ct 值计算 mean/sd/spread/n
+2. 合并重复"样本+组别+基因"记录（按字符串 key）
+3. 按样本分组，配对目标基因与内参基因
+4. 计算 ΔCt = targetCt − referenceCt，techSem（SD 传播）
+5. 对照组统计：按基因分组计算平均 ΔCt，bioSem（≥2 样本时）
+6. ΔΔCt = ΔCt − 对照组平均 ΔCt，相对表达量 = 2^−ΔΔCt
+7. QC 判断：目标+内参的 Ct 极差均不超过阈值 且 n ≥ 2
+
+### 图表
+
+- **resultsChartSvg**：逐样本柱状图，按组别排序。绿柱=通过，橙柱=需复核。误差棒为 techSem 换算的倍数区间。长名称截断+悬停全名
+- **groupChartSvg**：分组汇总图（仅 ΔΔCt 模式 + 多基因时）。按分组聚类，基因作为簇内彩色柱。顶部显示基因图例。单基因时自动隐藏
+
+### QC 告警层级
+
+`buildAlertsHtml()` 按优先级生成 HTML 告警：
+1. 无有效结果 → warning
+2. 重复记录已合并 → warning
+3. 单孔无技术重复 → warning
+4. 对照组缺基因数据 → danger
+5. 对照组 QC 失败（优先复核） → danger
+6. 目标基因极差过大 → warning
+7. 内参基因极差过大 → warning
+8. 全部通过 → success
+
+单复孔记录（n<2）不参与 QC spread 警告。
+
+### 持久化
+
+- localStorage 键 `qpcr-demo-v6`（兼容 v3/v4/v5 旧键的自动迁移）
+- `save()` 在每次操作后调用，保存 experiment、blocks、rows、replicateCount、plate 设置、mode、spread
+- `load()` 自动迁移旧格式数据（通过 `migrateState()`）
+- "恢复默认"（`resetBtn`）：清除所有 localStorage 键，重置所有状态为默认值
 
 ## 代码风格
 
 - 2 空格缩进、单引号、行尾分号
 - ES Module `import`/`export`
 - 核心计算函数必须是纯函数（不读 DOM、localStorage 或全局变量）
+- UI 渲染函数接收状态作为参数，不读取全局变量（但可以写 DOM、绑定事件）
 - UI 文案、CSV 表头为中文；标识符为英文
 - 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义
 - `styles.css` 为压缩风格（多规则单行），修改时保持该风格

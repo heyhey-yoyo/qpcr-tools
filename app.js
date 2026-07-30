@@ -459,12 +459,19 @@ function syncRowsFromBlocks() {
     if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
     placementsByBlock.get(item.blockIndex).push(item.well);
   });
-  const oldRows = rows;
+  // Copy so we can consume matches (splice), preventing duplicate blocks
+  // from sharing the same old row's Ct values.
+  const remaining = [...rows];
   rows = blocks.map((block, index) => {
     const wells = placementsByBlock.get(index) || [];
-    const match = oldRows.find(r =>
+    const matchIndex = remaining.findIndex(r =>
       r.name === block.sample && r.groupId === block.groupId && r.geneId === block.geneId
     );
+    let match = null;
+    if (matchIndex !== -1) {
+      match = remaining[matchIndex];
+      remaining.splice(matchIndex, 1);
+    }
     return {
       wells,
       name: block.sample,
@@ -974,16 +981,8 @@ $('#exampleTemplateBtn').addEventListener('click', () => {
   calculate();
 });
 
-els.targets.addEventListener('input', save);
-els.targets.addEventListener('change', () => {
-  const n = Math.max(1, Math.min(maxTargetCount(), Number(els.targets.value) || 1));
-  els.targets.value = String(n);
-  if (n !== experiment.targetGenes.length) {
-    experiment.targetGenes = Array.from({ length: n }, (_, i) => ({ id: 'tg' + (i + 1), name: `Target-${i + 1}` }));
-    targetCount();
-  }
-  save();
-});
+// els.targets is type="hidden" — its value is maintained by targetCount().
+// No event handlers needed; programmatic value changes don't fire input/change events.
 
 $('#clearBlocksBtn').addEventListener('click', () => { blocks = []; rows = []; renderAllBlocks(); renderPlate(); renderAllRows(); calculate(); save(); });
 $('#appendPresetBtn').addEventListener('click', appendPreset);

@@ -30,10 +30,11 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
   const mergedByKey = new Map();
   const mergedLabels = new Set();
   enriched.forEach(row => {
-    // Use geneId if available, fall back to normalized gene name for the merge key.
-    // The merge key format stays string-based as requested.
+    // Use stable IDs for merge keys, falling back to normalized display names
+    // for backward compatibility with data that lacks IDs.
+    const groupKey = row.groupId ? normalizeKey(row.groupId) : normalizeKey(row.group);
     const geneKey = row.geneId ? normalizeKey(row.geneId) : normalizeKey(row.gene);
-    const key = `${row.name}|||${row.group}|||${geneKey}`;
+    const key = `${row.name}|||${groupKey}|||${geneKey}`;
     if (!mergedByKey.has(key)) {
       mergedByKey.set(key, { ...row, cts: [...row.cts] });
     } else {
@@ -47,7 +48,8 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
   // ---- Step 3: group by sample ----
   const bySample = {};
   [...mergedByKey.values()].forEach(row => {
-    const key = `${row.name}|||${row.group}`;
+    const groupKey = row.groupId ? normalizeKey(row.groupId) : normalizeKey(row.group);
+    const key = `${row.name}|||${groupKey}`;
     (bySample[key] ||= []).push(row);
   });
 
