@@ -437,8 +437,45 @@ function renderAllBlocks() {
 function readBlocks() {
   blocks = readBlocksFromDom(els.blocksBody, blocks, experiment, replicateCount);
   if (blocks[0]) blocks[0].breakBefore = false;
+  // Sync display fields to matching rows
+  rows.forEach((row, i) => {
+    if (i < blocks.length) {
+      row.name = blocks[i].sample;
+      row.group = blocks[i].group;
+      row.groupId = blocks[i].groupId;
+      row.gene = blocks[i].gene;
+      row.geneId = blocks[i].geneId;
+    }
+  });
   renderPlate();
   save();
+}
+
+// Regenerate rows from blocks, preserving Ct values by matching (sample, groupId, geneId)
+function syncRowsFromBlocks() {
+  latestPlate = generatePlacements();
+  const placementsByBlock = new Map();
+  latestPlate.placements.forEach(item => {
+    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+    placementsByBlock.get(item.blockIndex).push(item.well);
+  });
+  const oldRows = rows;
+  rows = blocks.map((block, index) => {
+    const wells = placementsByBlock.get(index) || [];
+    const match = oldRows.find(r =>
+      r.name === block.sample && r.groupId === block.groupId && r.geneId === block.geneId
+    );
+    return {
+      wells,
+      name: block.sample,
+      group: block.group,
+      groupId: block.groupId,
+      gene: block.gene,
+      geneId: block.geneId,
+      cts: match ? match.cts : Array(wells.length).fill('')
+    };
+  });
+  renderAllRows();
 }
 
 function moveBlock(event) {
@@ -450,6 +487,8 @@ function moveBlock(event) {
   if (blocks[0]) blocks[0].breakBefore = false;
   renderAllBlocks();
   renderPlate();
+  syncRowsFromBlocks();
+  calculate();
   save();
 }
 
@@ -504,6 +543,8 @@ function appendPreset() {
   }
   renderAllBlocks();
   renderPlate();
+  syncRowsFromBlocks();
+  calculate();
   save();
 }
 
@@ -515,6 +556,8 @@ function loadPreset() {
   els.gap.value = '0';
   renderAllBlocks();
   renderPlate();
+  syncRowsFromBlocks();
+  calculate();
   save();
 }
 
@@ -544,31 +587,6 @@ function renderPlate() {
 
 // ---- Ct rows ----
 
-function applyPlateToRows() {
-  readBlocks();
-  latestPlate = generatePlacements();
-  if (!blocks.length) { window.alert('当前模板为空，请先载入或追加模板。'); return; }
-  if (latestPlate.overflow) { window.alert(`模板超出${currentPlate().label}，暂不能应用。请先调整起始位置或布局。`); return; }
-
-  const placementsByBlock = new Map();
-  latestPlate.placements.forEach(item => {
-    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-    placementsByBlock.get(item.blockIndex).push(item.well);
-  });
-
-  rows = blocks.map((block, index) => {
-    const wells = placementsByBlock.get(index) || [];
-    return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-  });
-
-  const ctrl = getControlGroup(experiment);
-  renderRows(rows, replicateCount, experiment, els.body, els.head, {
-    onReadRows: readRows, onRemoveRow: removeRow
-  });
-  calculate();
-  save();
-  document.querySelector('.samples-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
 
 function fillExampleCts() {
   const refGeneName = experiment.refGene ? experiment.refGene.name : 'GAPDH';
@@ -950,7 +968,7 @@ $('#exampleTemplateBtn').addEventListener('click', () => {
   els.gap.value = '0';
   renderAllBlocks();
   renderPlate();
-  applyPlateToRows();
+  syncRowsFromBlocks();
   fillExampleCts();
   renderAllRows();
   calculate();
@@ -967,7 +985,7 @@ els.targets.addEventListener('change', () => {
   save();
 });
 
-$('#clearBlocksBtn').addEventListener('click', () => { blocks = []; renderAllBlocks(); renderPlate(); save(); });
+$('#clearBlocksBtn').addEventListener('click', () => { blocks = []; rows = []; renderAllBlocks(); renderPlate(); renderAllRows(); calculate(); save(); });
 $('#appendPresetBtn').addEventListener('click', appendPreset);
 
 $('#addBlockBtn').addEventListener('click', () => {
@@ -978,10 +996,11 @@ $('#addBlockBtn').addEventListener('click', () => {
   if (generatePlacements().overflow) { blocks.pop(); window.alert(`${currentPlate().label}空间不足，无法继续添加区块。`); }
   renderAllBlocks();
   renderPlate();
+  syncRowsFromBlocks();
+  calculate();
   save();
 });
 
-$('#applyPlateBtn').addEventListener('click', applyPlateToRows);
 $('#exportPlateBtn').addEventListener('click', () => {
   downloadFile(`qpcr-${currentPlate().size}-well-plate-plan.csv`, plateCsv(latestPlate.placements, currentPlate().size));
 });
@@ -1013,7 +1032,7 @@ els.bioRepsInput.addEventListener('change', () => {
 
 els.bioGroupReplicates.addEventListener('change', () => {
   blocks = buildTemplate();
-  renderAllBlocks(); renderPlate(); save();
+  renderAllBlocks(); renderPlate(); syncRowsFromBlocks(); calculate(); save();
 });
 
 els.repsInput.addEventListener('change', () => {
