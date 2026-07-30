@@ -533,7 +533,7 @@ function refreshOptionLists() {
 function renderBlocks() {
   refreshOptionLists();
   if (!blocks.length) {
-    els.blocksBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:22px">当前是空模板，请载入预设或添加点板区块。</td></tr>';
+    els.blocksBody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#64748b;padding:22px">当前是空模板，请将预设载入孔板或添加点板区块。</td></tr>';
     return;
   }
 
