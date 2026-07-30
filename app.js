@@ -243,7 +243,9 @@ function toggleControlGroup(groupId) {
   const target = experiment.groups.find(g => g.id === groupId);
   if (!target) return;
   experiment.groups.forEach(g => { g.isControl = (g.id === groupId); });
+  els.control.value = target.name;
   renderGroups();
+  calculate();
   save();
 }
 
