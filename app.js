@@ -50,6 +50,8 @@ const els = {
   paste: $('#pasteArea'), ctColumnPanel: $('#ctColumnPanel'),
   ctColumnArea: $('#ctColumnArea'), ctPasteStatus: $('#ctPasteStatus'),
   repsInput: $('#replicateCount'),
+  bioGroupReplicates: $('#bioGroupReplicates'),
+  bioGroupRow: $('#bioGroupRow'),
   groupsContainer: $('#groupsContainer'), addGroupBtn: $('#addGroupBtn'),
   bioRepsInput: $('#biologicalReplicates'),
   targetGenesContainer: $('#targetGenesContainer'),
@@ -90,6 +92,12 @@ function resizeReplicates(rows, oldCount, newCount) {
     return null;
   }
   return rows.map(row => ({ ...row, cts: (row.cts || []).slice(0, newCount), wells: (row.wells || []).slice(0, newCount) }));
+}
+
+function toggleBioGroupVisibility() {
+  const show = replicateCount === 1;
+  els.bioGroupRow.style.display = show ? '' : 'none';
+  if (!show) els.bioGroupReplicates.checked = false;
 }
 
 // ---- Experiment config helpers ----
@@ -149,13 +157,30 @@ function parseWell(value) {
 function buildTemplate() {
   const template = [];
   const refGene = experiment.refGene || { id: 'ref', name: 'GAPDH' };
+  const groupBio = els.bioGroupReplicates && els.bioGroupReplicates.checked;
+
   experiment.groups.forEach(group => {
-    for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-      const sample = `${group.name}-BioRep${bio}`;
+    if (groupBio) {
+      // Group biological replicates together per gene
       experiment.targetGenes.forEach(gene => {
-        template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+          const sample = `${group.name}-BioRep${bio}`;
+          template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+        }
       });
-      template.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+        const sample = `${group.name}-BioRep${bio}`;
+        template.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+      }
+    } else {
+      // Default: group by biological replicate
+      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+        const sample = `${group.name}-BioRep${bio}`;
+        experiment.targetGenes.forEach(gene => {
+          template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+        });
+        template.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+      }
     }
   });
   return template;
@@ -179,15 +204,29 @@ function exampleTemplate() {
   targetCount();
 
   const template = [];
+  const groupBio = els.bioGroupReplicates && els.bioGroupReplicates.checked;
   const batches = plate.size === '384' ? [1, 2] : [1];
   batches.forEach(() => {
     experiment.groups.forEach(group => {
-      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-        const sample = `${group.name}-BioRep${bio}`;
+      if (groupBio) {
         experiment.targetGenes.forEach(gene => {
-          template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+          for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+            const sample = `${group.name}-BioRep${bio}`;
+            template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+          }
         });
-        template.push({ sample, group: group.name, groupId: group.id, gene: experiment.refGene.name, geneId: experiment.refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+          const sample = `${group.name}-BioRep${bio}`;
+          template.push({ sample, group: group.name, groupId: group.id, gene: experiment.refGene.name, geneId: experiment.refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+        }
+      } else {
+        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+          const sample = `${group.name}-BioRep${bio}`;
+          experiment.targetGenes.forEach(gene => {
+            template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+          });
+          template.push({ sample, group: group.name, groupId: group.id, gene: experiment.refGene.name, geneId: experiment.refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+        }
       }
     });
   });
@@ -263,7 +302,8 @@ function save() {
       size: els.plateSize.value, startRow: els.startRow.value, startCol: els.startCol.value,
       direction: els.direction.value, gap: els.gap.value,
       targets: els.targets.value, appendCount: els.appendCount.value,
-      appendNewLine: els.appendNewLine.checked
+      appendNewLine: els.appendNewLine.checked,
+      bioGroupReplicates: els.bioGroupReplicates.checked
     },
     mode: els.mode.value,
     spread: els.spread.value
@@ -332,6 +372,8 @@ function load() {
     targetCount();
     els.appendCount.value = String(Math.max(1, Math.min(24, Number(state.plate?.appendCount) || 1)));
     els.appendNewLine.checked = Boolean(state.plate?.appendNewLine);
+    els.bioGroupReplicates.checked = Boolean(state.plate?.bioGroupReplicates);
+    toggleBioGroupVisibility();
   } catch (error) {
     console.warn('无法读取本地数据：', error);
     refreshCoordinateSelects('A', '1');
@@ -870,6 +912,11 @@ els.bioRepsInput.addEventListener('change', () => {
   targetCount(); save();
 });
 
+els.bioGroupReplicates.addEventListener('change', () => {
+  blocks = buildTemplate();
+  renderAllBlocks(); renderPlate(); save();
+});
+
 els.repsInput.addEventListener('change', () => {
   const oldCount = replicateCount;
   replicateCount = normalizeReplicateCount(els.repsInput.value);
@@ -881,6 +928,7 @@ els.repsInput.addEventListener('change', () => {
     rows = result;
   }
   blocks.forEach(b => { b.reps = replicateCount; });
+  toggleBioGroupVisibility();
   els.targets.max = String(maxTargetCount());
   targetCount();
   renderAllBlocks(); renderPlate(); renderAllRows(); calculate(); save();
@@ -896,7 +944,8 @@ $('#resetBtn').addEventListener('click', () => {
   replicateCount = DEFAULT_REPS;
   els.repsInput.value = String(DEFAULT_REPS);
   experiment = createExperiment();
-  els.targets.value = '1'; els.appendCount.value = '1'; els.appendNewLine.checked = false;
+  els.targets.value = '1'; els.appendCount.value = '1'; els.appendNewLine.checked = false; els.bioGroupReplicates.checked = false;
+  toggleBioGroupVisibility();
   els.plateSize.value = '96';
   refreshCoordinateSelects('A', '1');
   els.direction.value = 'horizontal'; els.gap.value = '0';
@@ -944,6 +993,7 @@ $('#exportBtn').addEventListener('click', () => downloadFile('qpcr-results.csv',
 // ---- Init ----
 refreshCoordinateSelects('A', '1');
 load();
+toggleBioGroupVisibility();
 blocks = blocks.length ? blocks : buildTemplate();
 renderAllBlocks();
 renderPlate();
