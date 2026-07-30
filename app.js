@@ -788,6 +788,7 @@ function handleRemoveGroup(groupId) {
   // Cascade delete associated data
   blocks = blocks.filter(b => b.groupId !== groupId);
   rows = rows.filter(r => r.groupId !== groupId);
+  if (blocks[0]) blocks[0].breakBefore = false;
   experiment = expRemoveGroup(experiment, groupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
@@ -823,6 +824,7 @@ function handleRemoveTargetGene(geneId) {
   // Cascade delete associated data
   blocks = blocks.filter(b => b.geneId !== geneId);
   rows = rows.filter(r => r.geneId !== geneId);
+  if (blocks[0]) blocks[0].breakBefore = false;
   experiment = expRemoveTargetGene(experiment, geneId);
   targetCount();
   renderAllBlocks();
