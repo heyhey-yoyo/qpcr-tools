@@ -458,8 +458,16 @@ function removeBlock(event) {
   const index = Number(event.currentTarget.closest('tr').dataset.index);
   blocks.splice(index, 1);
   if (blocks[0]) blocks[0].breakBefore = false;
-  // Sync: also remove the corresponding row
+  // Sync: remove corresponding row
   if (index < rows.length) rows.splice(index, 1);
+  // Regenerate well positions for remaining rows to match new plate layout
+  latestPlate = generatePlacements();
+  const placementsByBlock = new Map();
+  latestPlate.placements.forEach(item => {
+    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+    placementsByBlock.get(item.blockIndex).push(item.well);
+  });
+  rows.forEach((row, i) => { row.wells = placementsByBlock.get(i) || []; });
   renderAllBlocks();
   renderAllRows();
   renderPlate();
@@ -591,14 +599,22 @@ function readRows() {
 
 function removeRow(index) {
   rows.splice(index, 1);
-  // Sync: also remove the corresponding block
+  // Sync: remove corresponding block
   if (index < blocks.length) {
     blocks.splice(index, 1);
     if (blocks[0]) blocks[0].breakBefore = false;
-    renderAllBlocks();
-    renderPlate();
   }
+  // Regenerate well positions for remaining rows to match new plate layout
+  latestPlate = generatePlacements();
+  const placementsByBlock = new Map();
+  latestPlate.placements.forEach(item => {
+    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+    placementsByBlock.get(item.blockIndex).push(item.well);
+  });
+  rows.forEach((row, i) => { row.wells = placementsByBlock.get(i) || []; });
+  renderAllBlocks();
   renderAllRows();
+  renderPlate();
   calculate();
   save();
 }
