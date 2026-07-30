@@ -580,10 +580,77 @@ function loadPreset() {
 
 // ---- Plate layout sync ----
 
-/** Re-render plate, regenerate row wells from current layout, recalc, persist. */
+/**
+ * Called on every plate-layout change (size, start, direction, gap,
+ * empty-well click, replicate count).  Checks overflow first, confirms
+ * with user when Ct data exists, then maps Ct values by physical well
+ * position — NOT by array index — so values follow their wells.
+ */
 function syncPlateLayout() {
+  // Generate with current settings to check overflow before touching data
+  latestPlate = generatePlacements();
+  if (latestPlate.overflow) {
+    renderPlate(); // Show overflow warning banner in plate preview
+    window.alert(
+      `当前布局超出${currentPlate().label}容量。\n\n` +
+      '请调整起始孔、减少区块间隔、减少复孔数或改用更大孔板。\n\n' +
+      'Ct 数据未修改，布局未保存。'
+    );
+    return;
+  }
+
+  // Confirm when Ct data already exists — layout change will remap wells
+  const hasData = rows.some(row =>
+    (row.cts || []).some(ct => String(ct ?? '').trim() !== '')
+  );
+  if (hasData) {
+    if (!window.confirm(
+      '修改孔板布局将重新生成孔位。程序会尝试按原物理孔号保留 Ct 值。\n\n' +
+      '建议在修改布局前导出数据备份。确认继续？'
+    )) {
+      // Re-render plate with current settings so preview stays accurate
+      latestPlate = generatePlacements();
+      renderPlate();
+      return;
+    }
+  }
+
+  // Build well→Ct map from current rows BEFORE regenerating.
+  // Ct values are keyed by physical well so they survive reordering.
+  const wellCtMap = new Map();
+  rows.forEach(row => {
+    (row.wells || []).forEach((well, i) => {
+      const ct = (row.cts || [])[i];
+      if (well && String(ct ?? '').trim() !== '') {
+        wellCtMap.set(well, ct);
+      }
+    });
+  });
+
+  // Group placements by block index
+  const placementsByBlock = new Map();
+  latestPlate.placements.forEach(item => {
+    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+    placementsByBlock.get(item.blockIndex).push(item.well);
+  });
+
+  // Build new rows: wells from new layout, Ct from well→Ct map
+  rows = blocks.map((block, index) => {
+    const wells = placementsByBlock.get(index) || [];
+    const cts = wells.map(well => wellCtMap.get(well) || '');
+    return {
+      wells,
+      name: block.sample,
+      group: block.group,
+      groupId: block.groupId,
+      gene: block.gene,
+      geneId: block.geneId,
+      cts
+    };
+  });
+
   renderPlate();
-  syncRowsFromBlocks();
+  renderAllRows();
   calculate();
   save();
 }
@@ -915,8 +982,8 @@ function importTemplate(file) {
       targetCount();
       renderAllBlocks();
       renderPlate();
+      rows = [];
       syncRowsFromBlocks();
-      renderAllRows();
       calculate();
       save();
     } catch {
