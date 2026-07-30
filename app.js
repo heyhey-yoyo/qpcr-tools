@@ -520,10 +520,14 @@ function load() {
 }
 
 function refreshOptionLists() {
-  const genes = [...new Set([...blocks.map(block => block.gene), ...rows.map(row => row.gene)].filter(Boolean))];
-  const groups = [...new Set([...blocks.map(block => block.group), ...rows.map(row => row.group)].filter(Boolean))];
-  els.geneList.innerHTML = genes.map(gene => `<option value="${escapeHtml(gene)}"></option>`).join('');
-  els.groupList.innerHTML = groups.map(group => `<option value="${escapeHtml(group)}"></option>`).join('');
+  if (els.geneList) {
+    const genes = [...new Set([...blocks.map(block => block.gene), ...rows.map(row => row.gene)].filter(Boolean))];
+    els.geneList.innerHTML = genes.map(gene => `<option value="${escapeHtml(gene)}"></option>`).join('');
+  }
+  if (els.groupList) {
+    const groups = [...new Set([...blocks.map(block => block.group), ...rows.map(row => row.group)].filter(Boolean))];
+    els.groupList.innerHTML = groups.map(group => `<option value="${escapeHtml(group)}"></option>`).join('');
+  }
 }
 
 function renderBlocks() {
