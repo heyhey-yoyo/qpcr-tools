@@ -171,7 +171,7 @@ function escapeHtml(value) {
 function renderGroups() {
   els.groupsContainer.innerHTML = experiment.groups.map(g => `
     <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}">
-      <span class="chip-name">${escapeHtml(g.name)}</span>
+      <span class="chip-name" title="双击修改分组名">${escapeHtml(g.name)}</span>
       ${g.isControl ? '<span class="chip-badge">对照</span>' : `<button class="chip-ctl" data-action="control" data-id="${g.id}" title="设为对照组">设为对照</button>`}
       ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
     </span>
@@ -187,6 +187,14 @@ function renderGroups() {
     btn.addEventListener('click', e => {
       e.stopPropagation();
       removeGroup(btn.dataset.id);
+    });
+  });
+  els.groupsContainer.querySelectorAll('.chip-name').forEach(nameEl => {
+    nameEl.addEventListener('dblclick', e => {
+      e.stopPropagation();
+      const chip = nameEl.closest('.group-chip');
+      if (!chip) return;
+      renameGroup(chip.dataset.id);
     });
   });
 
@@ -214,6 +222,20 @@ function removeGroup(groupId) {
   if (!window.confirm(`确定删除分组"${target.name}"？`)) return;
   experiment.groups = experiment.groups.filter(g => g.id !== groupId);
   if (!experiment.groups.some(g => g.isControl)) experiment.groups[0].isControl = true;
+  renderGroups();
+  save();
+}
+
+function renameGroup(groupId) {
+  const target = experiment.groups.find(g => g.id === groupId);
+  if (!target) return;
+  const name = (window.prompt('修改分组名称：', target.name) || '').trim();
+  if (!name || name === target.name) return;
+  if (experiment.groups.some(g => g.id !== groupId && g.name === name)) {
+    window.alert('分组名称不能重复。');
+    return;
+  }
+  target.name = name;
   renderGroups();
   save();
 }
