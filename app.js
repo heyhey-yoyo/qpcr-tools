@@ -169,7 +169,7 @@ function escapeHtml(value) {
 
 function renderGroups() {
   els.groupsContainer.innerHTML = experiment.groups.map(g => `
-    <span class="group-chip${g.isControl ? ' chip-control' : ''}" title="${g.isControl ? '对照组（点击切换）' : '点击设为对照组'}">
+    <span class="group-chip${g.isControl ? ' chip-control' : ''}" data-id="${g.id}" title="${g.isControl ? '对照组（点击切换）' : '点击设为对照组'}">
       <span class="chip-name">${escapeHtml(g.name)}</span>
       <span class="chip-badge">${g.isControl ? '对照' : ''}</span>
       ${experiment.groups.length > 1 ? `<button class="chip-del" data-action="remove" data-id="${g.id}" title="删除分组">&times;</button>` : ''}
@@ -179,7 +179,8 @@ function renderGroups() {
   els.groupsContainer.querySelectorAll('.group-chip').forEach(chip => {
     chip.addEventListener('click', e => {
       if (e.target.closest('[data-action="remove"]')) return;
-      toggleControlGroup(chip.querySelector('.chip-del')?.dataset.id || experiment.groups.find(g => g.name === chip.querySelector('.chip-name').textContent)?.id);
+      const id = chip.dataset.id;
+      if (id) toggleControlGroup(id);
     });
   });
   els.groupsContainer.querySelectorAll('.chip-del').forEach(btn => {
