@@ -497,15 +497,19 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   // Build SVG
   const svgW = labelW + plate.cols * (ww + gap);
   const svgH = headerH + plate.rows.length * (wh + gap);
+  const seamW = plate.size === '384' ? 12 : 14;
+  const seamStroke = 'var(--surface)';
   let svgLines = '';
   hLines.forEach(l => {
+    svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="${seamStroke}" stroke-width="${seamW}" stroke-linecap="round" />`;
     svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
   });
   vLines.forEach(l => {
+    svgLines += `<line x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}" stroke="${seamStroke}" stroke-width="${seamW}" stroke-linecap="round" />`;
     svgLines += `<line x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
   });
 
-  const svgOverlay = svgLines ? `<svg class="plate-sep-overlay" style="position:absolute;top:0;left:0;width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:1" xmlns="http://www.w3.org/2000/svg">${svgLines}</svg>` : '';
+  const svgOverlay = svgLines ? `<svg class="plate-sep-overlay" style="position:absolute;top:0;left:0;width:${svgW}px;height:${svgH}px;overflow:visible;pointer-events:none;z-index:1" xmlns="http://www.w3.org/2000/svg">${svgLines}</svg>` : '';
 
   gridEl.innerHTML = html + svgOverlay;
 
