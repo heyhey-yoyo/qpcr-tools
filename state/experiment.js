@@ -204,23 +204,3 @@ export function setRefGeneName(experiment, newName) {
   assertUniqueName(allGenes, experiment.refGene?.id, trimmed, '基因');
   return { ...experiment, refGene: { ...experiment.refGene, name: trimmed } };
 }
-
-// ---- Name sync ----
-
-export function syncBlockDisplayNames(blocks, experiment) {
-  if (!blocks || !experiment) return blocks;
-  return blocks.map(block => ({
-    ...block,
-    group: resolveGroupName(experiment, block.groupId) || block.group || '',
-    gene: resolveGeneName(experiment, block.geneId) || block.gene || ''
-  }));
-}
-
-export function syncRowDisplayNames(rows, experiment) {
-  if (!rows || !experiment) return rows;
-  return rows.map(row => ({
-    ...row,
-    group: resolveGroupName(experiment, row.groupId) || row.group || '',
-    gene: resolveGeneName(experiment, row.geneId) || row.gene || ''
-  }));
-}

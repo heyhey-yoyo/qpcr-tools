@@ -65,7 +65,7 @@ export function renderGroups(experiment, containers) {
     editBtn.title = '修改分组名';
     editBtn.addEventListener('click', e => {
       e.stopPropagation();
-      const name = (window.prompt('修改分组名称：', g.name) || '').trim();
+      const name = (window.prompt('修改分组名称（点击"刷新点板信息"后同步到已生成的模板）：', g.name) || '').trim();
       if (name && name !== g.name) {
         containers.onRenameGroup(g.id, name);
       }
@@ -147,7 +147,7 @@ export function renderTargetGenes(experiment, maxCount, containers) {
     editBtn.title = '修改基因名';
     editBtn.addEventListener('click', e => {
       e.stopPropagation();
-      const name = (window.prompt('修改基因名：', g.name) || '').trim();
+      const name = (window.prompt('修改基因名（点击"刷新点板信息"后同步到已生成的模板）：', g.name) || '').trim();
       if (name && name !== g.name) {
         containers.onRenameTargetGene(g.id, name);
       }
@@ -200,7 +200,7 @@ export function renderRefGene(experiment, containers) {
   editBtn.title = '修改内参基因名';
   editBtn.addEventListener('click', e => {
     e.stopPropagation();
-    const name = (window.prompt('修改内参基因名：', refGene.name) || '').trim();
+    const name = (window.prompt('修改内参基因名（点击"刷新点板信息"后同步到已生成的模板）：', refGene.name) || '').trim();
     if (name && name !== refGene.name) {
       containers.onRenameRefGene(name);
     }
@@ -462,7 +462,7 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
     Math.max(row.cts?.length || 0, row.wells?.length || 0)
   ));
 
-  headEl.innerHTML = `<tr><th>孔位</th><th>样本名称</th><th>组别</th><th>基因</th>${Array.from({ length: maxReps }, (_, i) => `<th>Ct ${i + 1}</th>`).join('')}<th class="action-col">操作</th></tr>`;
+  headEl.innerHTML = `<tr><th>孔位</th><th>样本名称</th><th>组别</th><th>基因</th>${Array.from({ length: maxReps }, (_, i) => `<th>Ct ${i + 1}</th>`).join('')}</tr>`;
 
   containerEl.innerHTML = rows.map((row, index) => {
     const wells = Array.isArray(row.wells) ? row.wells : [];
@@ -484,7 +484,6 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
       <td class="readonly-cell">${escapeHtml(row.group || '')}</td>
       <td class="readonly-cell">${escapeHtml(row.gene || '')}</td>
       ${ctInputs}
-      <td class="action-col"><button class="icon-button danger remove-row" title="删除">×</button></td>
     </tr>`;
   }).join('');
 
@@ -503,12 +502,6 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
         input.classList.add('ct-invalid');
         input.title = 'Ct 值必须在 0–50 之间';
       }
-    });
-  });
-  containerEl.querySelectorAll('.remove-row').forEach(btn => {
-    btn.addEventListener('click', event => {
-      const index = Number(event.currentTarget.closest('tr').dataset.index);
-      callbacks.onRemoveRow(index);
     });
   });
 }

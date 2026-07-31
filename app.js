@@ -10,8 +10,7 @@ import {
   setCompareToGroup as expSetCompareTo, removeGroup as expRemoveGroup,
   removeTargetGene as expRemoveTargetGene, setRefGeneName,
   getBaselineGroups, ensureExperiment,
-  resolveGroupName, resolveGeneName,
-  syncBlockDisplayNames, syncRowDisplayNames
+  resolveGroupName, resolveGeneName
 } from './state/experiment.js';
 import { migrateState, CURRENT_VERSION } from './state/migration.js';
 import { resultsChartSvg, groupChartSvg } from './ui/charts.js';
@@ -67,6 +66,9 @@ let latest = [];
 let latestNotes = { merged: [], singleRep: [] };
 let latestPlate = { placements: [], overflow: false };
 let hasSavedState = false;
+// 第一步（实验配置/孔板设置）有未提交的结构变更时置 true。
+// 变更只暂存，点击"刷新点板信息"（loadPreset）才提交到模板与后续步骤。
+let stagedDirty = false;
 
 // ---- Utilities ----
 
@@ -84,23 +86,6 @@ function normalizeReplicateCount(value) {
   const num = Number(value);
   if (!Number.isFinite(num) || num < MIN_REPS) return DEFAULT_REPS;
   return Math.min(MAX_REPS_GLOBAL, Math.max(MIN_REPS, Math.round(num)));
-}
-
-function resizeReplicates(rows, oldCount, newCount) {
-  if (oldCount === newCount) return rows;
-  if (newCount > oldCount) {
-    return rows.map(row => ({
-      ...row, cts: [...row.cts, ...Array(newCount - oldCount).fill('')],
-      wells: [...(row.wells || []), ...Array(Math.max(0, newCount - (row.wells || []).length)).fill('')]
-    }));
-  }
-  const lostCts = rows.some(row =>
-    (row.cts || []).slice(newCount).some(ct => String(ct ?? '').trim() !== '')
-  );
-  if (lostCts && !window.confirm(`复孔数量从 ${oldCount} 减少到 ${newCount}，Ct${newCount + 1}–Ct${oldCount} 中已有数据将被移除。确认继续？`)) {
-    return null;
-  }
-  return rows.map(row => ({ ...row, cts: (row.cts || []).slice(0, newCount), wells: (row.wells || []).slice(0, newCount) }));
 }
 
 function toggleBioGroupVisibility() {
@@ -528,16 +513,34 @@ function removeBlock(event) {
   refreshAll();
 }
 
+/**
+ * "刷新点板信息"：第一步唯一的提交入口。
+ * 按当前实验配置 + 当前孔板设置（起始孔/方向/空孔）构建模板。
+ * 溢出时提醒并放弃提交；确认后清除当前所有孔位与已录入 Ct 数据，直接重建。
+ */
 function loadPreset() {
-  blocks = buildTemplate();
-  els.startRow.value = currentPlate().rows[0];
-  els.startCol.value = '1';
-  els.direction.value = 'horizontal';
-  els.gap.value = '0';
+  const oldBlocks = blocks;
+  const newBlocks = buildTemplate();
+  blocks = newBlocks;
+
+  // 溢出检查：出问题则提醒并放弃（模板保持原样）
   if (generatePlacements().overflow) {
-    window.alert(`${currentPlate().label}空间不足，预设未载入。请减少分组、基因、生物学重复或技术复孔数，或改用更大孔板。`);
+    blocks = oldBlocks;
+    renderPlate();
+    window.alert(`${currentPlate().label}空间不足，预设未载入，当前模板保持不变。请减少分组、基因、生物学重复或技术复孔数，或改用更大孔板。`);
     return;
   }
+
+  // 提交将清除当前所有孔位与已录入的 Ct 数据，需用户确认
+  if (!window.confirm('刷新点板信息将清除当前所有孔位与已录入的 Ct 数据，并按当前设计重新生成模板。\n\n确认继续？')) {
+    blocks = oldBlocks;
+    renderPlate();
+    return;
+  }
+
+  // 直接重建：清空旧数据表，syncRowsFromBlocks 按新模板生成全部空白行
+  rows = [];
+  stagedDirty = false;
   refreshAll();
 }
 
@@ -584,83 +587,14 @@ function rollbackLayout(snap) {
   renderAllBlocks();
 }
 
-/**
- * Called on every plate-layout change (size, start, direction, gap,
- * empty-well click, replicate count).  Checks overflow first, confirms
- * with user when Ct data exists, then maps Ct values by physical well
- * position.  Returns true on success, false if rolled back.
- */
-function syncPlateLayout() {
-  const oldSnap = lastGoodLayout ? { ...lastGoodLayout } : snapshotLayout();
-
-  // Generate with current settings to check overflow before touching data
-  latestPlate = generatePlacements();
-  if (latestPlate.overflow) {
-    rollbackLayout(oldSnap);
-    latestPlate = generatePlacements();
-    renderPlate();
-    window.alert(
-      `当前布局超出${currentPlate().label}容量，已恢复到修改前的设置。\n\n` +
-      '请调整起始孔、减少区块间隔、减少复孔数或改用更大孔板。'
-    );
-    return false;
-  }
-
-  // Confirm when Ct data already exists — layout change will remap wells
-  const hasData = rows.some(row =>
-    (row.cts || []).some(ct => String(ct ?? '').trim() !== '')
-  );
-  if (hasData) {
-    if (!window.confirm(
-      '修改孔板布局将重新生成孔位。程序会尝试按原物理孔号保留 Ct 值。\n\n' +
-      '建议在修改布局前导出数据备份。确认继续？'
-    )) {
-      rollbackLayout(oldSnap);
-      latestPlate = generatePlacements();
-      renderPlate();
-      renderAllRows();
-      return false;
-    }
-  }
-
-  // Build well→Ct map from current rows BEFORE regenerating.
-  const wellCtMap = new Map();
-  rows.forEach(row => {
-    (row.wells || []).forEach((well, i) => {
-      const ct = (row.cts || [])[i];
-      if (well && String(ct ?? '').trim() !== '') {
-        wellCtMap.set(well, ct);
-      }
-    });
-  });
-
-  // Group placements by block index
-  const placementsByBlock = wellsByBlockIndex(latestPlate.placements);
-
-  // Build new rows: wells from new layout, Ct from well→Ct map
-  rows = blocks.map((block, index) => {
-    const wells = placementsByBlock.get(index) || [];
-    const cts = wells.map(well => wellCtMap.get(well) || '');
-    return {
-      wells,
-      name: block.sample,
-      group: block.group,
-      groupId: block.groupId,
-      gene: block.gene,
-      geneId: block.geneId,
-      cts
-    };
-  });
-
-  commitLayout(snapshotLayout());
-  renderPlate();
-  renderAllRows();
-  calculate();
-  save();
-  return true;
-}
-
 // ---- Plate rendering ----
+
+/** 第一步配置有未提交变更时标记，并刷新预览与持久化。 */
+function markStaged() {
+  stagedDirty = true;
+  renderPlate();
+  save();
+}
 
 function renderPlate() {
   latestPlate = generatePlacements();
@@ -671,16 +605,18 @@ function renderPlate() {
       if (!parsed) return;
       els.startRow.value = parsed.row;
       els.startCol.value = String(parsed.col);
-      syncPlateLayout();
+      markStaged();
     }
   });
 
+  const stagedNote = stagedDirty
+    ? '<div class="alert alert-info">设计参数已变更，尚未应用。点击"刷新点板信息"后重新生成模板并同步后续步骤。</div>'
+    : '';
   const total = blocks.length * replicateCount;
-  if (latestPlate.overflow) {
-    els.plateAlert.innerHTML = `<div class="alert alert-warning">模板需要 ${total} 个孔，但当前位置无法全部放入 ${plate.label}。请提前起始位置、减少空孔或调整"另起一行"。</div>`;
-  } else {
-    els.plateAlert.innerHTML = '';
-  }
+  const overflowNote = latestPlate.overflow
+    ? `<div class="alert alert-warning">模板需要 ${total} 个孔，但当前位置无法全部放入 ${plate.label}。请提前起始位置、减少空孔或调整"另起一行"。</div>`
+    : '';
+  els.plateAlert.innerHTML = stagedNote + overflowNote;
 }
 
 // ---- Ct rows ----
@@ -702,7 +638,7 @@ function fillExampleCts() {
 
 function renderAllRows() {
   renderRows(rows, replicateCount, experiment, els.body, els.head, {
-    onReadRows: readRows, onRemoveRow: removeRow
+    onReadRows: readRows
   });
 }
 
@@ -717,24 +653,6 @@ function refreshAll() {
   renderAllBlocks();
   renderPlate();
   syncRowsFromBlocks();
-  calculate();
-  save();
-}
-
-function removeRow(index) {
-  rows.splice(index, 1);
-  // Sync: remove corresponding block
-  if (index < blocks.length) {
-    blocks.splice(index, 1);
-    if (blocks[0]) blocks[0].breakBefore = false;
-  }
-  // Regenerate well positions for remaining rows to match new plate layout
-  latestPlate = generatePlacements();
-  const placementsByBlock = wellsByBlockIndex(latestPlate.placements);
-  rows.forEach((row, i) => { row.wells = placementsByBlock.get(i) || []; });
-  renderAllBlocks();
-  renderAllRows();
-  renderPlate();
   calculate();
   save();
 }
@@ -1024,6 +942,7 @@ function importTemplate(file) {
       renderPlate();
       syncRowsFromBlocks();
       calculate();
+      stagedDirty = false;
       commitLayout(snapshotLayout());
       save();
     } catch {
@@ -1037,32 +956,18 @@ function importTemplate(file) {
 
 function handleRenameGroup(groupId, newName) {
   experiment = expRenameGroup(experiment, groupId, newName);
-  // Sync display names on blocks and rows
-  blocks = syncBlockDisplayNames(blocks, experiment);
-  rows = syncRowDisplayNames(rows, experiment);
+  // 改名同样只暂存：已生成的模板与 Ct 数据表保持旧名，点击"刷新点板信息"时按新配置重建
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
-  renderAllBlocks();
-  renderAllRows();
-  renderPlate();
-  calculate();
+  markStaged();
 }
 
 function handleSetCompareToGroup(groupId, targetGroupId) {
   experiment = expSetCompareTo(experiment, groupId, targetGroupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
-  // Rebuild template so baseline groups start on new rows with their dependents following
-  const oldBlocks = blocks;
-  const oldRows = rows;
-  blocks = buildTemplate();
-  if (generatePlacements().overflow) {
-    blocks = oldBlocks;
-    rows = oldRows;
-    window.alert(`${currentPlate().label}空间不足，比较基准未调整。`);
-    return;
-  }
-  refreshAll();
+  // 只更新实验配置，模板在"刷新点板信息"时按新基准重建
+  markStaged();
 }
 
 function handleRemoveGroup(groupId) {
@@ -1070,27 +975,18 @@ function handleRemoveGroup(groupId) {
     if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
     const target = experiment.groups.find(g => g.id === groupId);
     if (!target) return;
-    // Cascade delete via experiment module, which computes all affected IDs
+    // expRemoveGroup 计算所有受影响（含以它为基准）的组 ID
     const next = expRemoveGroup(experiment, groupId);
     const removedIds = new Set(next._removedIds || []);
     const removedNames = experiment.groups.filter(g => removedIds.has(g.id)).map(g => g.name);
-    const affectedBlocks = blocks.filter(b => removedIds.has(b.groupId)).length;
-    const affectedRows = rows.filter(r => removedIds.has(r.groupId)).length;
     const parts = [];
-    if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
-    if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
     if (removedIds.size > 1) parts.push(`以它为基准的 ${removedIds.size - 1} 个分组也将一并删除`);
-    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
-    if (!window.confirm(`确定删除 ${removedNames.join('、')}？${note}`)) return;
-    // Cascade delete all affected blocks
-    blocks = blocks.filter(b => !removedIds.has(b.groupId));
-    if (blocks[0]) blocks[0].breakBefore = false;
-    // Also filter rows directly (defensive)
-    rows = rows.filter(r => !removedIds.has(r.groupId));
+    const note = parts.length ? `\n\n${parts.join('、')}。` : '';
+    if (!window.confirm(`确定删除分组 ${removedNames.join('、')}？${note}\n\n已有模板与 Ct 数据不受影响，将在下次点击"刷新点板信息"时按新配置重建。`)) return;
     experiment = next;
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
       onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
-    refreshAll();
+    markStaged();
   } catch (e) {
     console.error('handleRemoveGroup error:', e);
   }
@@ -1098,13 +994,9 @@ function handleRemoveGroup(groupId) {
 
 function handleRenameTargetGene(geneId, newName) {
   experiment = expRenameTargetGene(experiment, geneId, newName);
-  blocks = syncBlockDisplayNames(blocks, experiment);
-  rows = syncRowDisplayNames(rows, experiment);
+  // 改名同样只暂存：已生成的模板与 Ct 数据表保持旧名，点击"刷新点板信息"时按新配置重建
   targetCount();
-  renderAllBlocks();
-  renderAllRows();
-  renderPlate();
-  calculate();
+  markStaged();
 }
 
 function handleRemoveTargetGene(geneId) {
@@ -1112,22 +1004,10 @@ function handleRemoveTargetGene(geneId) {
     if (experiment.targetGenes.length <= 1) { window.alert('至少需要一个目标基因。'); return; }
     const target = experiment.targetGenes.find(g => g.id === geneId);
     const targetName = target ? target.name : geneId;
-    const affectedBlocks = blocks.filter(b => b.geneId === geneId).length;
-    const affectedRows = rows.filter(r => r.geneId === geneId).length;
-    const parts = [];
-    if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
-    if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n删除后孔板布局会变化，但其他基因已录入的 Ct 值会保留。` : '';
-    if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
-    // Cascade delete blocks by stable ID
-    blocks = blocks.filter(b => b.geneId !== geneId);
-    if (blocks[0]) blocks[0].breakBefore = false;
+    if (!window.confirm(`确定删除目标基因"${targetName}"？\n\n已有模板与 Ct 数据不受影响，将在下次点击"刷新点板信息"时按新配置重建。`)) return;
     experiment = expRemoveTargetGene(experiment, geneId);
     targetCount();
-    // Rebuild the plate mapping while preserving Ct values for unchanged
-    // (sample, groupId, geneId) rows. Rows belonging to the deleted target
-    // gene are naturally omitted because their blocks no longer exist.
-    refreshAll();
+    markStaged();
   } catch (e) {
     console.error('handleRemoveTargetGene error:', e);
   }
@@ -1135,12 +1015,9 @@ function handleRemoveTargetGene(geneId) {
 
 function handleRenameRefGene(newName) {
   experiment = setRefGeneName(experiment, newName);
-  blocks = syncBlockDisplayNames(blocks, experiment);
-  rows = syncRowDisplayNames(rows, experiment);
+  // 改名同样只暂存：已生成的模板与 Ct 数据表保持旧名，点击"刷新点板信息"时按新配置重建
   targetCount();
-  renderAllBlocks();
-  renderAllRows();
-  calculate();
+  markStaged();
 }
 
 function handleAddGroup() {
@@ -1153,7 +1030,7 @@ function handleAddGroup() {
   experiment = expAddGroup(experiment, name);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
-  save();
+  markStaged();
 }
 
 function handleAddTargetGene() {
@@ -1164,17 +1041,43 @@ function handleAddTargetGene() {
   const name = `Target-${experiment.targetGenes.length + 1}`;
   experiment = expAddTargetGene(experiment, name);
   targetCount();
-  save();
+  markStaged();
 }
 
 // ---- Event bindings ----
 
 $('#exampleTemplateBtn').addEventListener('click', () => {
-  blocks = exampleTemplate();
+  // exampleTemplate 就地修改全局 experiment 并返回模板数组
+  const oldExperiment = JSON.parse(JSON.stringify(experiment));
+  const oldBlocks = blocks;
+  const oldRows = rows;
+  const oldSettings = {
+    startRow: els.startRow.value, startCol: els.startCol.value,
+    direction: els.direction.value, gap: els.gap.value
+  };
+  const template = exampleTemplate();
   els.startRow.value = currentPlate().rows[0];
   els.startCol.value = '1';
   els.direction.value = 'horizontal';
   els.gap.value = '0';
+  blocks = template;
+  if (generatePlacements().overflow) {
+    // 溢出则恢复演示前的全部状态（含实验配置、模板、数据与孔板设置）
+    experiment = oldExperiment;
+    blocks = oldBlocks;
+    rows = oldRows;
+    els.startRow.value = oldSettings.startRow;
+    els.startCol.value = oldSettings.startCol;
+    els.direction.value = oldSettings.direction;
+    els.gap.value = oldSettings.gap;
+    renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
+      onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
+    targetCount();
+    renderPlate();
+    window.alert(`${currentPlate().label}空间不足，功能演示未载入，当前模板保持不变。请先减少复孔数或生物学重复。`);
+    return;
+  }
+  stagedDirty = false;
   renderAllBlocks();
   renderPlate();
   syncRowsFromBlocks();
@@ -1225,10 +1128,10 @@ $('#templateFileInput').addEventListener('change', event => {
 
 els.plateSize.addEventListener('change', () => {
   refreshCoordinateSelects(els.startRow.value, els.startCol.value);
-  syncPlateLayout();
+  markStaged();
 });
 [els.startRow, els.startCol, els.direction, els.gap].forEach(el =>
-  el.addEventListener('change', syncPlateLayout)
+  el.addEventListener('change', markStaged)
 );
 
 els.addGroupBtn.addEventListener('click', handleAddGroup);
@@ -1238,38 +1141,23 @@ els.bioRepsInput.addEventListener('change', () => {
   experiment.biologicalReplicates = Math.max(1, Math.min(24, Number(els.bioRepsInput.value) || 1));
   els.bioRepsInput.value = String(experiment.biologicalReplicates);
   els.targets.max = String(maxTargetCount());
-  targetCount(); save();
+  targetCount();
+  markStaged();
 });
 
 els.bioGroupReplicates.addEventListener('change', () => {
-  blocks = buildTemplate();
-  refreshAll();
+  markStaged();
 });
 
+// 复孔数修改只暂存，点击"刷新点板信息"时随模板一起生效；
+// 若会导致已录入 Ct 被截断，提交时会弹确认
 els.repsInput.addEventListener('change', () => {
-  const oldCount = replicateCount;
   replicateCount = normalizeReplicateCount(els.repsInput.value);
   els.repsInput.value = String(replicateCount);
-  if (oldCount === replicateCount) return;
-
-  // Confirm data loss when reducing replicate count
-  if (replicateCount < oldCount && rows.length) {
-    const lostCts = rows.some(row =>
-      (row.cts || []).slice(replicateCount).some(ct => String(ct ?? '').trim() !== '')
-    );
-    if (lostCts && !window.confirm(`复孔数量从 ${oldCount} 减少到 ${replicateCount}，Ct${replicateCount + 1}–Ct${oldCount} 中已有数据将被移除。确认继续？`)) {
-      replicateCount = oldCount;
-      els.repsInput.value = String(oldCount);
-      return;
-    }
-  }
-
-  blocks.forEach(b => { b.reps = replicateCount; });
   toggleBioGroupVisibility();
   els.targets.max = String(maxTargetCount());
   targetCount();
-  renderAllBlocks();
-  syncPlateLayout();
+  markStaged();
 });
 
 $('#exampleDataBtn').addEventListener('click', () => { readRows(); fillExampleCts(); renderAllRows(); calculate(); });
@@ -1304,6 +1192,7 @@ $('#resetBtn').addEventListener('click', () => {
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   targetCount();
+  stagedDirty = false;
   commitLayout(snapshotLayout());
   renderAllBlocks();
   renderPlate();
