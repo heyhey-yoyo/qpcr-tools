@@ -483,7 +483,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
       hLines.push({
         y: originY + (row + 1) * (wh + gap) - gap / 2,
         x1: originX + start * (ww + gap),
-        x2: originX + (end + 1) * (ww + gap)
+        x2: originX + end * (ww + gap) + ww
       });
       start = null;
     };
@@ -497,9 +497,9 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     flush(plate.cols - 1);
   }
 
-  // Build SVG
-  const svgW = originX + plate.cols * (ww + gap);
-  const svgH = originY + plate.rows.length * (wh + gap);
+  // Build SVG — total size: label/header track + wells + (cols-1)/rows-1 gaps between them
+  const svgW = originX + (plate.cols - 1) * (ww + gap) + ww;
+  const svgH = originY + (plate.rows.length - 1) * (wh + gap) + wh;
   let svgLines = '';
   hLines.forEach(l => {
     svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;

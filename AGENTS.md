@@ -45,7 +45,7 @@ qpcr-tools/
 
 - **技术栈**：原生 HTML + CSS + JavaScript ES Modules（`import`/`export`）。无框架、无打包器、无 npm 依赖。
 - **运行时**：浏览器 `<script type="module">` 加载，需要 HTTP 服务器（`python -m http.server`）。
-- **缓存策略**：`index.html` 中通过查询串 `?v=11.0` 引用 CSS 和 JS，修改后需提升版本号。
+- **缓存策略**：`index.html` 中通过查询串 `?v=` 引用 CSS 和 JS，修改后需提升版本号。
 - **无 package.json** — 测试通过 Node.js `.mjs` 文件直接运行，无需项目配置。
 
 ## 本地运行
@@ -193,7 +193,7 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 
 ### 持久化
 
-- localStorage 键 `qpcr-demo-v6`（兼容 v3/v4/v5 旧键的自动迁移）
+- localStorage 键 `qpcr-demo-v7`（兼容 v3/v4/v5/v6 旧键的自动迁移）
 - `save()` 在每次操作后调用，保存 experiment、blocks、rows、replicateCount、plate 设置、mode、spread
 - `load()` 自动迁移旧格式数据（通过 `migrateState()`）
 - "恢复默认"（`resetBtn`）：清除所有 localStorage 键，重置所有状态为默认值
@@ -216,7 +216,7 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 ## 数据与隐私
 
 - 所有数据仅在浏览器本地处理，不上传任何服务器
-- 状态存储在 `localStorage`（键 `qpcr-demo-v6`，兼容 `qpcr-demo-v5`/`v4`/`v3`）
+- 状态存储在 `localStorage`（键 `qpcr-demo-v7`，兼容 `qpcr-demo-v6`/`v5`/`v4`/`v3`）
 - 无网络请求或远程依赖
 
 ---

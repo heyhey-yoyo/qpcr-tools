@@ -53,7 +53,7 @@
 - 分析结果 CSV 导出（带 BOM，兼容 Excel）
 - 模板 JSON 导出/导入
 - 复制结果到剪贴板
-- 全部状态自动保存到浏览器 localStorage（键 `qpcr-demo-v6`）
+- 全部状态自动保存到浏览器 localStorage（键 `qpcr-demo-v7`）
 - 恢复默认：一键清除所有数据并重置配置
 
 ## 技术栈
