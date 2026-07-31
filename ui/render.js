@@ -313,8 +313,13 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Build row→cells map
-  const rowCells = new Map();
+  // Compare groups share a cluster ID (for example N1 + T1). Keep those
+  // groups together and draw separators only between different clusters.
+  const cellGroups = new Map(placements.map(item => [
+    `${item.row},${item.col}`,
+    item.clusterId || item.groupId || item.group || ''
+  ]));
+  /*
   segments.forEach(s => {
     const r = s.row;
     if (!rowCells.has(r)) rowCells.set(r, []);
@@ -358,7 +363,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
 
   const sepRows = [...rowBreaks].sort((a, b) => a - b);
   const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
-  gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length));
+  gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length)); */
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -376,11 +381,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    const gr = rowShift(rowIndex);
-
-    if (rowBreaks.has(rowIndex)) {
-      html += `<div class="plate-separator" style="grid-row:${gr - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
-    }
+    const gr = rowIndex + 2;
 
     html += `<div class="plate-row-label" style="grid-row:${gr};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
@@ -392,7 +393,6 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
           : `grid-row:${gr};grid-column:${colIndex + 2} / span ${segment.span}`;
         const cls = [
           segment.axis === 'v' ? 'vertical' : '',
-          colSplits.has(key) ? 'col-split' : ''
         ].filter(Boolean).join(' ');
         html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
@@ -413,7 +413,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const hLines = []; // {y, x1, x2}
   const vLines = []; // {x, y1, y2}
 
-  transitions.forEach(t => {
+  /* transitions.forEach(t => {
     const x = labelW + t.col * (ww + gap) - gap / 2;
 
     // Vertical line: from transition row down through all rows
@@ -456,7 +456,43 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         break;
       }
     }
-  });
+  }); */
+
+  // Draw only boundaries between adjacent groups.
+  for (let row = 0; row < plate.rows.length; row += 1) {
+    for (let col = 0; col < plate.cols - 1; col += 1) {
+      const left = cellGroups.get(`${row},${col}`);
+      const right = cellGroups.get(`${row},${col + 1}`);
+      if (left && right && left !== right) {
+        vLines.push({
+          x: labelW + (col + 1) * (ww + gap) - gap / 2,
+          y1: headerH + row * (wh + gap) + gap,
+          y2: headerH + (row + 1) * (wh + gap)
+        });
+      }
+    }
+  }
+
+  for (let row = 0; row < plate.rows.length - 1; row += 1) {
+    let start = null;
+    const flush = end => {
+      if (start === null) return;
+      hLines.push({
+        y: headerH + (row + 1) * (wh + gap) - gap / 2,
+        x1: labelW + start * (ww + gap) + gap,
+        x2: labelW + (end + 1) * (ww + gap)
+      });
+      start = null;
+    };
+    for (let col = 0; col < plate.cols; col += 1) {
+      const upper = cellGroups.get(`${row},${col}`);
+      const lower = cellGroups.get(`${row + 1},${col}`);
+      const differs = upper && lower && upper !== lower;
+      if (differs && start === null) start = col;
+      if (!differs) flush(col - 1);
+    }
+    flush(plate.cols - 1);
+  }
 
   // Build SVG
   const svgW = labelW + plate.cols * (ww + gap);
