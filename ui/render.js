@@ -330,7 +330,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
 
   const numSeps = clusterRowStarts.size;
   const sepRows = [...clusterRowStarts].sort((a, b) => a - b);
-  const rowShift = r => r + 2 + sepRows.filter(sr => sr < r).length;
+  // Each separator row pushes subsequent rows down by 1
+  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
   const totalRows = plate.rows.length + numSeps;
 
   gridEl.style.setProperty('--plate-rows', String(totalRows));
@@ -353,7 +354,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   plate.rows.forEach((row, rowIndex) => {
     const gridRow = rowShift(rowIndex);
 
-    // Full-row separator before a row where a new cluster starts
+    // Insert full-row dashed separator before a cluster-start row
     if (clusterRowStarts.has(rowIndex)) {
       html += `<div class="plate-separator" style="grid-row:${gridRow - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
     }
@@ -366,7 +367,6 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         const placement = segment.axis === 'v'
           ? `grid-row:${gridRow} / span ${segment.span};grid-column:${colIndex + 2}`
           : `grid-row:${gridRow};grid-column:${colIndex + 2} / span ${segment.span}`;
-        // Same-row cluster split: add visual divider
         const isSplit = sameRowSplits.has(key);
         const splitCls = isSplit ? ' cluster-split' : '';
         html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}${splitCls}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
