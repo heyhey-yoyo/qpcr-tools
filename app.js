@@ -436,17 +436,9 @@ function renderAllBlocks() {
 function readBlocks() {
   blocks = readBlocksFromDom(els.blocksBody, blocks, experiment, replicateCount);
   if (blocks[0]) blocks[0].breakBefore = false;
-  // Sync display fields to matching rows
-  rows.forEach((row, i) => {
-    if (i < blocks.length) {
-      row.name = blocks[i].sample;
-      row.group = blocks[i].group;
-      row.groupId = blocks[i].groupId;
-      row.gene = blocks[i].gene;
-      row.geneId = blocks[i].geneId;
-    }
-  });
   renderPlate();
+  syncRowsFromBlocks();
+  calculate();
   save();
 }
 
