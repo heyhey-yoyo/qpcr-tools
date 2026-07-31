@@ -39,7 +39,6 @@ const $ = s => document.querySelector(s);
 const els = {
   blocksBody: $('#blocksBody'), plateGrid: $('#plateGrid'), plateLegend: $('#plateLegend'),
   plateAlert: $('#plateAlert'), targets: $('#targetCount'),
-  appendCount: $('#appendCount'), appendNewLine: $('#appendNewLine'),
   plateSize: $('#plateSize'), startRow: $('#startRow'), startCol: $('#startCol'),
   direction: $('#plateDirection'), gap: $('#blockGap'),
   body: $('#samplesBody'), head: $('#samplesHead'),
@@ -302,8 +301,7 @@ function save() {
     plate: {
       size: els.plateSize.value, startRow: els.startRow.value, startCol: els.startCol.value,
       direction: els.direction.value, gap: els.gap.value,
-      targets: els.targets.value, appendCount: els.appendCount.value,
-      appendNewLine: els.appendNewLine.checked,
+	      targets: els.targets.value,
       bioGroupReplicates: els.bioGroupReplicates.checked
     },
     mode: els.mode.value,
@@ -371,8 +369,6 @@ function load() {
     els.gap.value = state.plate?.gap || '0';
     els.targets.value = String(Number(state.plate?.targets) || 1);
     targetCount();
-    els.appendCount.value = String(Math.max(1, Math.min(24, Number(state.plate?.appendCount) || 1)));
-    els.appendNewLine.checked = Boolean(state.plate?.appendNewLine);
     els.bioGroupReplicates.checked = Boolean(state.plate?.bioGroupReplicates);
     toggleBioGroupVisibility();
     commitLayout(snapshotLayout());
@@ -534,32 +530,15 @@ function removeBlock(event) {
   save();
 }
 
-function appendPreset() {
-  readBlocks();
-  const preset = buildTemplate();
-  const copies = Math.max(1, Math.min(24, Number(els.appendCount?.value) || 1));
-
+function loadPreset() {
+  blocks = buildTemplate();
+  els.startRow.value = currentPlate().rows[0];
+  els.startCol.value = '1';
+  els.direction.value = 'horizontal';
+  els.gap.value = '0';
   if (generatePlacements().overflow) {
-    window.alert(`当前模板已超出${currentPlate().label}容量，请先调整布局再追加。`);
+    window.alert(`${currentPlate().label}空间不足，预设未载入。请减少分组、基因、生物学重复或技术复孔数，或改用更大孔板。`);
     return;
-  }
-
-  const startIndex = blocks.length;
-  for (let copyIndex = 0; copyIndex < copies; copyIndex += 1) {
-    const template = clone(preset);
-    const sampleMap = new Map();
-    template.forEach(b => { if (!sampleMap.has(b.sample)) sampleMap.set(b.sample, uniqueSampleName(b.sample)); });
-    template.forEach((b, ti) => {
-      b.sample = sampleMap.get(b.sample);
-      b.breakBefore = Boolean(els.appendNewLine.checked && ti === 0 && blocks.length);
-      blocks.push(normalizeBlock(b));
-    });
-  }
-
-  if (blocks.length) blocks[0].breakBefore = false;
-  if (generatePlacements().overflow) {
-    blocks.splice(startIndex);
-    window.alert(`${currentPlate().label}空间不足，本次未追加。可减少追加份数、取消"每份另起一行"，或改用更大孔板。`);
   }
   renderAllBlocks();
   renderPlate();
@@ -1229,7 +1208,7 @@ $('#clearBlocksBtn').addEventListener('click', () => {
   renderAllRows();
   calculate();
 });
-$('#appendPresetBtn').addEventListener('click', appendPreset);
+$('#loadPresetBtn').addEventListener('click', loadPreset);
 
 $('#addBlockBtn').addEventListener('click', () => {
   readBlocks();
@@ -1324,7 +1303,7 @@ $('#resetBtn').addEventListener('click', () => {
   replicateCount = DEFAULT_REPS;
   els.repsInput.value = String(DEFAULT_REPS);
   experiment = createExperiment();
-  els.targets.value = '1'; els.appendCount.value = '1'; els.appendNewLine.checked = false; els.bioGroupReplicates.checked = false;
+  els.targets.value = '1'; els.bioGroupReplicates.checked = false;
   toggleBioGroupVisibility();
   els.plateSize.value = '96';
   refreshCoordinateSelects('A', '1');

@@ -72,16 +72,7 @@
             </label>
           </div>
           <div class="experiment-row">
-            <label class="append-count-label" title="一次连续追加多少份模板">
-              <span>追加份数</span>
-              <input id="appendCount" class="append-count" type="number" min="1" max="24" step="1" value="1" aria-label="追加份数" />
-            </label>
-            <label class="append-line-label" title="追加多份时，让每一份模板从新的一排开始">
-              <input id="appendNewLine" type="checkbox" /> 每份另起一行
-            </label>
-          </div>
-          <div class="experiment-row">
-            <button id="appendPresetBtn" class="button button-primary" title="在现有区块后连续追加所选模板">追加点板预设</button>
+            <button id="loadPresetBtn" class="button button-primary" title="按当前实验配置重新生成点板模板，覆盖所有区块">载入点板预设</button>
           </div>
         </div>
       </div>
@@ -111,7 +102,7 @@
       <div id="plateGrid" class="plate-grid" aria-label="孔板预览"></div>
     </div>
     <div id="plateLegend" class="plate-legend"></div>
-    <p class="help-text">“功能演示”会载入一份当前孔板规格的演示模板；“清空全板”会移除所有区块；“追加点板预设”会保留现有区块并在后面继续排列，孔板放不下时会拒绝并提示。可设置一次追加多份，并选择每份是否另起一行。点击任意空孔可将它设为模板起点。预览图中同一区块（一组技术重复）会用浅色框圈出。“导出模板”会把当前点板区块保存为 JSON 文件，之后可用“导入模板”直接恢复。</p>
+    <p class="help-text">“载入点板预设”会按当前实验配置重新生成模板并覆盖所有区块；“功能演示”会载入一份当前孔板规格的演示模板；“清空全板”会移除所有区块。点击任意空孔可将它设为模板起点。预览图中同一区块（一组技术重复）会用浅色框圈出。“导出模板”会把当前点板区块保存为 JSON 文件，之后可用“导入模板”直接恢复。</p>
   </section>
 
   <section class="card settings-card">
