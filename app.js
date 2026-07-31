@@ -1059,6 +1059,19 @@ function handleSetCompareToGroup(groupId, targetGroupId) {
   experiment = expSetCompareTo(experiment, groupId, targetGroupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
+  // Rebuild template so baseline groups start on new rows with their dependents following
+  const oldBlocks = blocks;
+  const oldRows = rows;
+  blocks = buildTemplate();
+  if (generatePlacements().overflow) {
+    blocks = oldBlocks;
+    rows = oldRows;
+    window.alert(`${currentPlate().label}空间不足，比较基准未调整。`);
+    return;
+  }
+  renderAllBlocks();
+  renderPlate();
+  syncRowsFromBlocks();
   calculate();
   save();
 }
