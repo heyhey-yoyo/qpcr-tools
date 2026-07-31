@@ -313,6 +313,20 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
+  // Find rows that start with a breakBefore block
+  const breakRows = new Set();
+  segments.forEach(s => {
+    if (s.items.some(item => item.breakBefore)) breakRows.add(s.row);
+  });
+  const numBreaks = breakRows.size;
+  const sepRows = [...breakRows].sort((a, b) => a - b);
+  // Map original row → display row (shifted by separators inserted before it)
+  const rowShift = r => r + 2 + sepRows.filter(sr => sr < r).length;
+  // Total grid rows = plate rows + separators
+  const totalRows = plate.rows.length + numBreaks;
+
+  gridEl.style.setProperty('--plate-rows', String(totalRows));
+
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
     const displayGene = item.gene || resolveGeneName(experiment, item.geneId) || '';
@@ -329,23 +343,29 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    html += `<div class="plate-row-label" style="grid-row:${rowIndex + 2};grid-column:1">${row}</div>`;
+    const gridRow = rowShift(rowIndex);
+
+    // Insert separator row if this row starts a breakBefore baseline
+    if (breakRows.has(rowIndex)) {
+      html += `<div class="plate-separator" style="grid-row:${gridRow - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
+    }
+
+    html += `<div class="plate-row-label" style="grid-row:${gridRow};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
       const key = `${rowIndex},${colIndex}`;
       const segment = segmentStart.get(key);
       if (segment) {
         const placement = segment.axis === 'v'
-          ? `grid-row:${rowIndex + 2} / span ${segment.span};grid-column:${colIndex + 2}`
-          : `grid-row:${rowIndex + 2};grid-column:${colIndex + 2} / span ${segment.span}`;
+          ? `grid-row:${gridRow} / span ${segment.span};grid-column:${colIndex + 2}`
+          : `grid-row:${gridRow};grid-column:${colIndex + 2} / span ${segment.span}`;
         const isBreakStart = segment.items.some(item => item.breakBefore);
-        const breakCls = isBreakStart ? ' baseline-break' : '';
         const breakBtn = isBreakStart && callbacks && callbacks.onToggleBreakBefore
           ? `<button type="button" class="break-cancel" data-block-index="${segment.items[0].blockIndex}" title="取消另起一行">↩</button>`
           : '';
-        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}${breakCls}" style="${placement}">${segment.items.map(wellHtml).join('')}${breakBtn}</div>`;
+        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}${breakBtn}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
-        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${rowIndex + 2};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
+        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gridRow};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
       }
     }
   });
