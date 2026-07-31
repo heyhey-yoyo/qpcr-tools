@@ -436,9 +436,8 @@ function renderAllBlocks() {
 function readBlocks() {
   blocks = readBlocksFromDom(els.blocksBody, blocks, experiment, replicateCount);
   if (blocks[0]) blocks[0].breakBefore = false;
-  renderPlate();
   syncRowsFromBlocks();
-  calculate();
+  renderPlate();
   save();
 }
 
