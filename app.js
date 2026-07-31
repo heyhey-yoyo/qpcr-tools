@@ -155,35 +155,68 @@ function parseWell(value) {
 
 // ---- Template ----
 
+/** Build a single group's blocks for the template. */
+function buildGroupBlocks(group, refGene) {
+  const blocks = [];
+  const groupBio = els.bioGroupReplicates && els.bioGroupReplicates.checked;
+  if (groupBio) {
+    experiment.targetGenes.forEach(gene => {
+      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+        blocks.push({ sample: `${group.name}-BioRep${bio}`, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+      }
+    });
+    for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+      blocks.push({ sample: `${group.name}-BioRep${bio}`, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+    }
+  } else {
+    for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
+      const sample = `${group.name}-BioRep${bio}`;
+      experiment.targetGenes.forEach(gene => {
+        blocks.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
+      });
+      blocks.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
+    }
+  }
+  return blocks;
+}
+
 function buildTemplate() {
   const template = [];
   const refGene = experiment.refGene || { id: 'ref', name: 'GAPDH' };
-  const groupBio = els.bioGroupReplicates && els.bioGroupReplicates.checked;
 
-  experiment.groups.forEach(group => {
-    if (groupBio) {
-      // Group biological replicates together per gene
-      experiment.targetGenes.forEach(gene => {
-        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-          const sample = `${group.name}-BioRep${bio}`;
-          template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
-        }
-      });
-      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-        const sample = `${group.name}-BioRep${bio}`;
-        template.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
-      }
+  const isBaseline = g => !g.compareToGroupId || g.compareToGroupId === g.id;
+  const baselines = experiment.groups.filter(g => isBaseline(g));
+  const byBaseline = new Map();
+  baselines.forEach(b => byBaseline.set(b.id, []));
+  const orphans = [];
+
+  experiment.groups.forEach(g => {
+    if (isBaseline(g)) return;
+    const cid = g.compareToGroupId;
+    if (cid && byBaseline.has(cid)) {
+      byBaseline.get(cid).push(g);
     } else {
-      // Default: group by biological replicate
-      for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-        const sample = `${group.name}-BioRep${bio}`;
-        experiment.targetGenes.forEach(gene => {
-          template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
-        });
-        template.push({ sample, group: group.name, groupId: group.id, gene: refGene.name, geneId: refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
-      }
+      orphans.push(g);
     }
   });
+
+  // Output: each baseline followed by its dependents, then orphans
+  baselines.forEach((baseline, bi) => {
+    const baselineBlocks = buildGroupBlocks(baseline, refGene);
+    if (baselineBlocks.length) baselineBlocks[0].breakBefore = bi > 0;
+    template.push(...baselineBlocks);
+
+    (byBaseline.get(baseline.id) || []).forEach(dep => {
+      const depBlocks = buildGroupBlocks(dep, refGene);
+      template.push(...depBlocks);
+    });
+  });
+
+  orphans.forEach(g => {
+    const orphanBlocks = buildGroupBlocks(g, refGene);
+    template.push(...orphanBlocks);
+  });
+
   return template;
 }
 
@@ -205,32 +238,8 @@ function exampleTemplate() {
   targetCount();
 
   const template = [];
-  const groupBio = els.bioGroupReplicates && els.bioGroupReplicates.checked;
   const batches = plate.size === '384' ? [1, 2] : [1];
-  batches.forEach(() => {
-    experiment.groups.forEach(group => {
-      if (groupBio) {
-        experiment.targetGenes.forEach(gene => {
-          for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-            const sample = `${group.name}-BioRep${bio}`;
-            template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
-          }
-        });
-        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-          const sample = `${group.name}-BioRep${bio}`;
-          template.push({ sample, group: group.name, groupId: group.id, gene: experiment.refGene.name, geneId: experiment.refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
-        }
-      } else {
-        for (let bio = 1; bio <= experiment.biologicalReplicates; bio += 1) {
-          const sample = `${group.name}-BioRep${bio}`;
-          experiment.targetGenes.forEach(gene => {
-            template.push({ sample, group: group.name, groupId: group.id, gene: gene.name, geneId: gene.id, role: 'target', reps: replicateCount, breakBefore: false });
-          });
-          template.push({ sample, group: group.name, groupId: group.id, gene: experiment.refGene.name, geneId: experiment.refGene.id, role: 'reference', reps: replicateCount, breakBefore: false });
-        }
-      }
-    });
-  });
+  batches.forEach(() => template.push(...buildTemplate()));
   return template;
 }
 
