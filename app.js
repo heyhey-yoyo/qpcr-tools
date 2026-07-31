@@ -67,6 +67,7 @@ let rows = [];
 let latest = [];
 let latestNotes = { merged: [], singleRep: [] };
 let latestPlate = { placements: [], overflow: false };
+let hasSavedState = false;
 
 // ---- Utilities ----
 function clone(value) { return JSON.parse(JSON.stringify(value)); }
@@ -375,6 +376,7 @@ function load() {
     els.bioGroupReplicates.checked = Boolean(state.plate?.bioGroupReplicates);
     toggleBioGroupVisibility();
     commitLayout(snapshotLayout());
+    hasSavedState = true;
   } catch (error) {
     console.warn('无法读取本地数据：', error);
     refreshCoordinateSelects('A', '1');
@@ -1111,8 +1113,7 @@ function handleRemoveGroup(groupId) {
     const parts = [];
     if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
     if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
-    const hadBlocks = affectedBlocks > 0;
+    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n删除后孔板布局会变化，但其他分组已录入的 Ct 值会保留。` : '';
     if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
     // Cascade delete blocks by stable ID
     blocks = blocks.filter(b => b.groupId !== groupId);
@@ -1121,25 +1122,10 @@ function handleRemoveGroup(groupId) {
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
       onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
     renderAllBlocks();
-    // If blocks changed, regenerate rows so well positions stay in sync.
-    // If blocks didn't change, preserve existing rows (and their Ct data).
-    if (hadBlocks) {
-      latestPlate = generatePlacements();
-      if (blocks.length) {
-        const placementsByBlock = new Map();
-        latestPlate.placements.forEach(item => {
-          if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-          placementsByBlock.get(item.blockIndex).push(item.well);
-        });
-        rows = blocks.map((block, index) => {
-          const wells = placementsByBlock.get(index) || [];
-          return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-        });
-      } else {
-        rows = [];
-      }
-      renderAllRows();
-    }
+    // Rebuild the plate mapping while preserving Ct values for unchanged
+    // (sample, groupId, geneId) rows. Rows belonging to the deleted group
+    // are naturally omitted because their blocks no longer exist.
+    syncRowsFromBlocks();
     renderPlate();
     calculate();
     save();
@@ -1169,8 +1155,7 @@ function handleRemoveTargetGene(geneId) {
     const parts = [];
     if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
     if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n注意：删除后孔板布局会变化，Ct 数据将按新布局重新生成，已录入的 Ct 值将丢失。` : '';
-    const hadBlocks = affectedBlocks > 0;
+    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n删除后孔板布局会变化，但其他基因已录入的 Ct 值会保留。` : '';
     if (!window.confirm(`确定删除目标基因"${targetName}"？${note}`)) return;
     // Cascade delete blocks by stable ID
     blocks = blocks.filter(b => b.geneId !== geneId);
@@ -1178,25 +1163,10 @@ function handleRemoveTargetGene(geneId) {
     experiment = expRemoveTargetGene(experiment, geneId);
     targetCount();
     renderAllBlocks();
-    // If blocks changed, regenerate rows so well positions stay in sync.
-    // If blocks didn't change, preserve existing rows (and their Ct data).
-    if (hadBlocks) {
-      latestPlate = generatePlacements();
-      if (blocks.length) {
-        const placementsByBlock = new Map();
-        latestPlate.placements.forEach(item => {
-          if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-          placementsByBlock.get(item.blockIndex).push(item.well);
-        });
-        rows = blocks.map((block, index) => {
-          const wells = placementsByBlock.get(index) || [];
-          return { wells, name: block.sample, group: block.group, groupId: block.groupId, gene: block.gene, geneId: block.geneId, cts: Array(wells.length).fill('') };
-        });
-      } else {
-        rows = [];
-      }
-      renderAllRows();
-    }
+    // Rebuild the plate mapping while preserving Ct values for unchanged
+    // (sample, groupId, geneId) rows. Rows belonging to the deleted target
+    // gene are naturally omitted because their blocks no longer exist.
+    syncRowsFromBlocks();
     renderPlate();
     calculate();
     save();
@@ -1258,7 +1228,21 @@ $('#exampleTemplateBtn').addEventListener('click', () => {
 // els.targets is type="hidden" — its value is maintained by targetCount().
 // No event handlers needed; programmatic value changes don't fire input/change events.
 
-$('#clearBlocksBtn').addEventListener('click', () => { blocks = []; rows = []; renderAllBlocks(); renderPlate(); renderAllRows(); calculate(); save(); });
+$('#clearBlocksBtn').addEventListener('click', () => {
+  readBlocks();
+  readRows();
+  if (!blocks.length && !rows.length) return;
+  const enteredCtCount = rows.reduce((count, row) =>
+    count + (row.cts || []).filter(ct => String(ct ?? '').trim() !== '').length, 0);
+  const ctNote = enteredCtCount ? `，包括 ${enteredCtCount} 个已录入 Ct 值` : '';
+  if (!window.confirm(`确定清空全板？将删除 ${blocks.length} 个区块和 ${rows.length} 行 Ct 数据${ctNote}。此操作无法撤销。`)) return;
+  blocks = [];
+  rows = [];
+  renderAllBlocks();
+  renderPlate();
+  renderAllRows();
+  calculate();
+});
 $('#appendPresetBtn').addEventListener('click', appendPreset);
 
 $('#addBlockBtn').addEventListener('click', () => {
@@ -1336,9 +1320,19 @@ els.repsInput.addEventListener('change', () => {
 
 $('#addSampleBtn').addEventListener('click', () => { readRows(); rows.push(blankRow()); renderAllRows(); calculate(); });
 $('#exampleDataBtn').addEventListener('click', () => { readRows(); fillExampleCts(); renderAllRows(); calculate(); });
-$('#clearDataBtn').addEventListener('click', () => { rows = [blankRow()]; renderAllRows(); calculate(); });
+$('#clearDataBtn').addEventListener('click', () => {
+  readRows();
+  const enteredCtCount = rows.reduce((count, row) =>
+    count + (row.cts || []).filter(ct => String(ct ?? '').trim() !== '').length, 0);
+  if (enteredCtCount && !window.confirm(`确定清空 ${enteredCtCount} 个已录入的 Ct 值？样本、分组、基因和孔位将保留。`)) return;
+  if (!rows.length && blocks.length) syncRowsFromBlocks();
+  rows = rows.map(row => ({ ...row, cts: Array(rowSlotCount(row)).fill('') }));
+  renderAllRows();
+  calculate();
+});
 
 $('#resetBtn').addEventListener('click', () => {
+  if (!window.confirm('确定恢复默认设置？当前模板、Ct 数据和本地保存内容将被清除。此操作无法撤销。')) return;
   localStorage.removeItem(KEY);
   LEGACY_KEYS.forEach(k => localStorage.removeItem(k));
   replicateCount = DEFAULT_REPS;
@@ -1351,12 +1345,7 @@ $('#resetBtn').addEventListener('click', () => {
   els.direction.value = 'horizontal'; els.gap.value = '0';
   els.mode.value = 'ddct'; els.spread.value = '0.5';
   blocks = buildTemplate();
-  rows = clone([
-    { wells: ['A1', 'A2', 'A3'], name: 'NC-1', group: 'NC', groupId: resolveGroupId(experiment, 'NC').id, gene: 'IL6', geneId: resolveGeneId(experiment, 'IL6').id, cts: [25.12, 25.30, 25.21] },
-    { wells: ['A4', 'A5', 'A6'], name: 'NC-1', group: 'NC', groupId: resolveGroupId(experiment, 'NC').id, gene: 'GAPDH', geneId: resolveGeneId(experiment, 'GAPDH').id, cts: [19.91, 20.02, 19.96] },
-    { wells: ['A7', 'A8', 'A9'], name: 'Treat-1', group: 'Treatment', groupId: resolveGroupId(experiment, 'Treatment').id, gene: 'IL6', geneId: resolveGeneId(experiment, 'IL6').id, cts: [22.45, 22.53, 22.49] },
-    { wells: ['A10', 'A11', 'A12'], name: 'Treat-1', group: 'Treatment', groupId: resolveGroupId(experiment, 'Treatment').id, gene: 'GAPDH', geneId: resolveGeneId(experiment, 'GAPDH').id, cts: [20.14, 20.19, 20.11] }
-  ]);
+  rows = [];
   els.ctColumnArea.value = '';
   els.ctColumnPanel.classList.add('hidden');
   els.paste.classList.add('hidden');
@@ -1364,7 +1353,10 @@ $('#resetBtn').addEventListener('click', () => {
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
   targetCount();
   commitLayout(snapshotLayout());
-  renderAllBlocks(); renderPlate(); renderAllRows(); calculate();
+  renderAllBlocks();
+  renderPlate();
+  syncRowsFromBlocks();
+  calculate();
 });
 
 $('#pasteColumnBtn').addEventListener('click', pasteCtColumnFromClipboard);
@@ -1395,8 +1387,9 @@ $('#exportBtn').addEventListener('click', () => downloadFile('qpcr-results.csv',
 refreshCoordinateSelects('A', '1');
 load();
 toggleBioGroupVisibility();
-blocks = blocks.length ? blocks : buildTemplate();
+if (!hasSavedState && blocks.length === 0) blocks = buildTemplate();
 renderAllBlocks();
 renderPlate();
-renderAllRows();
+if (blocks.length && rows.length === 0) syncRowsFromBlocks();
+else renderAllRows();
 calculate();
