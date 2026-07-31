@@ -568,19 +568,6 @@ function appendPreset() {
   save();
 }
 
-function loadPreset() {
-  blocks = buildTemplate();
-  els.startRow.value = currentPlate().rows[0];
-  els.startCol.value = '1';
-  els.direction.value = 'horizontal';
-  els.gap.value = '0';
-  renderAllBlocks();
-  renderPlate();
-  syncRowsFromBlocks();
-  calculate();
-  save();
-}
-
 // ---- Plate layout sync ----
 
 /** Last known-good layout snapshot.  Saved on commit, restored on cancel/overflow. */
@@ -1210,7 +1197,6 @@ function handleAddTargetGene() {
 
 // ---- Event bindings ----
 
-$('#loadPresetBtn').addEventListener('click', loadPreset);
 $('#exampleTemplateBtn').addEventListener('click', () => {
   blocks = exampleTemplate();
   els.startRow.value = currentPlate().rows[0];
