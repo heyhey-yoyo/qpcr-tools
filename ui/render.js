@@ -408,17 +408,20 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const gap = plate.size === '384' ? 8 : 10; // grid gap
   const ww = plate.size === '384' ? 50 : 68; // well width
   const wh = plate.size === '384' ? 44 : 56; // well height
+  // CSS grid gap applies between ALL tracks (label col + header row too)
+  const originX = labelW + gap;
+  const originY = headerH + gap;
 
   // For each transition, find the boundary segment endpoints
   const hLines = []; // {y, x1, x2}
   const vLines = []; // {x, y1, y2}
 
   /* transitions.forEach(t => {
-    const x = labelW + t.col * (ww + gap) - gap / 2;
+    const x = originX + t.col * (ww + gap) - gap / 2;
 
     // Vertical line: from transition row down through all rows
     // where new cluster exists (even if old cluster also exists)
-    let yTop = headerH + t.row * (wh + gap) - gap / 2;
+    let yTop = originY + t.row * (wh + gap) - gap / 2;
     let yBot = yTop;
     let lastNewRow = t.row;
     for (let rr = t.row; rr < plate.rows.length; rr++) {
@@ -429,7 +432,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         break;
       }
     }
-    yBot = headerH + (lastNewRow + 1) * (wh + gap) - gap / 2;
+    yBot = originY + (lastNewRow + 1) * (wh + gap) - gap / 2;
     if (yBot > yTop) {
       vLines.push({ x, y1: yTop, y2: yBot });
     }
@@ -437,9 +440,9 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     // Top horizontal: at transition row, cols from transition to right edge
     // separating shared row from row above
     if (t.row > 0) {
-      const y = headerH + t.row * (wh + gap) - gap / 2;
+      const y = originY + t.row * (wh + gap) - gap / 2;
       const x1 = x;
-      const x2 = labelW + plate.cols * (ww + gap) - gap / 2;
+      const x2 = originX + plate.cols * (ww + gap) - gap / 2;
       hLines.push({ y, x1, x2 });
     }
 
@@ -449,8 +452,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
       const hasOld = cells.some(c => c.cluster === t.from);
       const hasNew = cells.some(c => c.cluster === t.to);
       if (!hasOld && hasNew) {
-        const y = headerH + rr * (wh + gap) - gap / 2;
-        const x1 = labelW;
+        const y = originY + rr * (wh + gap) - gap / 2;
+        const x1 = originX;
         const x2 = x;
         hLines.push({ y, x1, x2 });
         break;
@@ -465,9 +468,9 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
       const right = cellGroups.get(`${row},${col + 1}`);
       if (left && right && left !== right) {
         vLines.push({
-          x: labelW + (col + 1) * (ww + gap) - gap / 2,
-          y1: headerH + row * (wh + gap) + gap,
-          y2: headerH + (row + 1) * (wh + gap)
+          x: originX + (col + 1) * (ww + gap) - gap / 2,
+          y1: originY + row * (wh + gap),
+          y2: originY + row * (wh + gap) + wh
         });
       }
     }
@@ -478,9 +481,9 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     const flush = end => {
       if (start === null) return;
       hLines.push({
-        y: headerH + (row + 1) * (wh + gap) - gap / 2,
-        x1: labelW + start * (ww + gap) + gap,
-        x2: labelW + (end + 1) * (ww + gap)
+        y: originY + (row + 1) * (wh + gap) - gap / 2,
+        x1: originX + start * (ww + gap),
+        x2: originX + (end + 1) * (ww + gap)
       });
       start = null;
     };
@@ -495,8 +498,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   }
 
   // Build SVG
-  const svgW = labelW + plate.cols * (ww + gap);
-  const svgH = headerH + plate.rows.length * (wh + gap);
+  const svgW = originX + plate.cols * (ww + gap);
+  const svgH = originY + plate.rows.length * (wh + gap);
   let svgLines = '';
   hLines.forEach(l => {
     svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
