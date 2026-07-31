@@ -840,11 +840,10 @@ function calculate() {
     item.gene = item.gene || resolveGeneName(experiment, item.geneId) || '';
   });
 
-  // Generate charts
-  const groupOrder = (experiment.groups || []).map(g => g.name);
+  // Generate charts（顺序跟随 rows = 区块表顺序，与孔板排版一致）
   const geneOrder = [...experiment.targetGenes.map(g => g.name), experiment.refGene?.name || 'GAPDH'];
-  const chartHTML = resultsChartSvg(latest, groupOrder);
-  const groupChartHTML = mode === 'ddct' ? groupChartSvg(latest, groupOrder, geneOrder) : '';
+  const chartHTML = resultsChartSvg(latest);
+  const groupChartHTML = mode === 'ddct' ? groupChartSvg(latest, geneOrder) : '';
 
   // Build alerts
   const alertsHTML = buildAlertsHtml(latest, latestNotes, experiment, maxSpread);

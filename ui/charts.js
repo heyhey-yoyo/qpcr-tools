@@ -22,21 +22,12 @@ export function truncateLabel(text, maxLen = 12) {
 /**
  * Per-sample bar chart with error bars.
  * @param {Array} items - result items with { name, group, gene, fold, foldLow, foldHigh, qc }
- * @param {Array} groupOrder - ordered list of group names for sorting
  * @returns {string} SVG markup
  */
-export function resultsChartSvg(items, groupOrder) {
+export function resultsChartSvg(items) {
   const filtered = items.filter(item => Number.isFinite(item.fold));
   if (!filtered.length) return '';
-
-  // Sort by group order, then by sample name
-  const orderMap = new Map((groupOrder || []).map((g, i) => [normalizeKey(g), i]));
-  filtered.sort((a, b) => {
-    const ga = orderMap.get(normalizeKey(a.group)) ?? 99;
-    const gb = orderMap.get(normalizeKey(b.group)) ?? 99;
-    if (ga !== gb) return ga - gb;
-    return String(a.name).localeCompare(String(b.name), undefined, { numeric: true });
-  });
+  // 保持传入顺序（rows 顺序 = 区块表顺序），与孔板排版一致；不重新排序
 
   const maxNameLen = Math.max(...filtered.map(item => String(item.name || '').length), 4);
   const perItem = Math.max(76, Math.min(140, maxNameLen * 7 + 12));
@@ -77,11 +68,10 @@ export function resultsChartSvg(items, groupOrder) {
 /**
  * Grouped bar chart (ΔΔCt mode only, multiple genes).
  * @param {Array} items - result items
- * @param {Array} groupOrder - ordered list of group names
  * @param {Array} geneOrder - ordered list of gene names
  * @returns {string} SVG markup
  */
-export function groupChartSvg(items, groupOrder, geneOrder) {
+export function groupChartSvg(items, geneOrder) {
   const valid = items.filter(item => Number.isFinite(item.ddct) && !item.missingControl);
   if (!valid.length) return '';
 
@@ -90,9 +80,8 @@ export function groupChartSvg(items, groupOrder, geneOrder) {
     : [...new Set(valid.map(item => item.gene))];
   if (geneList.length <= 1) return ''; // single gene: individual chart is enough
 
-  const dataGroups = new Set(valid.map(item => normalizeKey(item.group)));
-  const groupList = (groupOrder || [])
-    .filter(name => dataGroups.has(normalizeKey(name)));
+  // 组簇顺序 = 结果中组首次出现顺序（与区块表/孔板排版一致）
+  const groupList = [...new Set(valid.map(item => item.group))];
 
   const byKey = new Map();
   valid.forEach(item => {
