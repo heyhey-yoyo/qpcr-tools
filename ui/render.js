@@ -313,51 +313,53 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Detect all cluster transition points: (row, col) where cluster changes
-  const splitCells = new Set(); // keys at (row, col) where a new cluster starts
+  // Detect cluster transitions: full-row vs same-row
+  const sameRowSplits = new Set(); // (row,col) where cluster changes within a row
+  const newRowStarts = new Set();  // row where a new cluster starts at col 0
   let prevCluster = null;
   let prevRow = -1;
-  let prevColEnd = -1; // column where previous segment ends
+  let prevColEnd = -1;
   segments.forEach(s => {
     const first = s.items[0];
     if (!first) return;
     const curCluster = first.clusterId;
     const curRow = s.row;
     if (prevCluster !== null && curCluster !== prevCluster) {
-      splitCells.add(`${curRow},${s.col}`);
+      if (curRow === prevRow) {
+        sameRowSplits.add(`${curRow},${s.col}`);
+      } else if (s.col === 0) {
+        // New cluster starts at beginning of new row → full-width separator
+        newRowStarts.add(curRow);
+      } else {
+        // New cluster starts mid-row on new row → Z-split
+        sameRowSplits.add(`${curRow},${s.col}`);
+      }
     }
     prevCluster = curCluster;
     prevRow = curRow;
     prevColEnd = s.col + s.span - 1;
   });
 
-  // For each split cell, determine border classes:
-  // - 'z-top': dashed top border (separates from row above)
-  // - 'z-left': dashed left border (separates from left within row)
-  // - 'z-above': dashed bottom border on the cell directly above-left of the split
-  const zAbove = new Set(); // keys for cells that need bottom border
-  const zTop = new Set();   // keys for cells that need top border
-  const zLeft = new Set();  // keys for cells that need left border
+  // Full-row separators: insert separator rows
+  const sepRows = [...newRowStarts].sort((a, b) => a - b);
+  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
+  const totalRows = plate.rows.length + sepRows.length;
+  gridEl.style.setProperty('--plate-rows', String(totalRows));
 
-  splitCells.forEach(key => {
+  // Z-split borders for same-row or mid-row transitions
+  const zAbove = new Set();
+  const zTop = new Set();
+  const zLeft = new Set();
+  sameRowSplits.forEach(key => {
     const [r, c] = key.split(',').map(Number);
-    zLeft.add(key);         // left border on the split-start cell
+    zLeft.add(key);
     if (r > 0) {
-      // Find the cell above (row-1, same col) or nearest occupied cell above
       for (let rr = r - 1; rr >= 0; rr--) {
         const above = segmentStart.get(`${rr},${c}`);
-        if (above) {
-          zAbove.add(`${rr},${above.col}`); // bottom border on the cell above
-          break;
-        }
+        if (above) { zAbove.add(`${rr},${above.col}`); break; }
       }
     }
-    // Top border on the split-start cell if previous cluster was on a different row
-    if (r > 0 && prevRow !== r) zTop.add(key);
   });
-
-  // No separator rows — use borders only, so --plate-rows stays unchanged
-  gridEl.style.setProperty('--plate-rows', String(plate.rows.length));
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -370,21 +372,26 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     </div>`;
   };
 
-  const gridRow = r => r + 2; // simple: no separators added
-
   let html = '<div class="plate-corner" style="grid-row:1;grid-column:1"></div>';
   html += Array.from({ length: plate.cols }, (_, i) => i + 1)
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    html += `<div class="plate-row-label" style="grid-row:${gridRow(rowIndex)};grid-column:1">${row}</div>`;
+    const gr = rowShift(rowIndex);
+
+    // Full-row dashed separator before a new-row cluster start
+    if (newRowStarts.has(rowIndex)) {
+      html += `<div class="plate-separator" style="grid-row:${gr - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
+    }
+
+    html += `<div class="plate-row-label" style="grid-row:${gr};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
       const key = `${rowIndex},${colIndex}`;
       const segment = segmentStart.get(key);
       if (segment) {
         const placement = segment.axis === 'v'
-          ? `grid-row:${gridRow(rowIndex)} / span ${segment.span};grid-column:${colIndex + 2}`
-          : `grid-row:${gridRow(rowIndex)};grid-column:${colIndex + 2} / span ${segment.span}`;
+          ? `grid-row:${gr} / span ${segment.span};grid-column:${colIndex + 2}`
+          : `grid-row:${gr};grid-column:${colIndex + 2} / span ${segment.span}`;
         const cls = [
           segment.axis === 'v' ? 'vertical' : '',
           zAbove.has(key) ? 'z-above' : '',
@@ -394,7 +401,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
-        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gridRow(rowIndex)};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
+        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gr};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
       }
     }
   });
