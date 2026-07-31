@@ -92,6 +92,7 @@ export function renderGroups(experiment, containers) {
       sel.appendChild(optBaseline);
       experiment.groups.forEach(other => {
         if (other.id === g.id) return;
+        if (!isBaseline(other)) return;
         const opt = document.createElement('option');
         opt.value = other.id;
         opt.textContent = other.name;
