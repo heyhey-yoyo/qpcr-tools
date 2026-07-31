@@ -365,10 +365,10 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
     }).join('');
 
     return `<tr data-index="${index}" data-group-id="${escapeHtml(row.groupId || '')}" data-gene-id="${escapeHtml(row.geneId || '')}">
-      <td><input class="wells-input" data-field="wells" value="${escapeHtml(wellsText)}" /></td>
-      <td><input data-field="name" value="${escapeHtml(row.name || '')}" /></td>
-      <td><input data-field="group" value="${escapeHtml(row.group || '')}" /></td>
-      <td><input data-field="gene" value="${escapeHtml(row.gene || '')}" /></td>
+      <td class="readonly-cell">${escapeHtml(wellsText) || '—'}</td>
+      <td class="readonly-cell">${escapeHtml(row.name || '')}</td>
+      <td class="readonly-cell">${escapeHtml(row.group || '')}</td>
+      <td class="readonly-cell">${escapeHtml(row.gene || '')}</td>
       ${ctInputs}
       <td class="action-col"><button class="icon-button danger remove-row" title="删除">×</button></td>
     </tr>`;
@@ -400,36 +400,22 @@ export function renderRows(rows, replicateCount, experiment, containerEl, headEl
 }
 
 /**
- * Read rows from DOM. Preserves existing IDs when name matches.
+ * Read rows from DOM. Wells, name, group, gene are driven by blocks
+ * (read-only in the table), so we preserve them from the in-memory row.
+ * Only Ct values are read from DOM inputs.
  */
 export function readRowsFromDom(container, existingRows, experiment) {
   return [...container.querySelectorAll('tr[data-index]')].map(row => {
     const index = Number(row.dataset.index);
     const oldRow = existingRows[index] || {};
 
-    const groupName = row.querySelector('[data-field="group"]').value.trim();
-    const geneName = row.querySelector('[data-field="gene"]').value.trim();
-
-    let groupId = oldRow.groupId;
-    if (normalizeKey(groupName) !== normalizeKey(oldRow.group || '') || !groupId) {
-      const resolved = resolveGroupId(experiment, groupName);
-      groupId = resolved.id;
-    }
-
-    let geneId = oldRow.geneId;
-    if (normalizeKey(geneName) !== normalizeKey(oldRow.gene || '') || !geneId) {
-      const resolved = resolveGeneId(experiment, geneName);
-      geneId = resolved.id;
-    }
-
     return {
-      wells: row.querySelector('[data-field="wells"]').value
-        .split(/[,，\s]+/).map(v => v.trim().toUpperCase()).filter(Boolean),
-      name: row.querySelector('[data-field="name"]').value.trim(),
-      group: groupName,
-      groupId,
-      gene: geneName,
-      geneId,
+      wells: oldRow.wells || [],
+      name: oldRow.name || '',
+      group: oldRow.group || '',
+      groupId: oldRow.groupId || '',
+      gene: oldRow.gene || '',
+      geneId: oldRow.geneId || '',
       cts: [...row.querySelectorAll('[data-ct]')].map(input => input.value)
     };
   });
