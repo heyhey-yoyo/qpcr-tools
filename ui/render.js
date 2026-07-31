@@ -9,7 +9,7 @@
 import { parseCt } from '../core/ct.js';
 import { fmt } from './charts.js';
 import { normalizeKey } from '../core/normalize.js';
-import { resolveGeneName, resolveGroupName, resolveGroupId, resolveGeneId, getControlGroup } from '../state/experiment.js';
+import { resolveGeneName, resolveGroupName, resolveGroupId, resolveGeneId, getBaselineGroups } from '../state/experiment.js';
 
 // ---- Utilities ----
 
@@ -28,9 +28,11 @@ export function renderGroups(experiment, containers) {
   const { groupsContainer, bioRepsInput } = containers;
   const frag = document.createDocumentFragment();
 
+  const isBaseline = g => !g.compareToGroupId || g.compareToGroupId === g.id;
+
   experiment.groups.forEach(g => {
     const chip = document.createElement('span');
-    chip.className = 'group-chip' + (g.isControl ? ' chip-control' : '');
+    chip.className = 'group-chip' + (isBaseline(g) ? ' chip-baseline' : '');
     chip.dataset.id = g.id;
 
     const nameEl = document.createElement('span');
@@ -51,20 +53,38 @@ export function renderGroups(experiment, containers) {
     });
     chip.appendChild(editBtn);
 
-    if (g.isControl) {
+    // Comparison group select
+    if (experiment.groups.length > 1) {
+      const sel = document.createElement('select');
+      sel.className = 'chip-compare';
+      // Option: "作为基准" (value = own id → self-reference = baseline)
+      const optBaseline = document.createElement('option');
+      optBaseline.value = '';
+      optBaseline.textContent = '作为基准';
+      sel.appendChild(optBaseline);
+      experiment.groups.forEach(other => {
+        if (other.id === g.id) return;
+        const opt = document.createElement('option');
+        opt.value = other.id;
+        opt.textContent = other.name;
+        sel.appendChild(opt);
+      });
+      sel.value = g.compareToGroupId || '';
+      sel.title = '选择比较基准组';
+      sel.addEventListener('change', e => {
+        e.stopPropagation();
+        const val = e.target.value || null;
+        containers.onSetCompareToGroup(g.id, val);
+      });
+      sel.addEventListener('click', e => e.stopPropagation());
+      chip.appendChild(sel);
+    }
+
+    if (isBaseline(g)) {
       const badge = document.createElement('span');
       badge.className = 'chip-badge';
-      badge.textContent = '对照';
+      badge.textContent = '基准';
       chip.appendChild(badge);
-    } else {
-      const ctlBtn = document.createElement('button');
-      ctlBtn.className = 'chip-ctl';
-      ctlBtn.textContent = '设为对照';
-      ctlBtn.addEventListener('click', e => {
-        e.stopPropagation();
-        containers.onToggleControl(g.id);
-      });
-      chip.appendChild(ctlBtn);
     }
 
     if (experiment.groups.length > 1) {
@@ -427,21 +447,20 @@ export function renderResults(results, mode, experiment, controlStatsByGene, con
   const { desc, formula, summary, alerts, chart, groupChart, results: resultsBody } = containers;
 
   const refGeneName = experiment.refGene ? experiment.refGene.name : 'GAPDH';
-  const controlGroup = getControlGroup(experiment);
-  const controlName = controlGroup ? controlGroup.name : 'NC';
+  const baselineNames = (experiment.groups || []).filter(g => !g.compareToGroupId || g.compareToGroupId === g.id).map(g => g.name);
   const maxSpread = Number(containers.spreadEl ? containers.spreadEl.value : 0.5);
 
   // Description
   if (desc) {
     desc.innerHTML = mode === 'ddct'
-      ? `内参基因：<strong>${escapeHtml(refGeneName)}</strong> · 对照组：<strong>${escapeHtml(controlName)}</strong> — 以对照组为校准样本，按目标基因分别计算 ΔCt、ΔΔCt 和相对表达倍数。`
+      ? `内参基因：<strong>${escapeHtml(refGeneName)}</strong> · 基准组：<strong>${escapeHtml(baselineNames.join('、'))}</strong> — 各样本按所属组别指定的比较基准分别计算 ΔCt、ΔΔCt 和相对表达倍数。`
       : `内参基因：<strong>${escapeHtml(refGeneName)}</strong> — 仅以内参基因归一化，计算每个样本的 ΔCt 和 2^-ΔCt。`;
   }
 
   // Formula note
   if (containers.formula) {
     containers.formula.innerHTML = mode === 'ddct'
-      ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 对照组同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），对照组样本作为基准不画误差棒。'
+      ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 所属组别指定比较基准组的同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），基准组样本不画误差棒。'
       : '<strong>归一化表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；归一化表达量 = 2<sup>−ΔCt</sup>。误差棒为 ΔCt 的 SEM，仅反映技术重复层面。';
   }
 
@@ -474,10 +493,11 @@ export function renderResults(results, mode, experiment, controlStatsByGene, con
   if (resultsBody) {
     resultsBody.innerHTML = results.map(item => `<tr>
       <td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.group)}</td><td>${escapeHtml(item.gene)}</td>
+      <td>${mode === 'ddct' ? escapeHtml(item.compareToGroup || '—') : '—'}</td>
       <td>${fmt(item.targetCt)}</td><td>${fmt(item.referenceCt)}</td><td>${fmt(item.dct)}</td>
       <td>${mode === 'ddct' ? fmt(item.ddct) : '—'}</td><td>${fmt(item.fold)}</td>
       <td><span class="status ${item.missingControl || !item.qc ? 'status-warning' : 'status-ok'}">${item.missingControl ? '缺对照' : item.n < 2 ? '单孔' : item.qc ? '通过' : '需复核'}</span></td>
-    </tr>`).join('') || '<tr><td colspan="9" style="text-align:center;color:#64748b;padding:24px">暂无可计算结果</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="10" style="text-align:center;color:#64748b;padding:24px">暂无可计算结果</td></tr>';
   }
 }
 
@@ -486,9 +506,6 @@ export function renderResults(results, mode, experiment, controlStatsByGene, con
  * Returns HTML string that can be inserted into the alerts container.
  */
 export function buildAlertsHtml(results, notes, experiment, maxSpread) {
-  const controlGroup = getControlGroup(experiment);
-  const controlName = controlGroup ? controlGroup.name : '';
-  const controlNameKey = normalizeKey(controlName);
   const refGeneName = experiment.refGene ? experiment.refGene.name : '';
 
   const messages = [];
@@ -503,19 +520,27 @@ export function buildAlertsHtml(results, notes, experiment, maxSpread) {
     messages.push(['warning', `仅 1 个有效孔，无技术重复误差，结果请谨慎使用：${notes.singleRep.map(escapeHtml).join('、')}`]);
   }
 
-  const missingGenes = [...new Set(results.filter(item => item.missingControl).map(item => item.gene))];
-  if (missingGenes.length) {
-    messages.push(['danger', `无法计算 ${missingGenes.map(escapeHtml).join('、')} 的 ΔΔCt：对照组中没有对应基因的有效数据。`]);
-  }
+  // Missing control per gene — group by compareToGroup
+  const missingByGroup = new Map();
+  results.filter(item => item.missingControl).forEach(item => {
+    const key = item.compareToGroup || '未知基准';
+    if (!missingByGroup.has(key)) missingByGroup.set(key, new Set());
+    missingByGroup.get(key).add(item.gene);
+  });
+  missingByGroup.forEach((genes, groupName) => {
+    messages.push(['danger', `无法计算 ${[...genes].map(escapeHtml).join('、')} 的 ΔΔCt：比较基准"${escapeHtml(groupName)}"中没有对应基因的有效数据。`]);
+  });
 
-  // Only flag real QC failures (spread exceeds threshold), not single-replicate (n<2)
-  const controlQcIssues = [...new Set(
-    results.filter(item => !item.missingControl && !item.qc && item.n >= 2 && normalizeKey(item.group) === controlNameKey)
-      .map(item => `${item.name} · ${item.gene}`)
-  )];
-  if (controlQcIssues.length) {
-    messages.push(['danger', `对照组存在需复核记录，会影响所有样本的 ΔΔCt，请优先复核：${controlQcIssues.map(escapeHtml).join('、')}`]);
-  }
+  // Baseline QC failures (per baseline group)
+  const baselineIssues = new Map();
+  results.filter(item => item.isBaseline && !item.qc && item.n >= 2).forEach(item => {
+    const key = item.group || '未知';
+    if (!baselineIssues.has(key)) baselineIssues.set(key, []);
+    baselineIssues.get(key).push(`${item.name} · ${item.gene}`);
+  });
+  baselineIssues.forEach((items, groupName) => {
+    messages.push(['danger', `基准组 ${escapeHtml(groupName)} 存在需复核记录，会影响以它为基准的样本的 ΔΔCt，请优先复核：${items.map(escapeHtml).join('、')}`]);
+  });
 
   const targetIssues = [...new Set(
     results.filter(item => !item.missingControl && item.n >= 2 && item.targetSpread > maxSpread)

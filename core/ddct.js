@@ -6,32 +6,27 @@ import { normalizeKey } from './normalize.js';
 
 /**
  * Pure-function qPCR analysis: ΔCt / ΔΔCt computation.
+ * Supports multiple baseline groups via compareToGroupId.
  *
  * DOES NOT read DOM, localStorage, or global variables.
- * All required data is passed as arguments.
  *
  * @param {Object} params
  * @param {Array}   params.rows           - Ct data rows, each with { name, groupId, group, geneId, gene, cts[] }
- * @param {Object}  params.experiment     - { groups, targetGenes, refGene }
+ * @param {Object}  params.experiment     - { groups (with compareToGroupId), targetGenes, refGene }
  * @param {string}  params.mode           - 'ddct' | 'dct'
  * @param {number}  params.maxSpread      - QC threshold for max Ct spread
  * @returns {{ results: Array, notes: { merged: string[], singleRep: string[] }, controlStatsByGene: Map }}
  */
 export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
   const refGeneId = experiment.refGene ? experiment.refGene.id : 'ref';
-  const controlGroup = (experiment.groups || []).find(g => g.isControl);
-  const controlGroupId = controlGroup ? controlGroup.id : null;
 
   // ---- Step 1: per-row statistics using parseCt-based validation ----
   const enriched = rows.map(row => ({ ...row, s: rowStats(row.cts) }));
 
   // ---- Step 2: merge duplicate sample+group+gene records ----
-  // (kept as-is per user constraint — string-based merge key)
   const mergedByKey = new Map();
   const mergedLabels = new Set();
   enriched.forEach(row => {
-    // Use stable IDs for merge keys, falling back to normalized display names
-    // for backward compatibility with data that lacks IDs.
     const groupKey = row.groupId ? normalizeKey(row.groupId) : normalizeKey(row.group);
     const geneKey = row.geneId ? normalizeKey(row.geneId) : normalizeKey(row.gene);
     const key = `${row.name}|||${groupKey}|||${geneKey}`;
@@ -86,7 +81,6 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
         groupId: target.groupId || null,
         gene: target.gene,
         geneId: target.geneId || null,
-        // Raw statistics
         targetCt: target.s.mean,
         referenceCt: reference.s.mean,
         targetN: target.s.n,
@@ -95,43 +89,77 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
         refTechSd: reference.s.sd,
         targetSpread: target.s.spread,
         referenceSpread: reference.s.spread,
-        // ΔCt
         dct,
-        // Technical SEM of ΔCt (propagated from target + ref independent wells)
         techSem: techSe,
         n: Math.min(target.s.n, reference.s.n)
       });
     });
   });
 
-  // ---- Step 5: control group ΔCt statistics, per target gene ----
-  const controlByGene = new Map();
-  output.forEach(item => {
-    // Match to control group by stable groupId (fallback: normalized name)
-    const isControl = item.groupId
-      ? item.groupId === controlGroupId
-      : normalizeKey(item.group) === normalizeKey(controlGroup ? controlGroup.name : '');
+  // ---- Resolve each item's comparison group from experiment ----
+  const groupById = new Map((experiment.groups || []).map(g => [g.id, g]));
+  const resolveGroup = item => {
+    if (item.groupId && groupById.has(item.groupId)) return groupById.get(item.groupId);
+    return (experiment.groups || []).find(
+      g => normalizeKey(g.name) === normalizeKey(item.group)
+    ) || null;
+  };
 
-    if (!isControl) return;
+  // Follow compareToGroupId chains to the ultimate baseline.
+  // Returns null if groupId is unknown or the chain leads to a dangling ref.
+  const resolveBaseline = (groupId, visited) => {
+    visited = visited || new Set();
+    if (!groupId || visited.has(groupId)) return null;
+    visited.add(groupId);
+    const g = groupById.get(groupId);
+    if (!g) return null;
+    if (!g.compareToGroupId || g.compareToGroupId === g.id) return g.id;
+    if (!groupById.has(g.compareToGroupId)) return null; // dangling ref
+    return resolveBaseline(g.compareToGroupId, visited);
+  };
 
-    // Key by stable geneId (fallback: normalized gene name)
+  const comparisons = output.map(item => {
+    const group = resolveGroup(item);
+    if (!group) {
+      // Unknown group (user-typed name) → its own baseline
+      const fallbackId = item.groupId || `name:${normalizeKey(item.group)}`;
+      return { compareToGroupId: fallbackId, compareToGroup: item.group, isBaseline: true };
+    }
+    const baselineId = resolveBaseline(group.id);
+    // Dangling chain or self-referencing cycle → treat as its own baseline
+    if (!baselineId) {
+      return { compareToGroupId: group.id, compareToGroup: group.name, isBaseline: true };
+    }
+    const baseline = groupById.get(baselineId);
+    const isBaseline = baselineId === group.id;
+    return {
+      compareToGroupId: baselineId,
+      compareToGroup: baseline ? baseline.name : group.name,
+      isBaseline
+    };
+  });
+
+  // ---- Step 5: per-baseline ΔCt statistics, per target gene ----
+  const controlByBaselineGene = new Map();
+  output.forEach((item, i) => {
+    if (!comparisons[i].isBaseline) return;
+    const baselineGroupId = comparisons[i].compareToGroupId;
     const geneKey = item.geneId || normalizeKey(item.gene);
-    if (!controlByGene.has(geneKey)) controlByGene.set(geneKey, []);
-    controlByGene.get(geneKey).push(item);
+    const key = `${baselineGroupId}|||${geneKey}`;
+    if (!controlByBaselineGene.has(key)) controlByBaselineGene.set(key, []);
+    controlByBaselineGene.get(key).push(item);
   });
 
   const controlStatsByGene = new Map();
-  controlByGene.forEach((items, geneKey) => {
+  controlByBaselineGene.forEach((items, key) => {
     const dcts = items.map(item => item.dct);
     const avg = mean(dcts);
-    // bioSem is between-sample SEM: requires ≥2 biological samples.
-    // When n=1, bioSem is null — do NOT use techSem as a substitute.
     let bioSem = null;
     if (items.length > 1) {
       const variance = dcts.reduce((sum, v) => sum + (v - avg) ** 2, 0) / (dcts.length - 1);
       bioSem = Math.sqrt(variance / dcts.length);
     }
-    controlStatsByGene.set(geneKey, {
+    controlStatsByGene.set(key, {
       gene: items[0].gene,
       geneId: items[0].geneId,
       mean: avg,
@@ -141,12 +169,12 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
   });
 
   // ---- Step 6: ΔΔCt and fold change ----
-  output = output.map(item => {
+  output = output.map((item, i) => {
     const qc = Math.max(item.targetSpread, item.referenceSpread) <= maxSpread && item.n >= 2;
     const geneKey = item.geneId || normalizeKey(item.gene);
+    const cmp = comparisons[i];
 
     if (mode !== 'ddct') {
-      // ΔCt mode: 2^-ΔCt
       const fold = Math.pow(2, -item.dct);
       return {
         ...item,
@@ -155,17 +183,20 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
         controlMean: null,
         controlBioSem: null,
         controlN: null,
-        // Error bars show technical SEM of ΔCt
         error: item.techSem,
         errorType: item.techSem !== null ? 'techSem' : null,
         fold,
         foldLow: Number.isFinite(item.techSem) ? Math.pow(2, -(item.dct + item.techSem)) : fold,
-        foldHigh: Number.isFinite(item.techSem) ? Math.pow(2, -(item.dct - item.techSem)) : fold
+        foldHigh: Number.isFinite(item.techSem) ? Math.pow(2, -(item.dct - item.techSem)) : fold,
+        compareToGroupId: cmp.compareToGroupId,
+        compareToGroup: cmp.compareToGroup,
+        isBaseline: cmp.isBaseline
       };
     }
 
-    // ΔΔCt mode
-    const controlStats = controlStatsByGene.get(geneKey);
+    const statsKey = `${cmp.compareToGroupId}|||${geneKey}`;
+    const controlStats = controlStatsByGene.get(statsKey);
+
     if (!controlStats || !Number.isFinite(controlStats.mean)) {
       return {
         ...item,
@@ -179,22 +210,15 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
         errorType: null,
         fold: null,
         foldLow: null,
-        foldHigh: null
+        foldHigh: null,
+        compareToGroupId: cmp.compareToGroupId,
+        compareToGroup: cmp.compareToGroup,
+        isBaseline: cmp.isBaseline
       };
     }
 
     const ddct = item.dct - controlStats.mean;
-
-    // Determine if this sample is in the control group
-    const isControl = item.groupId
-      ? item.groupId === controlGroupId
-      : normalizeKey(item.group) === normalizeKey(controlGroup ? controlGroup.name : '');
-
-    // Error bars show only the sample's technical SEM of ΔCt.
-    // Control group samples are the baseline — no error bars.
-    // controlStats.bioSem is between-sample biological variation, reported
-    // separately; it must NOT be merged into the technical error bars.
-    const error = isControl ? null : item.techSem;
+    const error = cmp.isBaseline ? null : item.techSem;
     const fold = Math.pow(2, -ddct);
 
     return {
@@ -208,7 +232,10 @@ export function computeAnalysis({ rows, experiment, mode, maxSpread }) {
       errorType: error !== null ? 'techSem' : null,
       fold,
       foldLow: Number.isFinite(error) ? Math.pow(2, -(ddct + error)) : fold,
-      foldHigh: Number.isFinite(error) ? Math.pow(2, -(ddct - error)) : fold
+      foldHigh: Number.isFinite(error) ? Math.pow(2, -(ddct - error)) : fold,
+      compareToGroupId: cmp.compareToGroupId,
+      compareToGroup: cmp.compareToGroup,
+      isBaseline: cmp.isBaseline
     };
   });
 

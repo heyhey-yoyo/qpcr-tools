@@ -8,9 +8,10 @@ import { computeAnalysis } from './core/ddct.js';
 import {
   createExperiment, createGroup, addGroup as expAddGroup, addTargetGene as expAddTargetGene,
   renameGroup as expRenameGroup, renameTargetGene as expRenameTargetGene,
-  toggleControlGroup as expToggleControl, removeGroup as expRemoveGroup,
+  setCompareToGroup as expSetCompareTo, removeGroup as expRemoveGroup,
   removeTargetGene as expRemoveTargetGene, setRefGeneName,
-  getControlGroup, resolveGroupName, resolveGeneName, resolveGroupId, resolveGeneId,
+  getBaselineGroups, ensureCompareAssignments,
+  resolveGroupName, resolveGeneName, resolveGroupId, resolveGeneId,
   syncBlockDisplayNames, syncRowDisplayNames
 } from './state/experiment.js';
 import { migrateState, CURRENT_VERSION } from './state/migration.js';
@@ -24,8 +25,8 @@ import { parseCtColumn } from './io/import.js';
 import { resultsCsv, plateCsv, downloadFile, exportTemplateJson } from './io/export.js';
 
 // ---- Constants ----
-const KEY = 'qpcr-demo-v6';
-const LEGACY_KEYS = ['qpcr-demo-v5', 'qpcr-demo-v4', 'qpcr-demo-v3'];
+const KEY = 'qpcr-demo-v7';
+const LEGACY_KEYS = ['qpcr-demo-v6', 'qpcr-demo-v5', 'qpcr-demo-v4', 'qpcr-demo-v3'];
 const DEFAULT_REPS = 3;
 const MIN_REPS = 1;
 const MAX_REPS_GLOBAL = 6;
@@ -189,10 +190,10 @@ function buildTemplate() {
 function exampleTemplate() {
   const plate = currentPlate();
   experiment.groups = [
-    { id: 'ex1', name: 'NC', isControl: true },
-    { id: 'ex2', name: '24H', isControl: false },
-    { id: 'ex3', name: '48H', isControl: false },
-    { id: 'ex4', name: '96H', isControl: false }
+    { id: 'ex1', name: 'NC', compareToGroupId: null },
+    { id: 'ex2', name: '24H', compareToGroupId: 'ex1' },
+    { id: 'ex3', name: '48H', compareToGroupId: 'ex1' },
+    { id: 'ex4', name: '96H', compareToGroupId: 'ex1' }
   ];
   experiment.biologicalReplicates = 2;
   experiment.targetGenes = [
@@ -200,7 +201,7 @@ function exampleTemplate() {
   ];
   experiment.refGene = { id: 'ref', name: 'ACTB' };
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   targetCount();
 
   const template = [];
@@ -318,7 +319,7 @@ function load() {
     if (!state) {
       refreshCoordinateSelects('A', '1');
       renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-        onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+        onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
       return;
     }
 
@@ -356,7 +357,7 @@ function load() {
     els.spread.value = state.spread || '0.5';
 
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-      onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+      onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
 
     const plateSize = PLATES[state.plate?.size] ? state.plate.size : '96';
     els.plateSize.value = plateSize;
@@ -686,13 +687,12 @@ function renderPlate() {
 function fillExampleCts() {
   const refGeneName = experiment.refGene ? experiment.refGene.name : 'GAPDH';
   const refKey = normalizeKey(refGeneName);
-  const controlGroup = getControlGroup(experiment);
-  const controlKey = controlGroup ? normalizeKey(controlGroup.name) : '';
+  const baselineKeys = getBaselineGroups(experiment).map(g => normalizeKey(g.name));
   const geneBase = new Map();
   rows.forEach(row => {
     const key = normalizeKey(row.gene || 'Gene');
     if (!geneBase.has(key)) geneBase.set(key, key === refKey ? 19.5 : 22 + geneBase.size * 1.2);
-    const effect = key !== refKey && normalizeKey(row.group || '') !== controlKey ? -2 : 0;
+    const effect = key !== refKey && !baselineKeys.includes(normalizeKey(row.group || '')) ? -2 : 0;
     const base = geneBase.get(key) + effect;
     row.cts = row.cts.map(() => (base + (Math.random() - 0.5) * 0.24).toFixed(2));
   });
@@ -902,9 +902,6 @@ async function pasteCtColumnFromClipboard() {
 // ---- Calculation ----
 
 function calculate() {
-  const refGeneId = experiment.refGene ? experiment.refGene.id : 'ref';
-  const controlGroup = getControlGroup(experiment);
-  const controlGroupId = controlGroup ? controlGroup.id : null;
   const maxSpread = Number(els.spread.value) || 0.5;
   const mode = els.mode.value;
 
@@ -1019,7 +1016,7 @@ function importTemplate(file) {
       }
 
       renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-        onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+        onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
       targetCount();
       renderAllBlocks();
       rows = [];
@@ -1042,18 +1039,19 @@ function handleRenameGroup(groupId, newName) {
   blocks = syncBlockDisplayNames(blocks, experiment);
   rows = syncRowDisplayNames(rows, experiment);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   renderAllBlocks();
   renderAllRows();
   renderPlate();
   calculate();
 }
 
-function handleToggleControl(groupId) {
-  experiment = expToggleControl(experiment, groupId);
+function handleSetCompareToGroup(groupId, targetGroupId) {
+  experiment = expSetCompareTo(experiment, groupId, targetGroupId);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   calculate();
+  save();
 }
 
 function handleRemoveGroup(groupId) {
@@ -1063,9 +1061,14 @@ function handleRemoveGroup(groupId) {
     if (!target) return;
     const affectedBlocks = blocks.filter(b => b.groupId === groupId).length;
     const affectedRows = rows.filter(r => r.groupId === groupId).length;
+    const dependentGroups = experiment.groups.filter(g => g.compareToGroupId === groupId);
     const parts = [];
     if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
     if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
+    if (dependentGroups.length) {
+      const newBaseline = getBaselineGroups(experiment).find(g => g.id !== groupId);
+      parts.push(`${dependentGroups.length} 个组别以它为比较基准（将改以"${newBaseline ? newBaseline.name : '—'}"为基准）`);
+    }
     const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n删除后孔板布局会变化，但其他分组已录入的 Ct 值会保留。` : '';
     if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
     // Cascade delete blocks by stable ID
@@ -1073,7 +1076,7 @@ function handleRemoveGroup(groupId) {
     if (blocks[0]) blocks[0].breakBefore = false;
     experiment = expRemoveGroup(experiment, groupId);
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-      onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+      onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
     renderAllBlocks();
     // Rebuild the plate mapping while preserving Ct values for unchanged
     // (sample, groupId, geneId) rows. Rows belonging to the deleted group
@@ -1146,7 +1149,7 @@ function handleAddGroup() {
   }
   experiment = expAddGroup(experiment, name);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   save();
 }
 
@@ -1300,7 +1303,7 @@ $('#resetBtn').addEventListener('click', () => {
   els.ctColumnArea.value = '';
   els.ctColumnPanel.classList.add('hidden');
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
-    onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
+    onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
   targetCount();
   commitLayout(snapshotLayout());
   renderAllBlocks();

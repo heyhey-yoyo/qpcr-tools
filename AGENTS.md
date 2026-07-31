@@ -45,7 +45,7 @@ qpcr-tools/
 
 - **技术栈**：原生 HTML + CSS + JavaScript ES Modules（`import`/`export`）。无框架、无打包器、无 npm 依赖。
 - **运行时**：浏览器 `<script type="module">` 加载，需要 HTTP 服务器（`python -m http.server`）。
-- **缓存策略**：`index.html` 中通过查询串 `?v=10.2` 引用 CSS 和 JS，修改后需提升版本号。
+- **缓存策略**：`index.html` 中通过查询串 `?v=11.0` 引用 CSS 和 JS，修改后需提升版本号。
 - **无 package.json** — 测试通过 Node.js `.mjs` 文件直接运行，无需项目配置。
 
 ## 本地运行
@@ -76,7 +76,7 @@ node test/migration.mjs # 数据迁移测试
 ```javascript
 // 实验配置
 experiment = {
-  groups: [{ id: 'g_xxx', name: 'NC', isControl: true }, ...],
+  groups: [{ id: 'g_xxx', name: 'NC', compareToGroupId: null }, ...],
   targetGenes: [{ id: 'tg_xxx', name: 'IL6' }, ...],
   refGene: { id: 'ref', name: 'GAPDH' },    // 内参基因，ID 固定为 'ref'
   biologicalReplicates: 1
@@ -125,7 +125,7 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 
 ### 实验配置管理
 
-- **分组芯片**（`renderGroups`）：每个分组渲染为 chip 组件，显示名称 + "改"按钮 + 对照组操作按钮 + 删除按钮（仅 >1 组时显示）
+- **分组芯片**（`renderGroups`）：每个分组渲染为 chip 组件，显示名称 + "改"按钮 + 比较基准下拉选择 + "基准"徽章（baseline 组）+ 删除按钮（仅 >1 组时显示）
 - **目标基因芯片**（`renderTargetGenes`）：每个基因渲染为 chip，显示名称 + "改"按钮 + 删除按钮（仅 >1 个时显示）。添加按钮在达到孔板上限时自动禁用
 - **内参基因芯片**（`renderRefGene`）：显示名称 + "改"按钮 + "内参"徽章
 - **生物学重复数**：独立 `<input>` 控件，范围 1–24

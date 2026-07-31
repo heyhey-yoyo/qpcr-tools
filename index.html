@@ -6,7 +6,7 @@
   <meta name="description" content="qPCR 96/384 孔板模板、罗氏单列 Ct 粘贴、技术重复质控、ΔCt、ΔΔCt 与相对表达分析工具。" />
   <meta name="theme-color" content="#0d9488" />
   <title>qPCR 分析工具</title>
-  <link rel="stylesheet" href="./styles.css?v=10.2" />
+  <link rel="stylesheet" href="./styles.css?v=11.0" />
 </head>
 <body>
 <header class="site-header">
@@ -168,7 +168,7 @@
     <div id="resultsChart" class="results-chart"></div>
     <div id="groupChart" class="results-chart"></div>
     <div class="table-wrap">
-      <table><thead><tr><th>样本</th><th>组别</th><th>目标基因</th><th>目标 Ct</th><th>内参 Ct</th><th>ΔCt</th><th>ΔΔCt</th><th>相对表达量</th><th>质控</th></tr></thead><tbody id="resultsBody"></tbody></table>
+      <table><thead><tr><th>样本</th><th>组别</th><th>目标基因</th><th>比较基准</th><th>目标 Ct</th><th>内参 Ct</th><th>ΔCt</th><th>ΔΔCt</th><th>相对表达量</th><th>质控</th></tr></thead><tbody id="resultsBody"></tbody></table>
     </div>
   </section>
 
@@ -178,7 +178,7 @@
       <li><strong>96 / 384 孔板：</strong>切换规格后，起始行和列会自动更新；模板区块和分析数据不会丢失。</li>
       <li><strong>连续追加模板：</strong>选择预设与追加份数后点击“追加模板”，已有布局不会被覆盖；样本编号会自动递增。</li>
       <li><strong>罗氏单列结果：</strong>支持 Ct、Cq、Cp 表头及 Undetermined 等缺失值；填入顺序与当前 Ct 表格一致。</li>
-      <li><strong>相对表达量：</strong>先计算 ΔCt = 目标基因 Ct − 内参基因 Ct，再以对照组平均 ΔCt 计算 ΔΔCt 和 2^-ΔΔCt。</li>
+      <li><strong>相对表达量：</strong>先计算 ΔCt = 目标基因 Ct − 内参基因 Ct，再以该组别指定的比较基准组平均 ΔCt 计算 ΔΔCt 和 2^-ΔΔCt。每个分组可通过芯片下拉框选择比较基准。</li>
       <li><strong>技术重复质控：</strong>同一行有效 Ct 的最大值与最小值之差超过阈值时会标记为需复核。</li>
       <li>本 Demo 不自动剔除离群孔；正式分析前应结合扩增曲线、熔解曲线和实验室 SOP 复核。</li>
       <li>数据仅保存在当前浏览器的 localStorage 中，不会上传到服务器。</li>
@@ -186,6 +186,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="container">qPCR 分析工具 · 数据不会离开当前浏览器</div></footer>
-<script type="module" src="./app.js?v=10.2"></script>
+<script type="module" src="./app.js?v=11.0"></script>
 </body>
 </html>

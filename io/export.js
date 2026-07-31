@@ -17,11 +17,11 @@ export function csvCell(value) {
  */
 export function resultsCsv(results, mode) {
   const header = [
-    '样本', '组别', '目标基因',
+    '样本', '组别', '目标基因', '比较基准',
     '目标Ct', '内参Ct', 'DeltaCt',
-    '对照组平均DeltaCt', '对照组N', 'DeltaDeltaCt',
+    '比较基准平均ΔCt', '比较基准N', 'DeltaDeltaCt',
     '相对表达量',
-    '误差类型', 'ΔCt SEM（技术重复，不含对照均值误差）',
+    '误差类型', 'ΔCt SEM（技术重复，不含比较基准平均误差）',
     'Fold下限', 'Fold上限', '质控'
   ].map(csvCell).join(',');
 
@@ -33,6 +33,7 @@ export function resultsCsv(results, mode) {
 
     return [
       item.name, item.group, item.gene,
+      mode === 'ddct' ? (item.compareToGroup || '—') : '—',
       fmt(item.targetCt), fmt(item.referenceCt), fmt(item.dct),
       fmt(item.controlMean), item.controlN ?? '',
       mode === 'ddct' ? fmt(item.ddct) : '—',

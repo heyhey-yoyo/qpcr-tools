@@ -1,42 +1,31 @@
 'use strict';
 
 import { normalizeKey } from '../core/normalize.js';
-import { createExperiment, createGroup, createTargetGene } from './experiment.js';
+import { createExperiment, createGroup, createTargetGene, ensureCompareAssignments } from './experiment.js';
 
-export const CURRENT_VERSION = 6;
+export const CURRENT_VERSION = 7;
 
 /**
  * Migrate a raw state object from localStorage to the current version.
- *
- * v5 → v6 changes:
- *   1. targetGenes: string[] → [{id, name}]
- *   2. Add refGene: {id: 'ref', name: <state.ref>}
- *   3. Add groupId / geneId to every block
- *   4. Add groupId / geneId to every row
- *   5. Remove top-level `ref` and `control` (now derived from experiment)
- *
- * Returns a fully-migrated state object ready for load().
  */
 export function migrateState(raw) {
   if (!raw || typeof raw !== 'object') return null;
 
-  // Already v6+
   if (raw._version === CURRENT_VERSION) {
-    // Ensure experiment is consistent
-    return normalizeV6(raw);
+    return normalizeV7(raw);
   }
 
-  // Detect version
-  const isV5 = raw.experiment && Array.isArray(raw.experiment.targetGenes) &&
-    typeof raw.experiment.targetGenes[0] === 'string';
+  // v6 → v7: convert isControl boolean to compareToGroupId
+  if (raw._version === 6) {
+    let state = migrateV6ToV7(raw);
+    state._version = CURRENT_VERSION;
+    return normalizeV7(state);
+  }
 
-  // If v5 or earlier with string[] targetGenes
+  // v5 and earlier
   let state = { ...raw };
 
-  // ---- Convert experiment ----
   let experiment = state.experiment || {};
-
-  // Ensure groups have IDs
   if (!experiment.groups || !Array.isArray(experiment.groups) || experiment.groups.length === 0) {
     experiment.groups = [
       { id: 'g1', name: 'NC', isControl: true },
@@ -48,7 +37,6 @@ export function migrateState(raw) {
     return { ...g, id: 'g' + (i + 1) };
   });
 
-  // Convert targetGenes from string[] to [{id, name}]
   if (Array.isArray(experiment.targetGenes)) {
     experiment.targetGenes = experiment.targetGenes.map((g, i) => {
       if (typeof g === 'string') return createTargetGene(g);
@@ -59,55 +47,90 @@ export function migrateState(raw) {
     experiment.targetGenes = [createTargetGene('IL6')];
   }
 
-  // Add refGene
   const refName = state.ref || 'GAPDH';
   experiment.refGene = { id: 'ref', name: refName };
 
+  // Convert isControl → compareToGroupId for v5 and earlier
+  experiment = convertLegacyControlFlags(experiment);
+
   state.experiment = experiment;
 
-  // ---- Add IDs to blocks ----
   if (Array.isArray(state.blocks)) {
     state.blocks = state.blocks.map(b => addBlockIds(b, experiment));
   }
-
-  // ---- Add IDs to rows ----
   if (Array.isArray(state.rows)) {
     state.rows = state.rows.map(r => addRowIds(r, experiment));
   }
 
-  // ---- Clean up old top-level fields ----
   delete state.ref;
   delete state.control;
 
   state._version = CURRENT_VERSION;
-  return normalizeV6(state);
+  return normalizeV7(state);
 }
 
-/**
- * Normalize an already-v6 state to ensure consistency.
- */
-function normalizeV6(state) {
+// ---- v6 → v7 conversion ----
+
+function migrateV6ToV7(state) {
+  if (!state.experiment) return state;
+  state.experiment = convertLegacyControlFlags(state.experiment);
+  if (Array.isArray(state.blocks)) {
+    state.blocks = state.blocks.map(b => { const { isControl, ...rest } = b; return rest; });
+  }
+  return state;
+}
+
+function convertLegacyControlFlags(experiment) {
+  const groups = (experiment.groups || []).map(g => {
+    // Switch from isControl boolean
+    if (!g.hasOwnProperty('compareToGroupId')) {
+      return { id: g.id, name: g.name, compareToGroupId: g.isControl ? null : undefined };
+    }
+    // Already has compareToGroupId — keep but strip isControl
+    const { isControl, ...rest } = g;
+    return rest;
+  });
+
+  if (groups.length === 0) return experiment;
+
+  // Find control group (was isControl:true) or first group
+  const controlGroup = groups.find(g => g.compareToGroupId === null);
+  const baselineId = controlGroup ? controlGroup.id : groups[0].id;
+
+  // Assign all non-baseline groups to the baseline
+  const final = groups.map(g => {
+    if (g.compareToGroupId === null || g.compareToGroupId === g.id) return g;
+    if (g.compareToGroupId === undefined) return { ...g, compareToGroupId: baselineId };
+    return g;
+  });
+
+  return { ...experiment, groups: final };
+}
+
+// ---- v7 normalization ----
+
+function normalizeV7(state) {
   if (!state.experiment.refGene) {
     state.experiment.refGene = { id: 'ref', name: 'GAPDH' };
   }
   if (!Array.isArray(state.experiment.targetGenes) || !state.experiment.targetGenes.length) {
     state.experiment.targetGenes = [createTargetGene('IL6')];
   }
-  // Ensure all targetGenes have IDs
   state.experiment.targetGenes = state.experiment.targetGenes.map(g => {
     if (!g.id) return createTargetGene(g.name || g);
     return g;
   });
-  // Ensure groups have IDs
   state.experiment.groups = (state.experiment.groups || []).map((g, i) => {
-    if (!g.id) return createGroup(g.name, g.isControl);
-    return g;
+    const { isControl, ...rest } = g;
+    if (!rest.id) return createGroup(rest.name || `Group${i + 1}`, rest.compareToGroupId);
+    return rest;
   });
-  // Ensure blocks have IDs
+  // Ensure valid compareToGroupId assignments
+  state.experiment = ensureCompareAssignments(state.experiment);
+
   if (Array.isArray(state.blocks)) {
     state.blocks = state.blocks.map(b => addBlockIds(b, state.experiment));
   }
-  // Ensure rows have IDs
   if (Array.isArray(state.rows)) {
     state.rows = state.rows.map(r => addRowIds(r, state.experiment));
   }
@@ -115,13 +138,10 @@ function normalizeV6(state) {
   return state;
 }
 
-/**
- * Add groupId and geneId to a block if missing.
- */
+// ---- ID helpers (unchanged) ----
+
 function addBlockIds(block, experiment) {
   if (block.groupId && block.geneId) return block;
-
-  // Resolve group
   const groupName = block.group || '';
   const groupKey = normalizeKey(groupName);
   let groupId = block.groupId || null;
@@ -129,8 +149,6 @@ function addBlockIds(block, experiment) {
     const match = (experiment.groups || []).find(g => normalizeKey(g.name) === groupKey);
     groupId = match ? match.id : null;
   }
-
-  // Resolve gene
   const geneName = block.gene || '';
   const geneKey = normalizeKey(geneName);
   let geneId = block.geneId || null;
@@ -142,16 +160,11 @@ function addBlockIds(block, experiment) {
       geneId = match ? match.id : null;
     }
   }
-
   return { ...block, groupId: groupId || block.groupId, geneId: geneId || block.geneId };
 }
 
-/**
- * Add groupId and geneId to a row if missing.
- */
 function addRowIds(row, experiment) {
   if (row.groupId && row.geneId) return row;
-
   const groupName = row.group || '';
   const groupKey = normalizeKey(groupName);
   let groupId = row.groupId || null;
@@ -159,7 +172,6 @@ function addRowIds(row, experiment) {
     const match = (experiment.groups || []).find(g => normalizeKey(g.name) === groupKey);
     groupId = match ? match.id : null;
   }
-
   const geneName = row.gene || '';
   const geneKey = normalizeKey(geneName);
   let geneId = row.geneId || null;
@@ -171,6 +183,5 @@ function addRowIds(row, experiment) {
       geneId = match ? match.id : null;
     }
   }
-
   return { ...row, groupId: groupId || row.groupId, geneId: geneId || row.geneId };
 }
