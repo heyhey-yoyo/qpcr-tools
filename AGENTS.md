@@ -45,7 +45,7 @@ qpcr-tools/
 
 - **技术栈**：原生 HTML + CSS + JavaScript ES Modules（`import`/`export`）。无框架、无打包器、无 npm 依赖。
 - **运行时**：浏览器 `<script type="module">` 加载，需要 HTTP 服务器（`python -m http.server`）。
-- **缓存策略**：`index.html` 中通过查询串 `?v=9.0` 引用 CSS 和 JS，修改后需提升版本号。
+- **缓存策略**：`index.html` 中通过查询串 `?v=10.2` 引用 CSS 和 JS，修改后需提升版本号。
 - **无 package.json** — 测试通过 Node.js `.mjs` 文件直接运行，无需项目配置。
 
 ## 本地运行
