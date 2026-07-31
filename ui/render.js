@@ -405,7 +405,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   // ---- SVG overlay for cluster boundary dashes ----
   const labelW = 28; // row label column width
   const headerH = 24; // column header height
-  const gap = 5; // grid gap
+  const gap = plate.size === '384' ? 8 : 10; // grid gap
   const ww = plate.size === '384' ? 50 : 68; // well width
   const wh = plate.size === '384' ? 44 : 56; // well height
 
@@ -497,15 +497,11 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   // Build SVG
   const svgW = labelW + plate.cols * (ww + gap);
   const svgH = headerH + plate.rows.length * (wh + gap);
-  const seamW = plate.size === '384' ? 12 : 14;
-  const seamStroke = 'var(--surface)';
   let svgLines = '';
   hLines.forEach(l => {
-    svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="${seamStroke}" stroke-width="${seamW}" stroke-linecap="round" />`;
     svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
   });
   vLines.forEach(l => {
-    svgLines += `<line x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}" stroke="${seamStroke}" stroke-width="${seamW}" stroke-linecap="round" />`;
     svgLines += `<line x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
   });
 
