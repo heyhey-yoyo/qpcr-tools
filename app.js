@@ -1051,6 +1051,7 @@ function importTemplate(file) {
       targetCount();
       renderAllBlocks();
       rows = [];
+      renderPlate();
       syncRowsFromBlocks();
       calculate();
       commitLayout(snapshotLayout());

@@ -154,8 +154,8 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 
 ### 模板导入/导出
 
-- **导出模板**：`exportTemplateJson()` 生成 JSON（含 version: 4, replicateCount, experiment, blocks）
-- **导入模板**（`importTemplate`）：支持 version 1–4，自动恢复 experiment 配置和复孔数，旧版混合复孔数据降级处理
+- **导出模板**：`exportTemplateJson()` 生成 JSON（含 version: 5, replicateCount, experiment, plate, blocks）
+- **导入模板**（`importTemplate`）：支持 version 1–5，自动恢复 experiment 配置和复孔数，导入成功后同步刷新孔板预览与 Ct 数据表，旧版混合复孔数据降级处理
 
 ### Ct 数据导入
 
