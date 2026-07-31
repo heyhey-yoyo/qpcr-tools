@@ -333,8 +333,32 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     prev = cur;
   });
 
-  // Simple: no separator rows, no cell classes — grid stays clean
-  gridEl.style.setProperty('--plate-rows', String(plate.rows.length));
+  // Row separation: find rows where cluster differs
+  const rowBreaks = new Set();
+  let lastClusters = null;
+  for (let r = 0; r < plate.rows.length; r++) {
+    const cells = rowCells.get(r);
+    if (!cells) { lastClusters = null; continue; }
+    const clusters = new Set(cells.map(c => c.cluster));
+    if (lastClusters && ([...clusters].some(c => !lastClusters.has(c)) || [...lastClusters].some(c => !clusters.has(c)))) {
+      rowBreaks.add(r);
+    }
+    lastClusters = clusters;
+  }
+
+  // Column separation: same-row cluster boundaries
+  const colSplits = new Set();
+  rowCells.forEach((cells, r) => {
+    for (let i = 0; i < cells.length - 1; i++) {
+      if (cells[i].cluster !== cells[i + 1].cluster) {
+        colSplits.add(`${r},${cells[i + 1].col}`);
+      }
+    }
+  });
+
+  const sepRows = [...rowBreaks].sort((a, b) => a - b);
+  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
+  gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length));
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -347,25 +371,33 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     </div>`;
   };
 
-  const gr = r => r + 2;
   let html = '<div class="plate-corner" style="grid-row:1;grid-column:1"></div>';
   html += Array.from({ length: plate.cols }, (_, i) => i + 1)
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    html += `<div class="plate-row-label" style="grid-row:${gr(rowIndex)};grid-column:1">${row}</div>`;
+    const gr = rowShift(rowIndex);
+
+    if (rowBreaks.has(rowIndex)) {
+      html += `<div class="plate-separator" style="grid-row:${gr - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
+    }
+
+    html += `<div class="plate-row-label" style="grid-row:${gr};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
       const key = `${rowIndex},${colIndex}`;
       const segment = segmentStart.get(key);
       if (segment) {
         const placement = segment.axis === 'v'
-          ? `grid-row:${gr(rowIndex)} / span ${segment.span};grid-column:${colIndex + 2}`
-          : `grid-row:${gr(rowIndex)};grid-column:${colIndex + 2} / span ${segment.span}`;
-        const cls = segment.axis === 'v' ? 'vertical' : '';
+          ? `grid-row:${gr} / span ${segment.span};grid-column:${colIndex + 2}`
+          : `grid-row:${gr};grid-column:${colIndex + 2} / span ${segment.span}`;
+        const cls = [
+          segment.axis === 'v' ? 'vertical' : '',
+          colSplits.has(key) ? 'col-split' : ''
+        ].filter(Boolean).join(' ');
         html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
-        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gr(rowIndex)};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
+        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gr};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
       }
     }
   });
@@ -382,51 +414,44 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const vLines = []; // {x, y1, y2}
 
   transitions.forEach(t => {
-    // Vertical line at the transition column, from this row down to where the old cluster ends
-    // or where the new cluster started being contiguous above
     const x = labelW + t.col * (ww + gap) - gap / 2;
-    const yTop = headerH + t.row * (wh + gap) - gap / 2;
 
-    // Find how far down the old cluster extends from above this transition row
+    // Vertical line: from transition row down through all rows
+    // where new cluster exists (even if old cluster also exists)
+    let yTop = headerH + t.row * (wh + gap) - gap / 2;
     let yBot = yTop;
+    let lastNewRow = t.row;
     for (let rr = t.row; rr < plate.rows.length; rr++) {
       const cells = rowCells.get(rr) || [];
-      const hasOld = cells.some(c => c.cluster === t.from);
-      const hasNew = cells.some(c => c.cluster === t.to);
-      if (hasNew && !hasOld) {
-        yBot = headerH + (rr + 1) * (wh + gap) - gap / 2;
+      if (cells.some(c => c.cluster === t.to)) {
+        lastNewRow = rr;
       } else {
         break;
       }
     }
-
-    if (yBot > yTop + wh / 2) {
+    yBot = headerH + (lastNewRow + 1) * (wh + gap) - gap / 2;
+    if (yBot > yTop) {
       vLines.push({ x, y1: yTop, y2: yBot });
     }
 
-    // Horizontal line: above this transition row, across cols where old cluster was
-    // and below those cols where new cluster now is
-    const oldCells = (rowCells.get(t.row - 1) || []).filter(c => c.cluster === t.from && c.end >= t.col);
-    const newCells = (rowCells.get(t.row) || []).filter(c => c.cluster === t.to && c.col >= t.col);
-
-    // Above: last row of old cluster gets a bottom separator at the transition columns
-    if (t.row > 0 && oldCells.length) {
-      const x1 = labelW + t.col * (ww + gap) - gap / 2;
-      const x2 = labelW + plate.cols * (ww + gap) - gap / 2;
+    // Top horizontal: at transition row, cols from transition to right edge
+    // separating shared row from row above
+    if (t.row > 0) {
       const y = headerH + t.row * (wh + gap) - gap / 2;
+      const x1 = x;
+      const x2 = labelW + plate.cols * (ww + gap) - gap / 2;
       hLines.push({ y, x1, x2 });
     }
 
-    // Below: new cluster cells below old cluster area
-    // Find rows below where old cluster doesn't exist but new does
-    for (let rr = t.row; rr < plate.rows.length; rr++) {
+    // Bottom horizontal: at row where old cluster disappears, cols from left to transition
+    for (let rr = t.row + 1; rr < plate.rows.length; rr++) {
       const cells = rowCells.get(rr) || [];
-      const hasOld = cells.some(c => c.cluster === t.from && c.col < t.col);
+      const hasOld = cells.some(c => c.cluster === t.from);
       const hasNew = cells.some(c => c.cluster === t.to);
       if (!hasOld && hasNew) {
         const y = headerH + rr * (wh + gap) - gap / 2;
         const x1 = labelW;
-        const x2 = labelW + t.col * (ww + gap) - gap / 2;
+        const x2 = x;
         hLines.push({ y, x1, x2 });
         break;
       }
