@@ -130,22 +130,36 @@ export function setCompareToGroup(experiment, groupId, targetGroupId) {
 }
 
 export function removeGroup(experiment, groupId) {
-  let groups = experiment.groups.filter(g => g.id !== groupId);
+  // Collect all groups to delete: the target + groups comparing to it
+  const toDelete = new Set([groupId]);
+  let added = true;
+  while (added) {
+    added = false;
+    experiment.groups.forEach(g => {
+      if (!toDelete.has(g.id) && g.compareToGroupId && toDelete.has(g.compareToGroupId)) {
+        toDelete.add(g.id);
+        added = true;
+      }
+    });
+  }
+  let groups = experiment.groups.filter(g => !toDelete.has(g.id));
   if (!groups.length) return { ...experiment, groups: [] };
   // Ensure at least one baseline exists
   if (!groups.some(g => !g.compareToGroupId || g.compareToGroupId === g.id)) {
     groups[0] = { ...groups[0], compareToGroupId: null };
   }
-  const firstBaseline = groups.find(g => !g.compareToGroupId || g.compareToGroupId === g.id);
+  // Clean up dangling refs to deleted groups
   groups = groups.map(g => {
     let c = g.compareToGroupId;
-    if (c === groupId || (c && !groups.some(other => other.id === c))) {
-      c = firstBaseline ? firstBaseline.id : null;
-    }
+    if (c && toDelete.has(c)) c = null;
     if (c === g.id) c = null;
     return { ...g, compareToGroupId: c };
   });
-  return { ...experiment, groups };
+  // Ensure baseline exists after cleanup
+  if (!groups.some(g => !g.compareToGroupId)) {
+    if (groups.length) groups[0] = { ...groups[0], compareToGroupId: null };
+  }
+  return { ...experiment, groups, _removedIds: [...toDelete] };
 }
 
 export function addTargetGene(experiment, name) {

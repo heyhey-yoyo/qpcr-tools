@@ -1103,28 +1103,36 @@ function handleRemoveGroup(groupId) {
     if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
     const target = experiment.groups.find(g => g.id === groupId);
     if (!target) return;
-    const affectedBlocks = blocks.filter(b => b.groupId === groupId).length;
-    const affectedRows = rows.filter(r => r.groupId === groupId).length;
-    const dependentGroups = experiment.groups.filter(g => g.compareToGroupId === groupId);
+    // Collect all IDs that will be deleted (target + cascade dependents)
+    const removedIds = new Set([groupId]);
+    let added = true;
+    while (added) {
+      added = false;
+      experiment.groups.forEach(g => {
+        if (!removedIds.has(g.id) && g.compareToGroupId && removedIds.has(g.compareToGroupId)) {
+          removedIds.add(g.id);
+          added = true;
+        }
+      });
+    }
+    const removedNames = experiment.groups.filter(g => removedIds.has(g.id)).map(g => g.name);
+    const affectedBlocks = blocks.filter(b => removedIds.has(b.groupId)).length;
+    const affectedRows = rows.filter(r => removedIds.has(r.groupId)).length;
     const parts = [];
     if (affectedBlocks) parts.push(`${affectedBlocks} 个区块`);
     if (affectedRows) parts.push(`${affectedRows} 行 Ct 数据`);
-    if (dependentGroups.length) {
-      const newBaseline = getBaselineGroups(experiment).find(g => g.id !== groupId);
-      parts.push(`${dependentGroups.length} 个组别以它为比较基准（将改以"${newBaseline ? newBaseline.name : '—'}"为基准）`);
-    }
-    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。\n\n删除后孔板布局会变化，但其他分组已录入的 Ct 值会保留。` : '';
-    if (!window.confirm(`确定删除分组"${target.name}"？${note}`)) return;
-    // Cascade delete blocks by stable ID
-    blocks = blocks.filter(b => b.groupId !== groupId);
+    if (removedIds.size > 1) parts.push(`以它为基准的 ${removedIds.size - 1} 个分组也将一并删除`);
+    const note = parts.length ? `\n\n关联数据：${parts.join('、')}，将一并删除。` : '';
+    if (!window.confirm(`确定删除 ${removedNames.join('、')}？${note}`)) return;
+    // Cascade delete all affected blocks
+    blocks = blocks.filter(b => !removedIds.has(b.groupId));
     if (blocks[0]) blocks[0].breakBefore = false;
+    // Also filter rows directly (defensive)
+    rows = rows.filter(r => !removedIds.has(r.groupId));
     experiment = expRemoveGroup(experiment, groupId);
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
       onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
     renderAllBlocks();
-    // Rebuild the plate mapping while preserving Ct values for unchanged
-    // (sample, groupId, geneId) rows. Rows belonging to the deleted group
-    // are naturally omitted because their blocks no longer exist.
     syncRowsFromBlocks();
     renderPlate();
     calculate();
