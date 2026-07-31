@@ -313,79 +313,41 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Detect full-row cluster starts and same-row boundaries
-  const newRowStarts = new Set();
-  let prevCluster = null;
-  let prevRow = -1;
-  segments.forEach(s => {
-    const first = s.items[0];
-    if (!first) return;
-    const curCluster = first.clusterId;
-    const curRow = s.row;
-    if (prevCluster !== null && curCluster !== prevCluster && s.col === 0) {
-      newRowStarts.add(curRow);
-    }
-    prevCluster = curCluster;
-    prevRow = curRow;
-  });
-
-  // For each row, find all cells at the rightmost edge of each cluster
-  // (cells that have a different cluster to their right, or are the last cell of a cluster on that row)
-  const zBelow = new Set(); // bottom border
-  const zTop = new Set();   // top border
-  const zLeft = new Set();  // left border
-
-  // Build a map: row → [(col, colEnd, clusterId)]
+  // Build a map: row → [{col, end, cluster}] sorted by col
   const rowCells = new Map();
   segments.forEach(s => {
     const r = s.row;
     if (!rowCells.has(r)) rowCells.set(r, []);
     rowCells.get(r).push({ col: s.col, end: s.col + s.span - 1, cluster: s.items[0].clusterId });
   });
+  rowCells.forEach(cells => cells.sort((a, b) => a.col - b.col));
 
-  // For each row, find cluster boundaries
+  // ---- 1. Row separation: find rows where cluster differs from previous row ----
+  const rowBreaks = new Set(); // rows that need a separator above them
+  let lastRowClusters = null;
+  for (let r = 0; r < plate.rows.length; r++) {
+    const cells = rowCells.get(r);
+    if (!cells) { lastRowClusters = null; continue; }
+    const clusters = new Set(cells.map(c => c.cluster));
+    if (lastRowClusters !== null) {
+      const changed = clusters.size !== lastRowClusters.size || [...clusters].some(c => !lastRowClusters.has(c));
+      if (changed) rowBreaks.add(r);
+    }
+    lastRowClusters = clusters;
+  }
+
+  // ---- 2. Column separation: find same-row cluster boundaries ----
+  const colSplits = new Set(); // (row, col) where a vertical split is needed
   rowCells.forEach((cells, r) => {
-    cells.sort((a, b) => a.col - b.col);
     for (let i = 0; i < cells.length - 1; i++) {
       if (cells[i].cluster !== cells[i + 1].cluster) {
-        const splitCol = cells[i + 1].col;
-        // z-left on this row AND all rows below where the new cluster continues
-        zLeft.add(`${r},${splitCol}`);
-        for (let rr = r + 1; rr < plate.rows.length; rr++) {
-          const rc = rowCells.get(rr) || [];
-          if (rc.some(c => c.col === splitCol && c.cluster === cells[i + 1].cluster)) {
-            zLeft.add(`${rr},${splitCol}`);
-          }
-          // Also add if first cell of this row belongs to new cluster
-          if (rc.length > 0 && rc[0].cluster === cells[i + 1].cluster) {
-            zLeft.add(`${rr},${rc[0].col}`);
-          }
-        }
-        // Cells of old cluster on preceding rows get bottom border
-        for (let rr = r; rr >= 0; rr--) {
-          const rc = rowCells.get(rr) || [];
-          rc.forEach(c => {
-            if (c.cluster === cells[i].cluster && c.end >= splitCol) {
-              zBelow.add(`${rr},${c.col}`);
-            }
-          });
-        }
-        // Cells of new cluster on this and subsequent rows get top border
-        zTop.add(`${r},${splitCol}`);
-        for (let rr = r; rr < plate.rows.length; rr++) {
-          const rc = rowCells.get(rr) || [];
-          rc.forEach(c => {
-            if (c.cluster === cells[i + 1].cluster && c.col >= splitCol) {
-              zTop.add(`${rr},${c.col}`);
-            }
-          });
-        }
+        colSplits.add(`${r},${cells[i + 1].col}`);
       }
     }
   });
 
-  // Full-row separators
-  const sepRows = [...newRowStarts].sort((a, b) => a - b);
+  // ---- Render ----
+  const sepRows = [...rowBreaks].sort((a, b) => a - b);
   const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
   gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length));
 
@@ -407,8 +369,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   plate.rows.forEach((row, rowIndex) => {
     const gr = rowShift(rowIndex);
 
-    // Full-row dashed separator before a new-row cluster start
-    if (newRowStarts.has(rowIndex)) {
+    // Full-row dashed separator between rows with different clusters
+    if (rowBreaks.has(rowIndex)) {
       html += `<div class="plate-separator" style="grid-row:${gr - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
     }
 
@@ -420,11 +382,10 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         const placement = segment.axis === 'v'
           ? `grid-row:${gr} / span ${segment.span};grid-column:${colIndex + 2}`
           : `grid-row:${gr};grid-column:${colIndex + 2} / span ${segment.span}`;
+        const isSplit = colSplits.has(key);
         const cls = [
           segment.axis === 'v' ? 'vertical' : '',
-          zBelow.has(key) ? 'z-below' : '',
-          zTop.has(key) ? 'z-top' : '',
-          zLeft.has(key) ? 'z-left' : ''
+          isSplit ? 'col-split' : ''
         ].filter(Boolean).join(' ');
         html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
