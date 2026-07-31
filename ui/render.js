@@ -7,20 +7,10 @@
  */
 
 import { parseCt } from '../core/ct.js';
+import { escapeHtml } from '../core/escape.js';
 import { fmt } from './charts.js';
 import { normalizeKey } from '../core/normalize.js';
 import { resolveGeneName, resolveGroupName, resolveGroupId, resolveGeneId, getBaselineGroups } from '../state/experiment.js';
-
-// ---- Utilities ----
-
-export function escapeHtml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
-}
 
 // ---- Group chips ----
 
@@ -319,51 +309,6 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     `${item.row},${item.col}`,
     item.clusterId || item.groupId || item.group || ''
   ]));
-  /*
-  segments.forEach(s => {
-    const r = s.row;
-    if (!rowCells.has(r)) rowCells.set(r, []);
-    rowCells.get(r).push({ col: s.col, end: s.col + s.span - 1, cluster: s.items[0].clusterId });
-  });
-  rowCells.forEach(cells => cells.sort((a, b) => a.col - b.col));
-
-  // Collect all cluster transition points: (row, col, prevCluster, newCluster)
-  const transitions = [];
-  let prev = null;
-  segments.forEach(s => {
-    const cur = { row: s.row, col: s.col, cluster: s.items[0].clusterId };
-    if (prev && cur.cluster !== prev.cluster) {
-      transitions.push({ row: cur.row, col: cur.col, from: prev.cluster, to: cur.cluster });
-    }
-    prev = cur;
-  });
-
-  // Row separation: find rows where cluster differs
-  const rowBreaks = new Set();
-  let lastClusters = null;
-  for (let r = 0; r < plate.rows.length; r++) {
-    const cells = rowCells.get(r);
-    if (!cells) { lastClusters = null; continue; }
-    const clusters = new Set(cells.map(c => c.cluster));
-    if (lastClusters && ([...clusters].some(c => !lastClusters.has(c)) || [...lastClusters].some(c => !clusters.has(c)))) {
-      rowBreaks.add(r);
-    }
-    lastClusters = clusters;
-  }
-
-  // Column separation: same-row cluster boundaries
-  const colSplits = new Set();
-  rowCells.forEach((cells, r) => {
-    for (let i = 0; i < cells.length - 1; i++) {
-      if (cells[i].cluster !== cells[i + 1].cluster) {
-        colSplits.add(`${r},${cells[i + 1].col}`);
-      }
-    }
-  });
-
-  const sepRows = [...rowBreaks].sort((a, b) => a - b);
-  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
-  gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length)); */
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -415,51 +360,6 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   // For each transition, find the boundary segment endpoints
   const hLines = []; // {y, x1, x2}
   const vLines = []; // {x, y1, y2}
-
-  /* transitions.forEach(t => {
-    const x = originX + t.col * (ww + gap) - gap / 2;
-
-    // Vertical line: from transition row down through all rows
-    // where new cluster exists (even if old cluster also exists)
-    let yTop = originY + t.row * (wh + gap) - gap / 2;
-    let yBot = yTop;
-    let lastNewRow = t.row;
-    for (let rr = t.row; rr < plate.rows.length; rr++) {
-      const cells = rowCells.get(rr) || [];
-      if (cells.some(c => c.cluster === t.to)) {
-        lastNewRow = rr;
-      } else {
-        break;
-      }
-    }
-    yBot = originY + (lastNewRow + 1) * (wh + gap) - gap / 2;
-    if (yBot > yTop) {
-      vLines.push({ x, y1: yTop, y2: yBot });
-    }
-
-    // Top horizontal: at transition row, cols from transition to right edge
-    // separating shared row from row above
-    if (t.row > 0) {
-      const y = originY + t.row * (wh + gap) - gap / 2;
-      const x1 = x;
-      const x2 = originX + plate.cols * (ww + gap) - gap / 2;
-      hLines.push({ y, x1, x2 });
-    }
-
-    // Bottom horizontal: at row where old cluster disappears, cols from left to transition
-    for (let rr = t.row + 1; rr < plate.rows.length; rr++) {
-      const cells = rowCells.get(rr) || [];
-      const hasOld = cells.some(c => c.cluster === t.from);
-      const hasNew = cells.some(c => c.cluster === t.to);
-      if (!hasOld && hasNew) {
-        const y = originY + rr * (wh + gap) - gap / 2;
-        const x1 = originX;
-        const x2 = x;
-        hLines.push({ y, x1, x2 });
-        break;
-      }
-    }
-  }); */
 
   // Draw only boundaries between adjacent groups.
   for (let row = 0; row < plate.rows.length; row += 1) {

@@ -16,20 +16,21 @@ qpcr-tools/
 │   ├── ct.js               # Ct 值校验：parseCt(), isValidCt(), filterValidCts()
 │   ├── statistics.js       # 统计函数：mean(), sd(), sem(), spread(), rowStats()
 │   ├── normalize.js        # 字符串归一化：normalizeKey()
+│   ├── escape.js           # HTML/XML 转义：escapeHtml()
 │   └── ddct.js             # 核心分析：computeAnalysis() — ΔCt/ΔΔCt 纯计算
 │
 ├── state/                  # 状态管理模块
 │   ├── experiment.js       # 实验配置：组别/基因的稳定 ID 模型、CRUD、名称解析、display name 同步
-│   └── migration.js        # localStorage 数据迁移（v3→v4→v5→v6），向后兼容旧版
+│   └── migration.js        # localStorage 数据迁移（v3→v7），向后兼容旧版
 │
 ├── ui/                     # UI 渲染模块（读/写 DOM，但不访问全局变量）
 │   ├── render.js           # DOM 渲染：renderGroups, renderTargetGenes, renderRefGene,
 │   │                       #   renderBlocks, renderPlateGrid, renderRows, renderResults,
-│   │                       #   readBlocksFromDom, readRowsFromDom, buildAlertsHtml, escapeHtml
+│   │                       #   readBlocksFromDom, readRowsFromDom, buildAlertsHtml
 │   └── charts.js           # SVG 图表生成（纯函数）：resultsChartSvg(), groupChartSvg()
 │
 ├── io/                     # 输入/输出模块
-│   ├── import.js           # 数据导入：parseCtColumn()（罗氏单列）, parseFullTable()（完整表格粘贴）
+│   ├── import.js           # 数据导入：parseCtColumn()（罗氏单列 Ct 解析）
 │   └── export.js           # 数据导出：resultsCsv(), plateCsv(), downloadFile(), exportTemplateJson()
 │
 ├── test/                   # 单元测试（Node.js ES module, .mjs）
@@ -160,7 +161,6 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 ### Ct 数据导入
 
 - **罗氏单列 Ct 粘贴**（`parseCtColumn`）：从剪贴板读取或手动粘贴。检测并跳过标题行（Ct/Cq/Cp/Ct Value 等）、缺失值行（Undetermined/No Ct/N/A 等）、孔位 ID 行。严格按孔位顺序从上到下依次填入。显示详细状态消息（填入数/剩余数/多出数/跳过数）
-- **完整表格粘贴**（`parseFullTable`）：支持 TAB 或逗号分隔，自动识别孔位列（可选）。Ct 值通过 `parseCt()` 校验
 
 ### 分析计算流程
 

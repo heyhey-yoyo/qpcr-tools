@@ -1,7 +1,6 @@
 'use strict';
 
-import { parseCt, isValidCt } from '../core/ct.js';
-import { normalizeKey } from '../core/normalize.js';
+import { parseCt } from '../core/ct.js';
 
 /**
  * Parse Roche single-column Ct/Cp/Cq output.
@@ -93,62 +92,3 @@ export function parseCtColumn(text) {
   return { values, numeric, skipped };
 }
 
-/**
- * Parse a full table paste (tab or comma separated).
- * Lines must have at least 4 columns after optional well column.
- * Ct values are validated through parseCt().
- *
- * @param {string} text - raw pasted text
- * @param {Object} plate - plate config { rows, cols }
- * @param {number} replicateCount - expected number of replicates per row
- * @returns {Array} rows with { wells, name, group, gene, cts }
- */
-export function parseFullTable(text, plate, replicateCount) {
-  return String(text).trim().split(/\n/)
-    .map(line => line.replace(/\r$/, '').split(/\t|,/))
-    .filter(parts => parts.length >= 4)
-    .map(parts => {
-      const first = parts[0].trim();
-      const wells = first.split(/[,，;\s]+/).map(value => value.trim().toUpperCase()).filter(Boolean);
-      const hasWellColumn = wells.length > 0 && wells.every(well => {
-        const match = well.match(/^([A-P])(\d{1,2})$/);
-        return match && plate.rows.includes(match[1]) && Number(match[2]) >= 1 && Number(match[2]) <= plate.cols;
-      });
-      const offset = hasWellColumn ? 1 : 0;
-      if (parts.length < 4 + offset) return null;
-
-      const rawCts = parts.slice(3 + offset).map(value => value.trim()).slice(0, replicateCount);
-      // Validate each Ct through parseCt
-      const cts = rawCts.map(v => {
-        const parsed = parseCt(v);
-        return parsed.valid ? String(parsed.value) : '';
-      });
-
-      return {
-        wells: hasWellColumn ? wells : Array(Math.max(replicateCount, cts.length)).fill(''),
-        name: parts[offset].trim(),
-        group: parts[offset + 1].trim(),
-        gene: parts[offset + 2].trim(),
-        cts: cts.length ? cts : Array(replicateCount).fill('')
-      };
-    }).filter(Boolean);
-}
-
-/**
- * Import template from parsed JSON data.
- * Handles version 1-4 template formats.
- *
- * @param {Object} data - parsed JSON
- * @returns {{ blocks: Array, experiment: Object|null, replicateCount: number }|null}
- */
-export function importTemplateData(data) {
-  const list = Array.isArray(data) ? data : data?.blocks;
-  if (!Array.isArray(list) || !list.length) return null;
-
-  return {
-    blocks: list,
-    experiment: data.experiment || null,
-    replicateCount: data.replicateCount,
-    version: data.version || 1
-  };
-}

@@ -56,10 +56,10 @@ export function migrateState(raw) {
   state.experiment = experiment;
 
   if (Array.isArray(state.blocks)) {
-    state.blocks = state.blocks.map(b => addBlockIds(b, experiment));
+    state.blocks = state.blocks.map(b => addEntityIds(b, experiment));
   }
   if (Array.isArray(state.rows)) {
-    state.rows = state.rows.map(r => addRowIds(r, experiment));
+    state.rows = state.rows.map(r => addEntityIds(r, experiment));
   }
 
   delete state.ref;
@@ -129,10 +129,10 @@ function normalizeV7(state) {
   state.experiment = ensureCompareAssignments(state.experiment);
 
   if (Array.isArray(state.blocks)) {
-    state.blocks = state.blocks.map(b => addBlockIds(b, state.experiment));
+    state.blocks = state.blocks.map(b => addEntityIds(b, state.experiment));
   }
   if (Array.isArray(state.rows)) {
-    state.rows = state.rows.map(r => addRowIds(r, state.experiment));
+    state.rows = state.rows.map(r => addEntityIds(r, state.experiment));
   }
   state._version = CURRENT_VERSION;
   return state;
@@ -140,18 +140,19 @@ function normalizeV7(state) {
 
 // ---- ID helpers (unchanged) ----
 
-function addBlockIds(block, experiment) {
-  if (block.groupId && block.geneId) return block;
-  const groupName = block.group || '';
+/** Backfill groupId/geneId on a legacy block or row by matching display names. */
+function addEntityIds(entity, experiment) {
+  if (entity.groupId && entity.geneId) return entity;
+  const groupName = entity.group || '';
   const groupKey = normalizeKey(groupName);
-  let groupId = block.groupId || null;
+  let groupId = entity.groupId || null;
   if (!groupId) {
     const match = (experiment.groups || []).find(g => normalizeKey(g.name) === groupKey);
     groupId = match ? match.id : null;
   }
-  const geneName = block.gene || '';
+  const geneName = entity.gene || '';
   const geneKey = normalizeKey(geneName);
-  let geneId = block.geneId || null;
+  let geneId = entity.geneId || null;
   if (!geneId) {
     if (experiment.refGene && normalizeKey(experiment.refGene.name) === geneKey) {
       geneId = experiment.refGene.id;
@@ -160,28 +161,5 @@ function addBlockIds(block, experiment) {
       geneId = match ? match.id : null;
     }
   }
-  return { ...block, groupId: groupId || block.groupId, geneId: geneId || block.geneId };
-}
-
-function addRowIds(row, experiment) {
-  if (row.groupId && row.geneId) return row;
-  const groupName = row.group || '';
-  const groupKey = normalizeKey(groupName);
-  let groupId = row.groupId || null;
-  if (!groupId) {
-    const match = (experiment.groups || []).find(g => normalizeKey(g.name) === groupKey);
-    groupId = match ? match.id : null;
-  }
-  const geneName = row.gene || '';
-  const geneKey = normalizeKey(geneName);
-  let geneId = row.geneId || null;
-  if (!geneId) {
-    if (experiment.refGene && normalizeKey(experiment.refGene.name) === geneKey) {
-      geneId = experiment.refGene.id;
-    } else {
-      const match = (experiment.targetGenes || []).find(g => normalizeKey(g.name) === geneKey);
-      geneId = match ? match.id : null;
-    }
-  }
-  return { ...row, groupId: groupId || row.groupId, geneId: geneId || row.geneId };
+  return { ...entity, groupId: groupId || entity.groupId, geneId: geneId || entity.geneId };
 }

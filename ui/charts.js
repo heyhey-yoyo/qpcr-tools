@@ -7,6 +7,7 @@
 
 import { mean } from '../core/statistics.js';
 import { normalizeKey } from '../core/normalize.js';
+import { escapeHtml } from '../core/escape.js';
 
 export function fmt(value, digits = 3) {
   return Number.isFinite(value) ? value.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '') : '—';
@@ -16,14 +17,6 @@ export function truncateLabel(text, maxLen = 12) {
   const s = String(text || '');
   if (s.length <= maxLen) return s;
   return s.slice(0, maxLen - 1) + '…';
-}
-
-function escapeXml(value) {
-  return String(value ?? '')
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;');
 }
 
 /**
@@ -73,8 +66,8 @@ export function resultsChartSvg(items, groupOrder) {
     return `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="4" fill="${color}"/>`
       + error
       + `<text x="${cx}" y="${Math.max(10, yHigh - 5)}" text-anchor="middle" font-size="10" fill="#334155">${fmt(item.fold)}</text>`
-      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b"><title>${escapeXml(item.name)}</title>${escapeXml(shortName)}</text>`
-      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#94a3b8"><title>${escapeXml(item.gene)}</title>${escapeXml(shortGene)}</text>`;
+      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b"><title>${escapeHtml(item.name)}</title>${escapeHtml(shortName)}</text>`
+      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#94a3b8"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
   }).join('');
 
   const axis = `<line x1="4" y1="${baseY}" x2="${width - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
@@ -154,7 +147,7 @@ export function groupChartSvg(items, groupOrder, geneOrder) {
     const bars = allBars.filter(b => b.group === groupName);
     const cx = offset + clusterW / 2;
     const shortGroup = truncateLabel(groupName, 14);
-    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600"><title>${escapeXml(groupName)}</title>${escapeXml(shortGroup)}</text>`;
+    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600"><title>${escapeHtml(groupName)}</title>${escapeHtml(shortGroup)}</text>`;
     bars.forEach(b => {
       const x = offset + b.gi * (barW + barGap);
       const y = baseY - scale(b.fold);
@@ -177,7 +170,7 @@ export function groupChartSvg(items, groupOrder, geneOrder) {
   svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
   svgParts += geneList.map((g, i) =>
     `<rect x="${8 + i * 80}" y="4" width="10" height="10" rx="2" fill="${colors[i % colors.length]}" fill-opacity="0.85"/>`
-    + `<text x="${22 + i * 80}" y="13" font-size="9" fill="#475569">${escapeXml(g)}</text>`
+    + `<text x="${22 + i * 80}" y="13" font-size="9" fill="#475569">${escapeHtml(g)}</text>`
   ).join('');
 
   return `<svg viewBox="0 0 ${totalW} ${chartH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图">${svgParts}</svg>`;

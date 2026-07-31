@@ -2,22 +2,21 @@
 
 // ---- Imports ----
 import { parseCt } from './core/ct.js';
-import { mean, rowStats } from './core/statistics.js';
 import { normalizeKey } from './core/normalize.js';
 import { computeAnalysis } from './core/ddct.js';
 import {
-  createExperiment, createGroup, addGroup as expAddGroup, addTargetGene as expAddTargetGene,
+  createExperiment, addGroup as expAddGroup, addTargetGene as expAddTargetGene,
   renameGroup as expRenameGroup, renameTargetGene as expRenameTargetGene,
   setCompareToGroup as expSetCompareTo, removeGroup as expRemoveGroup,
   removeTargetGene as expRemoveTargetGene, setRefGeneName,
-  getBaselineGroups, ensureCompareAssignments,
-  resolveGroupName, resolveGeneName, resolveGroupId, resolveGeneId,
+  getBaselineGroups, ensureExperiment,
+  resolveGroupName, resolveGeneName,
   syncBlockDisplayNames, syncRowDisplayNames
 } from './state/experiment.js';
 import { migrateState, CURRENT_VERSION } from './state/migration.js';
-import { resultsChartSvg, groupChartSvg, fmt } from './ui/charts.js';
+import { resultsChartSvg, groupChartSvg } from './ui/charts.js';
 import {
-  escapeHtml, renderGroups, renderTargetGenes, renderRefGene,
+  renderGroups, renderTargetGenes, renderRefGene,
   renderBlocks, readBlocksFromDom, renderPlateGrid,
   renderRows, readRowsFromDom, renderResults, buildAlertsHtml
 } from './ui/render.js';
@@ -70,7 +69,16 @@ let latestPlate = { placements: [], overflow: false };
 let hasSavedState = false;
 
 // ---- Utilities ----
-function clone(value) { return JSON.parse(JSON.stringify(value)); }
+
+/** Group placements by block index → array of wells per block. */
+function wellsByBlockIndex(placements) {
+  const placementsByBlock = new Map();
+  placements.forEach(item => {
+    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
+    placementsByBlock.get(item.blockIndex).push(item.well);
+  });
+  return placementsByBlock;
+}
 
 function normalizeReplicateCount(value) {
   const num = Number(value);
@@ -345,22 +353,13 @@ function load() {
 
     // Restore experiment
     if (state.experiment && Array.isArray(state.experiment.groups) && state.experiment.groups.length) {
-      experiment = state.experiment;
-      // Ensure IDs exist on all entities
-      if (!experiment.refGene || !experiment.refGene.id) {
-        experiment.refGene = { id: 'ref', name: experiment.refGene?.name || 'GAPDH' };
-      }
-      experiment.targetGenes = (experiment.targetGenes || []).map((g, i) =>
-        typeof g === 'string' ? { id: 'tg' + (i + 1), name: g } : (g.id ? g : { ...g, id: 'tg' + (i + 1) })
-      );
-      if (!experiment.targetGenes.length) experiment.targetGenes = [{ id: 'tg1', name: 'IL6' }];
-      experiment.groups = experiment.groups.map(g => g.id ? g : { ...g, id: 'g' + Date.now() });
+      experiment = ensureExperiment(state.experiment);
     } else {
       experiment = createExperiment();
     }
 
     blocks = Array.isArray(state.blocks) ? state.blocks.map(normalizeBlock) : buildTemplate();
-    rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : clone(exampleRows);
+    rows = Array.isArray(state.rows) ? state.rows.map(normalizeRow) : [];
 
     els.mode.value = state.mode || 'ddct';
     els.spread.value = state.spread || '0.5';
@@ -472,11 +471,7 @@ function readBlocks() {
 // Regenerate rows from blocks, preserving Ct values by matching (sample, groupId, geneId)
 function syncRowsFromBlocks() {
   latestPlate = generatePlacements();
-  const placementsByBlock = new Map();
-  latestPlate.placements.forEach(item => {
-    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-    placementsByBlock.get(item.blockIndex).push(item.well);
-  });
+  const placementsByBlock = wellsByBlockIndex(latestPlate.placements);
   // Copy so we can consume matches (splice), preventing duplicate blocks
   // from sharing the same old row's Ct values.
   const remaining = [...rows];
@@ -520,11 +515,7 @@ function moveBlock(event) {
   if (nextIndex < 0 || nextIndex >= blocks.length) return;
   [blocks[index], blocks[nextIndex]] = [blocks[nextIndex], blocks[index]];
   if (blocks[0]) blocks[0].breakBefore = false;
-  renderAllBlocks();
-  renderPlate();
-  syncRowsFromBlocks();
-  calculate();
-  save();
+  refreshAll();
 }
 
 function removeBlock(event) {
@@ -534,19 +525,7 @@ function removeBlock(event) {
   if (blocks[0]) blocks[0].breakBefore = false;
   // Sync: remove corresponding row
   if (index < rows.length) rows.splice(index, 1);
-  // Regenerate well positions for remaining rows to match new plate layout
-  latestPlate = generatePlacements();
-  const placementsByBlock = new Map();
-  latestPlate.placements.forEach(item => {
-    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-    placementsByBlock.get(item.blockIndex).push(item.well);
-  });
-  rows.forEach((row, i) => { row.wells = placementsByBlock.get(i) || []; });
-  renderAllBlocks();
-  renderAllRows();
-  renderPlate();
-  calculate();
-  save();
+  refreshAll();
 }
 
 function loadPreset() {
@@ -559,11 +538,7 @@ function loadPreset() {
     window.alert(`${currentPlate().label}空间不足，预设未载入。请减少分组、基因、生物学重复或技术复孔数，或改用更大孔板。`);
     return;
   }
-  renderAllBlocks();
-  renderPlate();
-  syncRowsFromBlocks();
-  calculate();
-  save();
+  refreshAll();
 }
 
 // ---- Plate layout sync ----
@@ -660,11 +635,7 @@ function syncPlateLayout() {
   });
 
   // Group placements by block index
-  const placementsByBlock = new Map();
-  latestPlate.placements.forEach(item => {
-    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-    placementsByBlock.get(item.blockIndex).push(item.well);
-  });
+  const placementsByBlock = wellsByBlockIndex(latestPlate.placements);
 
   // Build new rows: wells from new layout, Ct from well→Ct map
   rows = blocks.map((block, index) => {
@@ -741,6 +712,15 @@ function readRows() {
   calculate();
 }
 
+/** Re-render everything after a structural change, then persist. */
+function refreshAll() {
+  renderAllBlocks();
+  renderPlate();
+  syncRowsFromBlocks();
+  calculate();
+  save();
+}
+
 function removeRow(index) {
   rows.splice(index, 1);
   // Sync: remove corresponding block
@@ -750,11 +730,7 @@ function removeRow(index) {
   }
   // Regenerate well positions for remaining rows to match new plate layout
   latestPlate = generatePlacements();
-  const placementsByBlock = new Map();
-  latestPlate.placements.forEach(item => {
-    if (!placementsByBlock.has(item.blockIndex)) placementsByBlock.set(item.blockIndex, []);
-    placementsByBlock.get(item.blockIndex).push(item.well);
-  });
+  const placementsByBlock = wellsByBlockIndex(latestPlate.placements);
   rows.forEach((row, i) => { row.wells = placementsByBlock.get(i) || []; });
   renderAllBlocks();
   renderAllRows();
@@ -1005,13 +981,7 @@ function importTemplate(file) {
       }
 
       if (data.version >= 3 && data.experiment && Array.isArray(data.experiment.groups) && data.experiment.groups.length) {
-        experiment = data.experiment;
-        if (!experiment.refGene) experiment.refGene = { id: 'ref', name: 'GAPDH' };
-        experiment.targetGenes = (experiment.targetGenes || []).map((g, i) =>
-          typeof g === 'string' ? { id: 'tg' + (i + 1), name: g } : (g.id ? g : { ...g, id: 'tg' + (i + 1) })
-        );
-        if (!experiment.targetGenes.length) experiment.targetGenes = [{ id: 'tg1', name: 'IL6' }];
-        experiment.groups = experiment.groups.map(g => g.id ? g : { ...g, id: 'g' + Date.now() });
+        experiment = ensureExperiment(data.experiment);
       } else {
         experiment = createExperiment();
       }
@@ -1092,11 +1062,7 @@ function handleSetCompareToGroup(groupId, targetGroupId) {
     window.alert(`${currentPlate().label}空间不足，比较基准未调整。`);
     return;
   }
-  renderAllBlocks();
-  renderPlate();
-  syncRowsFromBlocks();
-  calculate();
-  save();
+  refreshAll();
 }
 
 function handleRemoveGroup(groupId) {
@@ -1104,18 +1070,9 @@ function handleRemoveGroup(groupId) {
     if (experiment.groups.length <= 1) { window.alert('至少保留一个分组。'); return; }
     const target = experiment.groups.find(g => g.id === groupId);
     if (!target) return;
-    // Collect all IDs that will be deleted (target + cascade dependents)
-    const removedIds = new Set([groupId]);
-    let added = true;
-    while (added) {
-      added = false;
-      experiment.groups.forEach(g => {
-        if (!removedIds.has(g.id) && g.compareToGroupId && removedIds.has(g.compareToGroupId)) {
-          removedIds.add(g.id);
-          added = true;
-        }
-      });
-    }
+    // Cascade delete via experiment module, which computes all affected IDs
+    const next = expRemoveGroup(experiment, groupId);
+    const removedIds = new Set(next._removedIds || []);
     const removedNames = experiment.groups.filter(g => removedIds.has(g.id)).map(g => g.name);
     const affectedBlocks = blocks.filter(b => removedIds.has(b.groupId)).length;
     const affectedRows = rows.filter(r => removedIds.has(r.groupId)).length;
@@ -1130,14 +1087,10 @@ function handleRemoveGroup(groupId) {
     if (blocks[0]) blocks[0].breakBefore = false;
     // Also filter rows directly (defensive)
     rows = rows.filter(r => !removedIds.has(r.groupId));
-    experiment = expRemoveGroup(experiment, groupId);
+    experiment = next;
     renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
       onRenameGroup: handleRenameGroup, onSetCompareToGroup: handleSetCompareToGroup, onRemoveGroup: handleRemoveGroup });
-    renderAllBlocks();
-    syncRowsFromBlocks();
-    renderPlate();
-    calculate();
-    save();
+    refreshAll();
   } catch (e) {
     console.error('handleRemoveGroup error:', e);
   }
@@ -1171,14 +1124,10 @@ function handleRemoveTargetGene(geneId) {
     if (blocks[0]) blocks[0].breakBefore = false;
     experiment = expRemoveTargetGene(experiment, geneId);
     targetCount();
-    renderAllBlocks();
     // Rebuild the plate mapping while preserving Ct values for unchanged
     // (sample, groupId, geneId) rows. Rows belonging to the deleted target
     // gene are naturally omitted because their blocks no longer exist.
-    syncRowsFromBlocks();
-    renderPlate();
-    calculate();
-    save();
+    refreshAll();
   } catch (e) {
     console.error('handleRemoveTargetGene error:', e);
   }
@@ -1260,11 +1209,7 @@ $('#addBlockBtn').addEventListener('click', () => {
   block.sample = uniqueSampleName(block.sample);
   blocks.push(block);
   if (generatePlacements().overflow) { blocks.pop(); window.alert(`${currentPlate().label}空间不足，无法继续添加区块。`); }
-  renderAllBlocks();
-  renderPlate();
-  syncRowsFromBlocks();
-  calculate();
-  save();
+  refreshAll();
 });
 
 $('#exportPlateBtn').addEventListener('click', () => {
@@ -1298,7 +1243,7 @@ els.bioRepsInput.addEventListener('change', () => {
 
 els.bioGroupReplicates.addEventListener('change', () => {
   blocks = buildTemplate();
-  renderAllBlocks(); renderPlate(); syncRowsFromBlocks(); calculate(); save();
+  refreshAll();
 });
 
 els.repsInput.addEventListener('change', () => {

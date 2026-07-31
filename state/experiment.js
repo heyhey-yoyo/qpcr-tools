@@ -35,6 +35,21 @@ export function createExperiment(overrides) {
   };
 }
 
+/** Ensure stable IDs exist on all entities of a restored experiment.
+ *  Pure: returns a new object, leaves the input untouched. */
+export function ensureExperiment(experiment) {
+  if (!experiment) return experiment;
+  const refGene = (experiment.refGene && experiment.refGene.id)
+    ? experiment.refGene
+    : { id: 'ref', name: experiment.refGene?.name || 'GAPDH' };
+  let targetGenes = (experiment.targetGenes || []).map((g, i) =>
+    typeof g === 'string' ? { id: 'tg' + (i + 1), name: g } : (g.id ? g : { ...g, id: 'tg' + (i + 1) })
+  );
+  if (!targetGenes.length) targetGenes = [{ id: 'tg1', name: 'IL6' }];
+  const groups = (experiment.groups || []).map(g => g.id ? g : { ...g, id: 'g' + Date.now() });
+  return { ...experiment, refGene, targetGenes, groups };
+}
+
 // ---- Queries ----
 
 /** Groups whose compareToGroupId is null or self → they are calibration baselines. */
@@ -143,7 +158,7 @@ export function removeGroup(experiment, groupId) {
     });
   }
   let groups = experiment.groups.filter(g => !toDelete.has(g.id));
-  if (!groups.length) return { ...experiment, groups: [] };
+  if (!groups.length) return { ...experiment, groups: [], _removedIds: [...toDelete] };
   // Ensure at least one baseline exists
   if (!groups.some(g => !g.compareToGroupId || g.compareToGroupId === g.id)) {
     groups[0] = { ...groups[0], compareToGroupId: null };
