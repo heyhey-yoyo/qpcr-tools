@@ -78,10 +78,14 @@
       </div>
     </div>
 
+    <div class="section-heading" style="margin-top:20px">
+      <div><h2>第 2 步 · 点板信息确认</h2></div>
+    </div>
+
     <div class="subsection-heading">
       <div>
         <h3>点板区块</h3>
-        <p>一个区块代表同一样本、同一基因的一组技术重复。模板可连续追加，并自动生成新的样本编号。</p>
+        <p>一个区块代表同一样本、同一基因的一组技术重复。</p>
       </div>
       <div class="subsection-actions">
         <button id="addBlockBtn" class="button button-ghost">＋ 添加样本</button>
@@ -102,12 +106,12 @@
       <div id="plateGrid" class="plate-grid" aria-label="孔板预览"></div>
     </div>
     <div id="plateLegend" class="plate-legend"></div>
-    <p class="help-text">“刷新点板预设”会按当前实验配置重新生成模板并覆盖所有区块；“功能演示”会载入一份当前孔板规格的演示模板；“清空全板”会移除所有区块。点击任意空孔可将它设为模板起点。预览图中同一区块（一组技术重复）会用浅色框圈出。“导出模板”会把当前点板区块保存为 JSON 文件，之后可用“导入模板”直接恢复。</p>
+    <p class="help-text">"刷新点板预设"会按当前实验配置重新生成模板并覆盖所有区块；"功能演示"会载入一份当前孔板规格的演示模板；"清空全板"会移除所有区块。点击任意空孔可将它设为模板起点。预览图中同一区块（一组技术重复）会用浅色框圈出。"导出模板"会把当前点板区块保存为 JSON 文件，之后可用"导入模板"直接恢复。</p>
   </section>
 
   <section class="card settings-card">
     <div class="section-heading">
-      <div><h2>第 2 步 · 选择分析模式并设置参数</h2></div>
+      <div><h2>第 3 步 · 选择分析模式并设置参数</h2></div>
       <button id="resetBtn" class="button button-ghost">恢复默认</button>
     </div>
     <label class="field" style="margin-bottom:14px;">
@@ -126,7 +130,7 @@
 
   <section class="card samples-card">
     <div class="section-heading">
-      <div><h2>第 3 步 · 录入 Ct 数据</h2></div>
+      <div><h2>第 4 步 · 录入 Ct 数据</h2></div>
       <div class="button-row">
         <button id="pasteColumnBtn" class="button button-primary">粘贴单列 Ct</button>
         <button id="exampleDataBtn" class="button button-ghost">随机 Ct 测试</button>
@@ -155,12 +159,12 @@
         <tbody id="samplesBody"></tbody>
       </table>
     </div>
-    <p class="help-text">单列 Ct 会严格按照当前数据表从第一行 Ct1、Ct2、Ct3……到下一行继续填入。建议先“应用到 Ct 数据表”，再粘贴仪器导出的单列结果。</p>
+    <p class="help-text">单列 Ct 会严格按照当前数据表从第一行 Ct1、Ct2、Ct3……到下一行继续填入。建议先"应用到 Ct 数据表"，再粘贴仪器导出的单列结果。</p>
   </section>
 
   <section class="card results-card">
     <div class="section-heading">
-      <div><h2>第 4 步 · 分析结果</h2></div>
+      <div><h2>第 5 步 · 分析结果</h2></div>
       <div class="button-row"><button id="copyBtn" class="button button-ghost">复制结果</button><button id="exportBtn" class="button button-ghost">导出 CSV</button></div>
     </div>
     <div id="summary" class="summary-grid"></div>
@@ -176,7 +180,7 @@
     <h2>使用说明</h2>
     <ul>
       <li><strong>96 / 384 孔板：</strong>切换规格后，起始行和列会自动更新；模板区块和分析数据不会丢失。</li>
-      <li><strong>连续追加模板：</strong>选择预设与追加份数后点击“追加模板”，已有布局不会被覆盖；样本编号会自动递增。</li>
+      <li><strong>连续追加模板：</strong>选择预设与追加份数后点击"追加模板"，已有布局不会被覆盖；样本编号会自动递增。</li>
       <li><strong>罗氏单列结果：</strong>支持 Ct、Cq、Cp 表头及 Undetermined 等缺失值；填入顺序与当前 Ct 表格一致。</li>
       <li><strong>相对表达量：</strong>先计算 ΔCt = 目标基因 Ct − 内参基因 Ct，再以该组别指定的比较基准组平均 ΔCt 计算 ΔΔCt 和 2^-ΔΔCt。每个分组可通过芯片下拉框选择比较基准。</li>
       <li><strong>技术重复质控：</strong>同一行有效 Ct 的最大值与最小值之差超过阈值时会标记为需复核。</li>
