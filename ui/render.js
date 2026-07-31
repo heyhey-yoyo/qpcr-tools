@@ -313,23 +313,32 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Find rows where a new cluster starts AND it's on a different row from the previous cluster
-  const clusterRowStarts = new Set();
-  const sameRowSplits = new Set(); // keys where a new cluster starts on same row as previous
+  // Find all rows where a cluster transition occurs (full-width separator)
+  // and same-row split points within a row
+  const clusterTransitionRows = new Set();
+  const sameRowSplits = new Set();
+  let prevCluster = null;
+  let prevRow = -1;
   segments.forEach(s => {
     const first = s.items[0];
-    if (!first || !first.clusterChange) return;
-    // Check if any previous segment is in the same row but different cluster
-    const prevSegments = segments.filter(ps => ps.row === s.row && ps.items[0] && ps.items[0].clusterId !== first.clusterId && ps.col < s.col);
-    if (prevSegments.length) {
-      sameRowSplits.add(`${s.row},${s.col}`);
-    } else {
-      clusterRowStarts.add(s.row);
+    if (!first) return;
+    const curCluster = first.clusterId;
+    const curRow = s.row;
+    if (prevCluster !== null && curCluster !== prevCluster) {
+      if (curRow !== prevRow) {
+        // Cluster changed on a new row → full-width separator before this row
+        clusterTransitionRows.add(curRow);
+      } else {
+        // Same row → split marker
+        sameRowSplits.add(`${curRow},${s.col}`);
+      }
     }
+    prevCluster = curCluster;
+    prevRow = curRow;
   });
 
-  const numSeps = clusterRowStarts.size;
-  const sepRows = [...clusterRowStarts].sort((a, b) => a - b);
+  const numSeps = clusterTransitionRows.size;
+  const sepRows = [...clusterTransitionRows].sort((a, b) => a - b);
   // Each separator row pushes subsequent rows down by 1
   const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
   const totalRows = plate.rows.length + numSeps;
@@ -354,8 +363,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   plate.rows.forEach((row, rowIndex) => {
     const gridRow = rowShift(rowIndex);
 
-    // Insert full-row dashed separator before a cluster-start row
-    if (clusterRowStarts.has(rowIndex)) {
+    // Insert full-row dashed separator before a cluster-transition row
+    if (clusterTransitionRows.has(rowIndex)) {
       html += `<div class="plate-separator" style="grid-row:${gridRow - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
     }
 
