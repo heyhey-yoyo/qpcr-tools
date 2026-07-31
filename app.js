@@ -20,7 +20,7 @@ import {
   renderBlocks, readBlocksFromDom, renderPlateGrid,
   renderRows, readRowsFromDom, renderResults, buildAlertsHtml
 } from './ui/render.js';
-import { parseCtColumn, parseFullTable } from './io/import.js';
+import { parseCtColumn } from './io/import.js';
 import { resultsCsv, plateCsv, downloadFile, exportTemplateJson } from './io/export.js';
 
 // ---- Constants ----
@@ -46,7 +46,7 @@ const els = {
   desc: $('#modeDescription'), formula: $('#formulaNote'),
   summary: $('#summary'), alerts: $('#alerts'), results: $('#resultsBody'),
   chart: $('#resultsChart'), groupChart: $('#groupChart'),
-  paste: $('#pasteArea'), ctColumnPanel: $('#ctColumnPanel'),
+  ctColumnPanel: $('#ctColumnPanel'),
   ctColumnArea: $('#ctColumnArea'), ctPasteStatus: $('#ctPasteStatus'),
   repsInput: $('#replicateCount'),
   bioGroupReplicates: $('#bioGroupReplicates'),
@@ -1299,7 +1299,6 @@ $('#resetBtn').addEventListener('click', () => {
   rows = [];
   els.ctColumnArea.value = '';
   els.ctColumnPanel.classList.add('hidden');
-  els.paste.classList.add('hidden');
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
     onRenameGroup: handleRenameGroup, onToggleControl: handleToggleControl, onRemoveGroup: handleRemoveGroup });
   targetCount();
@@ -1313,19 +1312,6 @@ $('#resetBtn').addEventListener('click', () => {
 $('#pasteColumnBtn').addEventListener('click', pasteCtColumnFromClipboard);
 $('#applyCtColumnBtn').addEventListener('click', () => applyCtColumnText(els.ctColumnArea.value));
 $('#closeCtColumnBtn').addEventListener('click', () => els.ctColumnPanel.classList.add('hidden'));
-$('#pasteBtn').addEventListener('click', () => els.paste.classList.toggle('hidden'));
-els.paste.addEventListener('input', () => {
-  const parsed = parseFullTable(els.paste.value, currentPlate(), replicateCount);
-  if (parsed.length) {
-    rows = parsed.map(r => ({
-      ...r,
-      groupId: resolveGroupId(experiment, r.group).id,
-      geneId: resolveGeneId(experiment, r.gene).id
-    }));
-    renderAllRows(); calculate();
-  }
-});
-
 $('#copyBtn').addEventListener('click', async () => {
   try { await navigator.clipboard.writeText(resultsCsv(latest, els.mode.value)); }
   catch { window.alert('浏览器未允许复制，请使用"导出 CSV"。'); }
