@@ -131,16 +131,20 @@ export function setCompareToGroup(experiment, groupId, targetGroupId) {
 
 export function removeGroup(experiment, groupId) {
   let groups = experiment.groups.filter(g => g.id !== groupId);
+  if (!groups.length) return { ...experiment, groups: [] };
+  // Ensure at least one baseline exists
+  if (!groups.some(g => !g.compareToGroupId || g.compareToGroupId === g.id)) {
+    groups[0] = { ...groups[0], compareToGroupId: null };
+  }
   const firstBaseline = groups.find(g => !g.compareToGroupId || g.compareToGroupId === g.id);
   groups = groups.map(g => {
     let c = g.compareToGroupId;
-    if (c === groupId) c = firstBaseline ? firstBaseline.id : null;
+    if (c === groupId || (c && !groups.some(other => other.id === c))) {
+      c = firstBaseline ? firstBaseline.id : null;
+    }
     if (c === g.id) c = null;
     return { ...g, compareToGroupId: c };
   });
-  if (!groups.some(g => !g.compareToGroupId || g.compareToGroupId === g.id)) {
-    if (groups.length) groups[0] = { ...groups[0], compareToGroupId: null };
-  }
   return { ...experiment, groups };
 }
 
