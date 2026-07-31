@@ -1,0 +1,2458 @@
+From: <Saved by Blink>
+Snapshot-Content-Location: https://qpcr-tools.pages.dev/
+Subject: =?utf-8?Q?qPCR=20=E5=88=86=E6=9E=90=E5=B7=A5=E5=85=B7?=
+Date: Fri, 31 Jul 2026 13:45:38 +0800
+MIME-Version: 1.0
+Content-Type: multipart/related;
+	type="text/html";
+	boundary="----MultipartBoundary--3TAiMKloevk6TahWy0AhIOTCTGkSGXQY5pUdbf2iwy----"
+
+
+------MultipartBoundary--3TAiMKloevk6TahWy0AhIOTCTGkSGXQY5pUdbf2iwy----
+Content-Type: text/html
+Content-ID: <frame-45B5075831A70DB2295F700AA1B9B9B1@mhtml.blink>
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://qpcr-tools.pages.dev/
+
+<!DOCTYPE html><html lang=3D"zh-CN"><head><meta http-equiv=3D"Content-Type"=
+ content=3D"text/html; charset=3DUTF-8">
+ =20
+  <meta name=3D"viewport" content=3D"width=3Ddevice-width, initial-scale=3D=
+1">
+  <meta name=3D"description" content=3D"qPCR 96/384 =E5=AD=94=E6=9D=BF=E6=
+=A8=A1=E6=9D=BF=E3=80=81=E7=BD=97=E6=B0=8F=E5=8D=95=E5=88=97 Ct =E7=B2=98=
+=E8=B4=B4=E3=80=81=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D=E8=B4=A8=E6=8E=A7=E3=
+=80=81=CE=94Ct=E3=80=81=CE=94=CE=94Ct =E4=B8=8E=E7=9B=B8=E5=AF=B9=E8=A1=A8=
+=E8=BE=BE=E5=88=86=E6=9E=90=E5=B7=A5=E5=85=B7=E3=80=82">
+  <meta name=3D"theme-color" content=3D"#0d9488">
+  <title>qPCR =E5=88=86=E6=9E=90=E5=B7=A5=E5=85=B7</title>
+  <link rel=3D"stylesheet" href=3D"https://qpcr-tools.pages.dev/styles.css?=
+v=3D11.1">
+</head>
+<body>
+<header class=3D"site-header">
+  <div class=3D"container header-inner">
+    <div class=3D"header-brand"><span class=3D"brand-bold">YDchen</span><sp=
+an class=3D"brand-light">Tools</span></div>
+    <div class=3D"header-divider"></div>
+    <div class=3D"header-info">
+      <h1>qPCR =E5=88=86=E6=9E=90=E5=B7=A5=E5=85=B7</h1>
+      <p class=3D"subtitle">96 / 384 =E5=AD=94=E6=9D=BF=E6=A8=A1=E6=9D=BF =
+=C2=B7 =E7=BD=97=E6=B0=8F=E5=8D=95=E5=88=97 Ct =E7=B2=98=E8=B4=B4 =C2=B7 =
+=CE=94Ct / =CE=94=CE=94Ct=E3=80=82=E6=95=B0=E6=8D=AE=E4=BB=85=E5=9C=A8=E6=
+=B5=8F=E8=A7=88=E5=99=A8=E6=9C=AC=E5=9C=B0=E8=AE=A1=E7=AE=97=E3=80=82</p>
+    </div>
+  </div>
+</header>
+
+<main class=3D"container main-grid">
+  <section class=3D"card plate-card">
+    <div class=3D"section-heading">
+      <div><h2>=E7=AC=AC 1 =E6=AD=A5 =C2=B7 =E8=AE=BE=E8=AE=A1=E5=AD=94=E6=
+=9D=BF=E6=A8=A1=E6=9D=BF</h2></div>
+      <div class=3D"button-row">
+        <button id=3D"exportTemplateBtn" class=3D"button button-ghost">=E5=
+=AF=BC=E5=87=BA=E6=A8=A1=E6=9D=BF</button>
+        <button id=3D"importTemplateBtn" class=3D"button button-ghost">=E5=
+=AF=BC=E5=85=A5=E6=A8=A1=E6=9D=BF</button>
+        <button id=3D"exampleTemplateBtn" class=3D"button button-ghost">=E5=
+=8A=9F=E8=83=BD=E6=BC=94=E7=A4=BA</button>
+      </div>
+      <input id=3D"templateFileInput" type=3D"file" accept=3D".json,applica=
+tion/json" class=3D"hidden">
+    </div>
+
+    <div class=3D"plate-settings-grid">
+      <label class=3D"field"><span>=E5=AD=94=E6=9D=BF=E8=A7=84=E6=A0=BC</sp=
+an><select id=3D"plateSize"><option value=3D"96" selected=3D"">96 =E5=AD=94=
+=E6=9D=BF=EF=BC=888 =C3=97 12=EF=BC=89</option><option value=3D"384">384 =
+=E5=AD=94=E6=9D=BF=EF=BC=8816 =C3=97 24=EF=BC=89</option></select></label>
+      <label class=3D"field"><span>=E8=B5=B7=E5=A7=8B=E8=A1=8C</span><selec=
+t id=3D"startRow"><option value=3D"A">A</option><option value=3D"B">B</opti=
+on><option value=3D"C">C</option><option value=3D"D">D</option><option valu=
+e=3D"E">E</option><option value=3D"F">F</option><option value=3D"G">G</opti=
+on><option value=3D"H">H</option></select></label>
+      <label class=3D"field"><span>=E8=B5=B7=E5=A7=8B=E5=88=97</span><selec=
+t id=3D"startCol"><option value=3D"1">1</option><option value=3D"2">2</opti=
+on><option value=3D"3">3</option><option value=3D"4">4</option><option valu=
+e=3D"5">5</option><option value=3D"6">6</option><option value=3D"7">7</opti=
+on><option value=3D"8">8</option><option value=3D"9">9</option><option valu=
+e=3D"10">10</option><option value=3D"11">11</option><option value=3D"12">12=
+</option></select></label>
+      <label class=3D"field"><span>=E7=82=B9=E6=9D=BF=E6=96=B9=E5=90=91</sp=
+an><select id=3D"plateDirection"><option value=3D"horizontal">=E6=A8=AA=E5=
+=90=91=E8=BF=9E=E7=BB=AD</option><option value=3D"vertical">=E7=BA=B5=E5=90=
+=91=E8=BF=9E=E7=BB=AD</option></select></label>
+      <label class=3D"field"><span>=E5=8C=BA=E5=9D=97=E9=97=B4=E7=A9=BA=E5=
+=AD=94</span><select id=3D"blockGap"><option value=3D"0">0</option><option =
+value=3D"1">1</option><option value=3D"2">2</option></select></label>
+      <div class=3D"field field-wide">
+        <span>=E7=82=B9=E6=9D=BF=E9=A2=84=E8=AE=BE</span>
+        <div class=3D"inline-control template-control">
+          <div class=3D"experiment-row">
+            <span class=3D"experiment-label">=E5=88=86=E7=BB=84</span>
+            <button id=3D"addGroupBtn" class=3D"button button-ghost button-=
+sm">=EF=BC=8B</button>
+            <div id=3D"groupsContainer" class=3D"group-chip-list"><span cla=
+ss=3D"group-chip chip-baseline" data-id=3D"ex1"><span class=3D"chip-name">N=
+1</span><button class=3D"chip-edit" title=3D"=E4=BF=AE=E6=94=B9=E5=88=86=E7=
+=BB=84=E5=90=8D">=E6=94=B9</button><select class=3D"chip-compare" title=3D"=
+=E9=80=89=E6=8B=A9=E6=AF=94=E8=BE=83=E5=9F=BA=E5=87=86=E7=BB=84"><option va=
+lue=3D"">=E4=BD=9C=E4=B8=BA=E5=9F=BA=E5=87=86</option><option value=3D"gms8=
+ih6505">N2</option></select><span class=3D"chip-badge">=E5=9F=BA=E5=87=86</=
+span><button class=3D"chip-del" title=3D"=E5=88=A0=E9=99=A4=E5=88=86=E7=BB=
+=84">=C3=97</button></span><span class=3D"group-chip" data-id=3D"gms8h98oy9=
+"><span class=3D"chip-name">T1</span><button class=3D"chip-edit" title=3D"=
+=E4=BF=AE=E6=94=B9=E5=88=86=E7=BB=84=E5=90=8D">=E6=94=B9</button><select cl=
+ass=3D"chip-compare" title=3D"=E9=80=89=E6=8B=A9=E6=AF=94=E8=BE=83=E5=9F=BA=
+=E5=87=86=E7=BB=84"><option value=3D"">=E4=BD=9C=E4=B8=BA=E5=9F=BA=E5=87=86=
+</option><option value=3D"ex1">N1</option><option value=3D"gms8ih6505">N2</=
+option></select><button class=3D"chip-del" title=3D"=E5=88=A0=E9=99=A4=E5=
+=88=86=E7=BB=84">=C3=97</button></span><span class=3D"chip-line-break" aria=
+-hidden=3D"true"></span><span class=3D"group-chip chip-baseline" data-id=3D=
+"gms8ih6505"><span class=3D"chip-name">N2</span><button class=3D"chip-edit"=
+ title=3D"=E4=BF=AE=E6=94=B9=E5=88=86=E7=BB=84=E5=90=8D">=E6=94=B9</button>=
+<select class=3D"chip-compare" title=3D"=E9=80=89=E6=8B=A9=E6=AF=94=E8=BE=
+=83=E5=9F=BA=E5=87=86=E7=BB=84"><option value=3D"">=E4=BD=9C=E4=B8=BA=E5=9F=
+=BA=E5=87=86</option><option value=3D"ex1">N1</option></select><span class=
+=3D"chip-badge">=E5=9F=BA=E5=87=86</span><button class=3D"chip-del" title=
+=3D"=E5=88=A0=E9=99=A4=E5=88=86=E7=BB=84">=C3=97</button></span><span class=
+=3D"group-chip" data-id=3D"gms8h9tns4"><span class=3D"chip-name">T2</span><=
+button class=3D"chip-edit" title=3D"=E4=BF=AE=E6=94=B9=E5=88=86=E7=BB=84=E5=
+=90=8D">=E6=94=B9</button><select class=3D"chip-compare" title=3D"=E9=80=89=
+=E6=8B=A9=E6=AF=94=E8=BE=83=E5=9F=BA=E5=87=86=E7=BB=84"><option value=3D"">=
+=E4=BD=9C=E4=B8=BA=E5=9F=BA=E5=87=86</option><option value=3D"ex1">N1</opti=
+on><option value=3D"gms8ih6505">N2</option></select><button class=3D"chip-d=
+el" title=3D"=E5=88=A0=E9=99=A4=E5=88=86=E7=BB=84">=C3=97</button></span></=
+div>
+          </div>
+         =20
+          <div class=3D"experiment-row">
+            <span class=3D"experiment-label">=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=
+=9B=A0</span>
+            <button id=3D"addTargetGeneBtn" class=3D"button button-ghost bu=
+tton-sm" title=3D"=E6=B7=BB=E5=8A=A0=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=9B=A0">=
+=EF=BC=8B</button>
+            <div id=3D"targetGenesContainer" class=3D"group-chip-list"><spa=
+n class=3D"group-chip" data-id=3D"etg3"><span class=3D"chip-name">AADA</spa=
+n><button class=3D"chip-edit" title=3D"=E4=BF=AE=E6=94=B9=E5=9F=BA=E5=9B=A0=
+=E5=90=8D">=E6=94=B9</button><button class=3D"chip-del" title=3D"=E5=88=A0=
+=E9=99=A4=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=9B=A0">=C3=97</button></span><span =
+class=3D"group-chip" data-id=3D"tgms8ihhh66"><span class=3D"chip-name">CCDC=
+</span><button class=3D"chip-edit" title=3D"=E4=BF=AE=E6=94=B9=E5=9F=BA=E5=
+=9B=A0=E5=90=8D">=E6=94=B9</button><button class=3D"chip-del" title=3D"=E5=
+=88=A0=E9=99=A4=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=9B=A0">=C3=97</button></span>=
+</div>
+          </div>
+          <div class=3D"experiment-row">
+            <span class=3D"experiment-label">=E5=86=85=E5=8F=82=E5=9F=BA=E5=
+=9B=A0</span>
+            <div id=3D"refGeneContainer" class=3D"group-chip-list"><span cl=
+ass=3D"group-chip ref-chip"><span class=3D"chip-name">ACTB</span><button cl=
+ass=3D"chip-edit" title=3D"=E4=BF=AE=E6=94=B9=E5=86=85=E5=8F=82=E5=9F=BA=E5=
+=9B=A0=E5=90=8D">=E6=94=B9</button><span class=3D"chip-badge">=E5=86=85=E5=
+=8F=82</span></span></div>
+          </div>
+          <div class=3D"experiment-row">
+            <label class=3D"append-count-label" title=3D"=E6=AF=8F=E4=B8=AA=
+=E5=88=86=E7=BB=84=E7=9A=84=E7=8B=AC=E7=AB=8B=E7=94=9F=E7=89=A9=E5=AD=A6=E6=
+=A0=B7=E6=9C=AC=E6=95=B0=E9=87=8F">
+              <span>=E7=94=9F=E7=89=A9=E5=AD=A6=E9=87=8D=E5=A4=8D</span>
+              <input id=3D"biologicalReplicates" class=3D"append-count" typ=
+e=3D"number" min=3D"1" max=3D"24" step=3D"1" value=3D"1">
+            </label>
+            <label class=3D"reps-global-label" title=3D"=E5=90=8C=E4=B8=80=
+=E6=A0=B7=E6=9C=AC=E5=90=8C=E4=B8=80=E5=9F=BA=E5=9B=A0=E7=9A=84=E6=8A=80=E6=
+=9C=AF=E9=87=8D=E5=A4=8D=E5=AD=94=E6=95=B0=EF=BC=8C=E5=85=A8=E5=B1=80=E7=BB=
+=9F=E4=B8=80=E8=AE=BE=E7=BD=AE=EF=BC=9B=E4=BF=AE=E6=94=B9=E4=BC=9A=E5=BD=B1=
+=E5=93=8D=E5=B7=B2=E6=9C=89 Ct =E6=95=B0=E6=8D=AE">
+              <span>=E5=A4=8D=E5=AD=94=E6=95=B0</span>
+              <input id=3D"replicateCount" class=3D"reps-global-input" type=
+=3D"number" min=3D"1" max=3D"6" step=3D"1" value=3D"3">
+            </label>
+          </div>
+          <div class=3D"experiment-row" id=3D"bioGroupRow" style=3D"">
+            <label class=3D"append-line-label" title=3D"=E5=A4=8D=E5=AD=94=
+=E4=B8=BA 1 =E6=97=B6=EF=BC=8C=E5=B0=86=E5=90=8C=E4=B8=80=E5=9F=BA=E5=9B=A0=
+=E7=9A=84=E7=94=9F=E7=89=A9=E5=AD=A6=E9=87=8D=E5=A4=8D=E6=8E=92=E5=88=97=E5=
+=9C=A8=E7=9B=B8=E9=82=BB=E5=AD=94=E4=BD=8D">
+              <input id=3D"bioGroupReplicates" type=3D"checkbox"> =E7=94=9F=
+=E7=89=A9=E5=AD=A6=E9=87=8D=E5=A4=8D=E7=9B=B8=E9=82=BB=E6=8E=92=E5=88=97
+            </label>
+          </div>
+          <div class=3D"experiment-row">
+            <button id=3D"loadPresetBtn" class=3D"button button-primary" ti=
+tle=3D"=E6=8C=89=E5=BD=93=E5=89=8D=E5=AE=9E=E9=AA=8C=E9=85=8D=E7=BD=AE=E9=
+=87=8D=E6=96=B0=E7=94=9F=E6=88=90=E7=82=B9=E6=9D=BF=E6=A8=A1=E6=9D=BF=EF=BC=
+=8C=E8=A6=86=E7=9B=96=E6=89=80=E6=9C=89=E5=8C=BA=E5=9D=97">=E5=88=B7=E6=96=
+=B0=E7=82=B9=E6=9D=BF=E4=BF=A1=E6=81=AF</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class=3D"section-heading" style=3D"margin-top:20px">
+      <div><h2>=E7=AC=AC 2 =E6=AD=A5 =C2=B7 =E7=82=B9=E6=9D=BF=E4=BF=A1=E6=
+=81=AF=E7=A1=AE=E8=AE=A4</h2></div>
+    </div>
+
+    <div class=3D"subsection-heading">
+      <div>
+        <h3>=E7=82=B9=E6=9D=BF=E5=8C=BA=E5=9D=97</h3>
+        <p>=E4=B8=80=E4=B8=AA=E5=8C=BA=E5=9D=97=E4=BB=A3=E8=A1=A8=E5=90=8C=
+=E4=B8=80=E6=A0=B7=E6=9C=AC=E3=80=81=E5=90=8C=E4=B8=80=E5=9F=BA=E5=9B=A0=E7=
+=9A=84=E4=B8=80=E7=BB=84=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D=E3=80=82</p>
+      </div>
+      <div class=3D"subsection-actions">
+        <button id=3D"addBlockBtn" class=3D"button button-ghost">=EF=BC=8B =
+=E6=B7=BB=E5=8A=A0=E6=A0=B7=E6=9C=AC</button>
+                <button id=3D"clearBlocksBtn" class=3D"button button-danger=
+">=E6=B8=85=E7=A9=BA=E5=85=A8=E6=9D=BF</button>
+      </div>
+    </div>
+
+    <div class=3D"table-wrap block-table-wrap">
+      <table class=3D"block-table">
+        <thead><tr><th>=E5=8F=A6=E8=B5=B7=E4=B8=80=E8=A1=8C</th><th>=E6=A0=
+=B7=E6=9C=AC=E5=90=8D=E7=A7=B0</th><th>=E7=BB=84=E5=88=AB</th><th>=E5=9F=BA=
+=E5=9B=A0</th><th>=E7=B1=BB=E5=9E=8B</th><th class=3D"action-col">=E6=8E=92=
+=E5=BA=8F / =E5=88=A0=E9=99=A4</th></tr></thead>
+        <tbody id=3D"blocksBody">
+    <tr data-index=3D"0" data-group-id=3D"ex1" data-gene-id=3D"etg3">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" disabled=3D"" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=
+=8C=E5=BC=80=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB" =
+disabled=3D"">=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"1" data-group-id=3D"ex1" data-gene-id=3D"etg3">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"2" data-group-id=3D"ex1" data-gene-id=3D"etg3">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"3" data-group-id=3D"ex1" data-gene-id=3D"tgms8ihhh66"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"4" data-group-id=3D"ex1" data-gene-id=3D"tgms8ihhh66"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"5" data-group-id=3D"ex1" data-gene-id=3D"tgms8ihhh66"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"6" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"7" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"8" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"9" data-group-id=3D"gms8h98oy9" data-gene-id=3D"etg3"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"10" data-group-id=3D"gms8h98oy9" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"11" data-group-id=3D"gms8h98oy9" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"12" data-group-id=3D"gms8h98oy9" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"13" data-group-id=3D"gms8h98oy9" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"14" data-group-id=3D"gms8h98oy9" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"15" data-group-id=3D"gms8h98oy9" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"16" data-group-id=3D"gms8h98oy9" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"17" data-group-id=3D"gms8h98oy9" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T1-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T1"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"18" data-group-id=3D"gms8ih6505" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"19" data-group-id=3D"gms8ih6505" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"20" data-group-id=3D"gms8ih6505" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"21" data-group-id=3D"gms8ih6505" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"22" data-group-id=3D"gms8ih6505" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"23" data-group-id=3D"gms8ih6505" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"24" data-group-id=3D"gms8ih6505" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"25" data-group-id=3D"gms8ih6505" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"26" data-group-id=3D"gms8ih6505" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"N2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"N2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"27" data-group-id=3D"gms8h9tns4" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"28" data-group-id=3D"gms8h9tns4" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"29" data-group-id=3D"gms8h9tns4" data-gene-id=3D"etg3=
+">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"AADA"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"30" data-group-id=3D"gms8h9tns4" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"31" data-group-id=3D"gms8h9tns4" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"32" data-group-id=3D"gms8h9tns4" data-gene-id=3D"tgms=
+8ihhh66">
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"CCDC"></td>
+      <td><span class=3D"role-text">=E7=9B=AE=E6=A0=87</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"33" data-group-id=3D"gms8h9tns4" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep1"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"34" data-group-id=3D"gms8h9tns4" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep2"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr>
+    <tr data-index=3D"35" data-group-id=3D"gms8h9tns4" data-gene-id=3D"ref"=
+>
+      <td><input class=3D"break-toggle" data-field=3D"breakBefore" type=3D"=
+checkbox" title=3D"=E4=BB=8E=E6=96=B0=E7=9A=84=E4=B8=80=E8=A1=8C=E5=BC=80=
+=E5=A7=8B"></td>
+      <td><input data-field=3D"sample" value=3D"T2-BioRep3"></td>
+      <td><input data-field=3D"group" value=3D"T2"></td>
+      <td><input data-field=3D"gene" value=3D"ACTB"></td>
+      <td><span class=3D"role-text">=E5=86=85=E5=8F=82</span></td>
+      <td class=3D"action-col"><div class=3D"block-actions">
+        <button class=3D"icon-button move-up" title=3D"=E4=B8=8A=E7=A7=BB">=
+=E2=86=91</button>
+        <button class=3D"icon-button move-down" title=3D"=E4=B8=8B=E7=A7=BB=
+" disabled=3D"">=E2=86=93</button>
+        <button class=3D"icon-button danger remove-block" title=3D"=E5=88=
+=A0=E9=99=A4">=C3=97</button>
+      </div></td>
+    </tr></tbody>
+      </table>
+    </div>
+
+    <div id=3D"plateAlert" class=3D"alerts plate-alert"></div>
+    <div style=3D"margin-top:6px"><button id=3D"exportPlateBtn" class=3D"bu=
+tton button-ghost">=E5=AF=BC=E5=87=BA=E7=82=B9=E6=9D=BF=E6=B8=85=E5=8D=95</=
+button></div>
+    <div class=3D"plate-scroll">
+      <div id=3D"plateGrid" class=3D"plate-grid plate-96" aria-label=3D"=E5=
+=AD=94=E6=9D=BF=E9=A2=84=E8=A7=88" style=3D"--plate-cols: 12; --plate-rows:=
+ 8;"><div class=3D"plate-corner" style=3D"grid-row:1;grid-column:1"></div><=
+div class=3D"plate-col-label" style=3D"grid-row:1;grid-column:2">1</div><di=
+v class=3D"plate-col-label" style=3D"grid-row:1;grid-column:3">2</div><div =
+class=3D"plate-col-label" style=3D"grid-row:1;grid-column:4">3</div><div cl=
+ass=3D"plate-col-label" style=3D"grid-row:1;grid-column:5">4</div><div clas=
+s=3D"plate-col-label" style=3D"grid-row:1;grid-column:6">5</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:7">6</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:8">7</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:9">8</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:10">9</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:11">10</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:12">11</div><div class=
+=3D"plate-col-label" style=3D"grid-row:1;grid-column:13">12</div><div class=
+=3D"plate-row-label" style=3D"grid-row:2;grid-column:1">A</div><div class=
+=3D"well-group" style=3D"grid-row:2;grid-column:2 / span 1"><div class=3D"p=
+late-well group-0 " title=3D"N1-BioRep1 =C2=B7 N1 =C2=B7 AADA =C2=B7 =E9=87=
+=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A1</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep1</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:3=
+ / span 1"><div class=3D"plate-well group-0 " title=3D"N1-BioRep2 =C2=B7 N1=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A2</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep2</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:4=
+ / span 1"><div class=3D"plate-well group-0 " title=3D"N1-BioRep3 =C2=B7 N1=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A3</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep3</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:5=
+ / span 1"><div class=3D"plate-well group-0 " title=3D"N1-BioRep1 =C2=B7 N1=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A4</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep1</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:6=
+ / span 1"><div class=3D"plate-well group-0 " title=3D"N1-BioRep2 =C2=B7 N1=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A5</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep2</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:7=
+ / span 1"><div class=3D"plate-well group-0 " title=3D"N1-BioRep3 =C2=B7 N1=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A6</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N1-BioRep3</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:8=
+ / span 1"><div class=3D"plate-well group-0 reference" title=3D"N1-BioRep1 =
+=C2=B7 N1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A7</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N1-BioRep1</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:9=
+ / span 1"><div class=3D"plate-well group-0 reference" title=3D"N1-BioRep2 =
+=C2=B7 N1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A8</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N1-BioRep2</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:1=
+0 / span 1"><div class=3D"plate-well group-0 reference" title=3D"N1-BioRep3=
+ =C2=B7 N1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A9</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N1-BioRep3</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:1=
+1 / span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep1 =C2=B7 T=
+1 =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A10</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep1</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:1=
+2 / span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep2 =C2=B7 T=
+1 =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A11</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep2</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:2;grid-column:1=
+3 / span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep3 =C2=B7 T=
+1 =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">A12</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep3</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"plate-row-label" style=3D"grid-row:3;grid-col=
+umn:1">B</div><div class=3D"well-group" style=3D"grid-row:3;grid-column:2 /=
+ span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep1 =C2=B7 T1 =
+=C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B1</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep1</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:3=
+ / span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep2 =C2=B7 T1=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B2</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep2</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:4=
+ / span 1"><div class=3D"plate-well group-1 " title=3D"T1-BioRep3 =C2=B7 T1=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B3</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T1-BioRep3</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:5=
+ / span 1"><div class=3D"plate-well group-1 reference" title=3D"T1-BioRep1 =
+=C2=B7 T1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B4</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T1-BioRep1</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:6=
+ / span 1"><div class=3D"plate-well group-1 reference" title=3D"T1-BioRep2 =
+=C2=B7 T1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B5</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T1-BioRep2</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:7=
+ / span 1"><div class=3D"plate-well group-1 reference" title=3D"T1-BioRep3 =
+=C2=B7 T1 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B6</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T1-BioRep3</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group cluster-split" style=3D"grid-row:3=
+;grid-column:8 / span 1"><div class=3D"plate-well group-2 " title=3D"N2-Bio=
+Rep1 =C2=B7 N2 =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B7</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep1</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:9=
+ / span 1"><div class=3D"plate-well group-2 " title=3D"N2-BioRep2 =C2=B7 N2=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B8</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep2</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:1=
+0 / span 1"><div class=3D"plate-well group-2 " title=3D"N2-BioRep3 =C2=B7 N=
+2 =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B9</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep3</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:1=
+1 / span 1"><div class=3D"plate-well group-2 " title=3D"N2-BioRep1 =C2=B7 N=
+2 =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B10</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep1</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:1=
+2 / span 1"><div class=3D"plate-well group-2 " title=3D"N2-BioRep2 =C2=B7 N=
+2 =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B11</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep2</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:3;grid-column:1=
+3 / span 1"><div class=3D"plate-well group-2 " title=3D"N2-BioRep3 =C2=B7 N=
+2 =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">B12</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">N2-BioRep3</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"plate-row-label" style=3D"grid-row:4;grid-col=
+umn:1">C</div><div class=3D"well-group" style=3D"grid-row:4;grid-column:2 /=
+ span 1"><div class=3D"plate-well group-2 reference" title=3D"N2-BioRep1 =
+=C2=B7 N2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C1</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N2-BioRep1</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:3=
+ / span 1"><div class=3D"plate-well group-2 reference" title=3D"N2-BioRep2 =
+=C2=B7 N2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C2</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N2-BioRep2</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:4=
+ / span 1"><div class=3D"plate-well group-2 reference" title=3D"N2-BioRep3 =
+=C2=B7 N2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C3</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">N2-BioRep3</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:5=
+ / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep1 =C2=B7 T2=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C4</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep1</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:6=
+ / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep2 =C2=B7 T2=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C5</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep2</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:7=
+ / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep3 =C2=B7 T2=
+ =C2=B7 AADA =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C6</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep3</span>
+      <span class=3D"well-gene">AADA</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:8=
+ / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep1 =C2=B7 T2=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C7</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep1</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:9=
+ / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep2 =C2=B7 T2=
+ =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C8</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep2</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:1=
+0 / span 1"><div class=3D"plate-well group-3 " title=3D"T2-BioRep3 =C2=B7 T=
+2 =C2=B7 CCDC =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C9</span>
+      <span class=3D"well-role">R1</span>
+      <span class=3D"well-sample">T2-BioRep3</span>
+      <span class=3D"well-gene">CCDC</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:1=
+1 / span 1"><div class=3D"plate-well group-3 reference" title=3D"T2-BioRep1=
+ =C2=B7 T2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C10</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T2-BioRep1</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:1=
+2 / span 1"><div class=3D"plate-well group-3 reference" title=3D"T2-BioRep2=
+ =C2=B7 T2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C11</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T2-BioRep2</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"well-group" style=3D"grid-row:4;grid-column:1=
+3 / span 1"><div class=3D"plate-well group-3 reference" title=3D"T2-BioRep3=
+ =C2=B7 T2 =C2=B7 ACTB =C2=B7 =E9=87=8D=E5=A4=8D 1">
+      <span class=3D"well-id">C12</span>
+      <span class=3D"well-role">=E5=86=85=E5=8F=82</span>
+      <span class=3D"well-sample">T2-BioRep3</span>
+      <span class=3D"well-gene">ACTB</span>
+    </div></div><div class=3D"plate-row-label" style=3D"grid-row:5;grid-col=
+umn:1">D</div><button type=3D"button" class=3D"plate-well empty" data-well=
+=3D"D1" style=3D"grid-row:5;grid-column:2" title=3D"=E7=82=B9=E5=87=BB=E5=
+=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=
+=B9"><span class=3D"well-id">D1</span></button><button type=3D"button" clas=
+s=3D"plate-well empty" data-well=3D"D2" style=3D"grid-row:5;grid-column:3" =
+title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=
+=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">D2</span></butto=
+n><button type=3D"button" class=3D"plate-well empty" data-well=3D"D3" style=
+=3D"grid-row:5;grid-column:4" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=
+=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span clas=
+s=3D"well-id">D3</span></button><button type=3D"button" class=3D"plate-well=
+ empty" data-well=3D"D4" style=3D"grid-row:5;grid-column:5" title=3D"=E7=82=
+=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=
+=E8=B5=B7=E7=82=B9"><span class=3D"well-id">D4</span></button><button type=
+=3D"button" class=3D"plate-well empty" data-well=3D"D5" style=3D"grid-row:5=
+;grid-column:6" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id=
+">D5</span></button><button type=3D"button" class=3D"plate-well empty" data=
+-well=3D"D6" style=3D"grid-row:5;grid-column:7" title=3D"=E7=82=B9=E5=87=BB=
+=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=
+=82=B9"><span class=3D"well-id">D6</span></button><button type=3D"button" c=
+lass=3D"plate-well empty" data-well=3D"D7" style=3D"grid-row:5;grid-column:=
+8" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=
+=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">D7</span></bu=
+tton><button type=3D"button" class=3D"plate-well empty" data-well=3D"D8" st=
+yle=3D"grid-row:5;grid-column:9" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=
+=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span c=
+lass=3D"well-id">D8</span></button><button type=3D"button" class=3D"plate-w=
+ell empty" data-well=3D"D9" style=3D"grid-row:5;grid-column:10" title=3D"=
+=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=
+=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">D9</span></button><button=
+ type=3D"button" class=3D"plate-well empty" data-well=3D"D10" style=3D"grid=
+-row:5;grid-column:11" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=
+=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"w=
+ell-id">D10</span></button><button type=3D"button" class=3D"plate-well empt=
+y" data-well=3D"D11" style=3D"grid-row:5;grid-column:12" title=3D"=E7=82=B9=
+=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=
+=B5=B7=E7=82=B9"><span class=3D"well-id">D11</span></button><button type=3D=
+"button" class=3D"plate-well empty" data-well=3D"D12" style=3D"grid-row:5;g=
+rid-column:13" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=
+=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">D=
+12</span></button><div class=3D"plate-row-label" style=3D"grid-row:6;grid-c=
+olumn:1">E</div><button type=3D"button" class=3D"plate-well empty" data-wel=
+l=3D"E1" style=3D"grid-row:6;grid-column:2" title=3D"=E7=82=B9=E5=87=BB=E5=
+=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=
+=B9"><span class=3D"well-id">E1</span></button><button type=3D"button" clas=
+s=3D"plate-well empty" data-well=3D"E2" style=3D"grid-row:6;grid-column:3" =
+title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=
+=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">E2</span></butto=
+n><button type=3D"button" class=3D"plate-well empty" data-well=3D"E3" style=
+=3D"grid-row:6;grid-column:4" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=
+=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span clas=
+s=3D"well-id">E3</span></button><button type=3D"button" class=3D"plate-well=
+ empty" data-well=3D"E4" style=3D"grid-row:6;grid-column:5" title=3D"=E7=82=
+=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=
+=E8=B5=B7=E7=82=B9"><span class=3D"well-id">E4</span></button><button type=
+=3D"button" class=3D"plate-well empty" data-well=3D"E5" style=3D"grid-row:6=
+;grid-column:6" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id=
+">E5</span></button><button type=3D"button" class=3D"plate-well empty" data=
+-well=3D"E6" style=3D"grid-row:6;grid-column:7" title=3D"=E7=82=B9=E5=87=BB=
+=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=
+=82=B9"><span class=3D"well-id">E6</span></button><button type=3D"button" c=
+lass=3D"plate-well empty" data-well=3D"E7" style=3D"grid-row:6;grid-column:=
+8" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=
+=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">E7</span></bu=
+tton><button type=3D"button" class=3D"plate-well empty" data-well=3D"E8" st=
+yle=3D"grid-row:6;grid-column:9" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=
+=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span c=
+lass=3D"well-id">E8</span></button><button type=3D"button" class=3D"plate-w=
+ell empty" data-well=3D"E9" style=3D"grid-row:6;grid-column:10" title=3D"=
+=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=
+=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">E9</span></button><button=
+ type=3D"button" class=3D"plate-well empty" data-well=3D"E10" style=3D"grid=
+-row:6;grid-column:11" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=
+=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"w=
+ell-id">E10</span></button><button type=3D"button" class=3D"plate-well empt=
+y" data-well=3D"E11" style=3D"grid-row:6;grid-column:12" title=3D"=E7=82=B9=
+=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=
+=B5=B7=E7=82=B9"><span class=3D"well-id">E11</span></button><button type=3D=
+"button" class=3D"plate-well empty" data-well=3D"E12" style=3D"grid-row:6;g=
+rid-column:13" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=
+=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">E=
+12</span></button><div class=3D"plate-row-label" style=3D"grid-row:7;grid-c=
+olumn:1">F</div><button type=3D"button" class=3D"plate-well empty" data-wel=
+l=3D"F1" style=3D"grid-row:7;grid-column:2" title=3D"=E7=82=B9=E5=87=BB=E5=
+=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=
+=B9"><span class=3D"well-id">F1</span></button><button type=3D"button" clas=
+s=3D"plate-well empty" data-well=3D"F2" style=3D"grid-row:7;grid-column:3" =
+title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=
+=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">F2</span></butto=
+n><button type=3D"button" class=3D"plate-well empty" data-well=3D"F3" style=
+=3D"grid-row:7;grid-column:4" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=
+=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span clas=
+s=3D"well-id">F3</span></button><button type=3D"button" class=3D"plate-well=
+ empty" data-well=3D"F4" style=3D"grid-row:7;grid-column:5" title=3D"=E7=82=
+=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=
+=E8=B5=B7=E7=82=B9"><span class=3D"well-id">F4</span></button><button type=
+=3D"button" class=3D"plate-well empty" data-well=3D"F5" style=3D"grid-row:7=
+;grid-column:6" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id=
+">F5</span></button><button type=3D"button" class=3D"plate-well empty" data=
+-well=3D"F6" style=3D"grid-row:7;grid-column:7" title=3D"=E7=82=B9=E5=87=BB=
+=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=
+=82=B9"><span class=3D"well-id">F6</span></button><button type=3D"button" c=
+lass=3D"plate-well empty" data-well=3D"F7" style=3D"grid-row:7;grid-column:=
+8" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=
+=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">F7</span></bu=
+tton><button type=3D"button" class=3D"plate-well empty" data-well=3D"F8" st=
+yle=3D"grid-row:7;grid-column:9" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=
+=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span c=
+lass=3D"well-id">F8</span></button><button type=3D"button" class=3D"plate-w=
+ell empty" data-well=3D"F9" style=3D"grid-row:7;grid-column:10" title=3D"=
+=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=
+=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">F9</span></button><button=
+ type=3D"button" class=3D"plate-well empty" data-well=3D"F10" style=3D"grid=
+-row:7;grid-column:11" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=
+=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"w=
+ell-id">F10</span></button><button type=3D"button" class=3D"plate-well empt=
+y" data-well=3D"F11" style=3D"grid-row:7;grid-column:12" title=3D"=E7=82=B9=
+=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=
+=B5=B7=E7=82=B9"><span class=3D"well-id">F11</span></button><button type=3D=
+"button" class=3D"plate-well empty" data-well=3D"F12" style=3D"grid-row:7;g=
+rid-column:13" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=
+=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">F=
+12</span></button><div class=3D"plate-row-label" style=3D"grid-row:8;grid-c=
+olumn:1">G</div><button type=3D"button" class=3D"plate-well empty" data-wel=
+l=3D"G1" style=3D"grid-row:8;grid-column:2" title=3D"=E7=82=B9=E5=87=BB=E5=
+=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=
+=B9"><span class=3D"well-id">G1</span></button><button type=3D"button" clas=
+s=3D"plate-well empty" data-well=3D"G2" style=3D"grid-row:8;grid-column:3" =
+title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=
+=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">G2</span></butto=
+n><button type=3D"button" class=3D"plate-well empty" data-well=3D"G3" style=
+=3D"grid-row:8;grid-column:4" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=
+=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span clas=
+s=3D"well-id">G3</span></button><button type=3D"button" class=3D"plate-well=
+ empty" data-well=3D"G4" style=3D"grid-row:8;grid-column:5" title=3D"=E7=82=
+=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=
+=E8=B5=B7=E7=82=B9"><span class=3D"well-id">G4</span></button><button type=
+=3D"button" class=3D"plate-well empty" data-well=3D"G5" style=3D"grid-row:8=
+;grid-column:6" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id=
+">G5</span></button><button type=3D"button" class=3D"plate-well empty" data=
+-well=3D"G6" style=3D"grid-row:8;grid-column:7" title=3D"=E7=82=B9=E5=87=BB=
+=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=
+=82=B9"><span class=3D"well-id">G6</span></button><button type=3D"button" c=
+lass=3D"plate-well empty" data-well=3D"G7" style=3D"grid-row:8;grid-column:=
+8" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=
+=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">G7</span></bu=
+tton><button type=3D"button" class=3D"plate-well empty" data-well=3D"G8" st=
+yle=3D"grid-row:8;grid-column:9" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=
+=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span c=
+lass=3D"well-id">G8</span></button><button type=3D"button" class=3D"plate-w=
+ell empty" data-well=3D"G9" style=3D"grid-row:8;grid-column:10" title=3D"=
+=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=
+=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">G9</span></button><button=
+ type=3D"button" class=3D"plate-well empty" data-well=3D"G10" style=3D"grid=
+-row:8;grid-column:11" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=
+=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"w=
+ell-id">G10</span></button><button type=3D"button" class=3D"plate-well empt=
+y" data-well=3D"G11" style=3D"grid-row:8;grid-column:12" title=3D"=E7=82=B9=
+=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=
+=B5=B7=E7=82=B9"><span class=3D"well-id">G11</span></button><button type=3D=
+"button" class=3D"plate-well empty" data-well=3D"G12" style=3D"grid-row:8;g=
+rid-column:13" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=
+=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">G=
+12</span></button><div class=3D"plate-row-label" style=3D"grid-row:9;grid-c=
+olumn:1">H</div><button type=3D"button" class=3D"plate-well empty" data-wel=
+l=3D"H1" style=3D"grid-row:9;grid-column:2" title=3D"=E7=82=B9=E5=87=BB=E5=
+=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=
+=B9"><span class=3D"well-id">H1</span></button><button type=3D"button" clas=
+s=3D"plate-well empty" data-well=3D"H2" style=3D"grid-row:9;grid-column:3" =
+title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=
+=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">H2</span></butto=
+n><button type=3D"button" class=3D"plate-well empty" data-well=3D"H3" style=
+=3D"grid-row:9;grid-column:4" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=
+=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span clas=
+s=3D"well-id">H3</span></button><button type=3D"button" class=3D"plate-well=
+ empty" data-well=3D"H4" style=3D"grid-row:9;grid-column:5" title=3D"=E7=82=
+=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=
+=E8=B5=B7=E7=82=B9"><span class=3D"well-id">H4</span></button><button type=
+=3D"button" class=3D"plate-well empty" data-well=3D"H5" style=3D"grid-row:9=
+;grid-column:6" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id=
+">H5</span></button><button type=3D"button" class=3D"plate-well empty" data=
+-well=3D"H6" style=3D"grid-row:9;grid-column:7" title=3D"=E7=82=B9=E5=87=BB=
+=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=
+=82=B9"><span class=3D"well-id">H6</span></button><button type=3D"button" c=
+lass=3D"plate-well empty" data-well=3D"H7" style=3D"grid-row:9;grid-column:=
+8" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=
+=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">H7</span></bu=
+tton><button type=3D"button" class=3D"plate-well empty" data-well=3D"H8" st=
+yle=3D"grid-row:9;grid-column:9" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=
+=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span c=
+lass=3D"well-id">H8</span></button><button type=3D"button" class=3D"plate-w=
+ell empty" data-well=3D"H9" style=3D"grid-row:9;grid-column:10" title=3D"=
+=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=
+=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">H9</span></button><button=
+ type=3D"button" class=3D"plate-well empty" data-well=3D"H10" style=3D"grid=
+-row:9;grid-column:11" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=
+=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"w=
+ell-id">H10</span></button><button type=3D"button" class=3D"plate-well empt=
+y" data-well=3D"H11" style=3D"grid-row:9;grid-column:12" title=3D"=E7=82=B9=
+=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=
+=B5=B7=E7=82=B9"><span class=3D"well-id">H11</span></button><button type=3D=
+"button" class=3D"plate-well empty" data-well=3D"H12" style=3D"grid-row:9;g=
+rid-column:13" title=3D"=E7=82=B9=E5=87=BB=E5=B0=86=E6=AD=A4=E5=AD=94=E8=AE=
+=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9"><span class=3D"well-id">H=
+12</span></button></div>
+    </div>
+    <div id=3D"plateLegend" class=3D"plate-legend"><span class=3D"legend-it=
+em"><span class=3D"legend-dot group-0"></span>N1</span><span class=3D"legen=
+d-item"><span class=3D"legend-dot group-1"></span>T1</span><span class=3D"l=
+egend-item"><span class=3D"legend-dot group-2"></span>N2</span><span class=
+=3D"legend-item"><span class=3D"legend-dot group-3"></span>T2</span><span c=
+lass=3D"legend-item"><span class=3D"legend-line"></span>=E8=99=9A=E7=BA=BF=
+=E8=BE=B9=E6=A1=86 =3D =E5=86=85=E5=8F=82</span><span class=3D"legend-item"=
+><span class=3D"legend-frame"></span>=E6=B5=85=E6=A1=86 =3D =E5=90=8C=E4=B8=
+=80=E5=8C=BA=E5=9D=97=EF=BC=88=E4=B8=80=E7=BB=84=E6=8A=80=E6=9C=AF=E9=87=8D=
+=E5=A4=8D=EF=BC=89</span></div>
+    <p class=3D"help-text">"=E5=88=B7=E6=96=B0=E7=82=B9=E6=9D=BF=E4=BF=A1=
+=E6=81=AF"=E4=BC=9A=E6=8C=89=E5=BD=93=E5=89=8D=E5=AE=9E=E9=AA=8C=E9=85=8D=
+=E7=BD=AE=E9=87=8D=E6=96=B0=E7=94=9F=E6=88=90=E6=A8=A1=E6=9D=BF=E5=B9=B6=E8=
+=A6=86=E7=9B=96=E6=89=80=E6=9C=89=E5=8C=BA=E5=9D=97=EF=BC=9B"=E5=8A=9F=E8=
+=83=BD=E6=BC=94=E7=A4=BA"=E4=BC=9A=E8=BD=BD=E5=85=A5=E4=B8=80=E4=BB=BD=E5=
+=BD=93=E5=89=8D=E5=AD=94=E6=9D=BF=E8=A7=84=E6=A0=BC=E7=9A=84=E6=BC=94=E7=A4=
+=BA=E6=A8=A1=E6=9D=BF=EF=BC=9B"=E6=B8=85=E7=A9=BA=E5=85=A8=E6=9D=BF"=E4=BC=
+=9A=E7=A7=BB=E9=99=A4=E6=89=80=E6=9C=89=E5=8C=BA=E5=9D=97=E3=80=82=E7=82=B9=
+=E5=87=BB=E4=BB=BB=E6=84=8F=E7=A9=BA=E5=AD=94=E5=8F=AF=E5=B0=86=E5=AE=83=E8=
+=AE=BE=E4=B8=BA=E6=A8=A1=E6=9D=BF=E8=B5=B7=E7=82=B9=E3=80=82=E9=A2=84=E8=A7=
+=88=E5=9B=BE=E4=B8=AD=E5=90=8C=E4=B8=80=E5=8C=BA=E5=9D=97=EF=BC=88=E4=B8=80=
+=E7=BB=84=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D=EF=BC=89=E4=BC=9A=E7=94=A8=E6=
+=B5=85=E8=89=B2=E6=A1=86=E5=9C=88=E5=87=BA=E3=80=82"=E5=AF=BC=E5=87=BA=E6=
+=A8=A1=E6=9D=BF"=E4=BC=9A=E6=8A=8A=E5=BD=93=E5=89=8D=E7=82=B9=E6=9D=BF=E5=
+=8C=BA=E5=9D=97=E4=BF=9D=E5=AD=98=E4=B8=BA JSON =E6=96=87=E4=BB=B6=EF=BC=8C=
+=E4=B9=8B=E5=90=8E=E5=8F=AF=E7=94=A8"=E5=AF=BC=E5=85=A5=E6=A8=A1=E6=9D=BF"=
+=E7=9B=B4=E6=8E=A5=E6=81=A2=E5=A4=8D=E3=80=82</p>
+  </section>
+
+  <section class=3D"card settings-card">
+    <div class=3D"section-heading">
+      <div><h2>=E7=AC=AC 3 =E6=AD=A5 =C2=B7 =E9=80=89=E6=8B=A9=E5=88=86=E6=
+=9E=90=E6=A8=A1=E5=BC=8F=E5=B9=B6=E8=AE=BE=E7=BD=AE=E5=8F=82=E6=95=B0</h2><=
+/div>
+      <button id=3D"resetBtn" class=3D"button button-ghost">=E6=81=A2=E5=A4=
+=8D=E9=BB=98=E8=AE=A4</button>
+    </div>
+    <label class=3D"field" style=3D"margin-bottom:14px;">
+      <span>=E5=88=86=E6=9E=90=E6=A8=A1=E5=BC=8F</span>
+      <select id=3D"workflowSelect">
+        <option value=3D"ddct" selected=3D"">=E7=9B=B8=E5=AF=B9=E8=A1=A8=E8=
+=BE=BE=E9=87=8F=EF=BC=882^-=CE=94=CE=94Ct=EF=BC=89</option>
+        <option value=3D"dct">=E5=BD=92=E4=B8=80=E5=8C=96=E8=A1=A8=E8=BE=BE=
+=E9=87=8F=EF=BC=882^-=CE=94Ct=EF=BC=89</option>
+      </select>
+    </label>
+    <p id=3D"modeDescription" class=3D"mode-description">=E5=86=85=E5=8F=82=
+=E5=9F=BA=E5=9B=A0=EF=BC=9A<strong>ACTB</strong> =C2=B7 =E5=9F=BA=E5=87=86=
+=E7=BB=84=EF=BC=9A<strong>N1=E3=80=81N2</strong> =E2=80=94 =E5=90=84=E6=A0=
+=B7=E6=9C=AC=E6=8C=89=E6=89=80=E5=B1=9E=E7=BB=84=E5=88=AB=E6=8C=87=E5=AE=9A=
+=E7=9A=84=E6=AF=94=E8=BE=83=E5=9F=BA=E5=87=86=E5=88=86=E5=88=AB=E8=AE=A1=E7=
+=AE=97 =CE=94Ct=E3=80=81=CE=94=CE=94Ct =E5=92=8C=E7=9B=B8=E5=AF=B9=E8=A1=A8=
+=E8=BE=BE=E5=80=8D=E6=95=B0=E3=80=82</p>
+    <div class=3D"form-grid">
+      <label class=3D"field"><span>=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D Ct =
+=E6=9C=80=E5=A4=A7=E5=B7=AE=E5=80=BC</span><div class=3D"input-with-unit"><=
+input id=3D"maxSpread" type=3D"number" min=3D"0.1" step=3D"0.1" value=3D"0.=
+5"><span>Ct</span></div></label>
+    </div>
+    <div id=3D"formulaNote" class=3D"formula-note"><strong>=E7=9B=B8=E5=AF=
+=B9=E8=A1=A8=E8=BE=BE=EF=BC=9A</strong>=CE=94Ct =3D Ct(=E7=9B=AE=E6=A0=87=
+=E5=9F=BA=E5=9B=A0) =E2=88=92 Ct(=E5=86=85=E5=8F=82=E5=9F=BA=E5=9B=A0)=EF=
+=BC=9B=CE=94=CE=94Ct =3D =CE=94Ct(=E6=A0=B7=E6=9C=AC) =E2=88=92 =E6=89=80=
+=E5=B1=9E=E7=BB=84=E5=88=AB=E6=8C=87=E5=AE=9A=E6=AF=94=E8=BE=83=E5=9F=BA=E5=
+=87=86=E7=BB=84=E7=9A=84=E5=90=8C=E5=9F=BA=E5=9B=A0=E5=B9=B3=E5=9D=87 =CE=
+=94Ct=EF=BC=9B=E7=9B=B8=E5=AF=B9=E8=A1=A8=E8=BE=BE=E9=87=8F =3D 2<sup>=E2=
+=88=92=CE=94=CE=94Ct</sup>=E3=80=82=E8=AF=AF=E5=B7=AE=E6=A3=92=E4=BB=85=E4=
+=B8=BA=E8=AF=A5=E6=A0=B7=E6=9C=AC=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D=E7=9A=
+=84 SEM=EF=BC=88=CE=94Ct =E5=B1=82=E9=9D=A2=EF=BC=89=EF=BC=8C=E5=9F=BA=E5=
+=87=86=E7=BB=84=E6=A0=B7=E6=9C=AC=E4=B8=8D=E7=94=BB=E8=AF=AF=E5=B7=AE=E6=A3=
+=92=E3=80=82</div>
+  </section>
+
+  <section class=3D"card samples-card">
+    <div class=3D"section-heading">
+      <div><h2>=E7=AC=AC 4 =E6=AD=A5 =C2=B7 =E5=BD=95=E5=85=A5 Ct =E6=95=B0=
+=E6=8D=AE</h2></div>
+      <div class=3D"button-row">
+        <button id=3D"pasteColumnBtn" class=3D"button button-primary">=E7=
+=B2=98=E8=B4=B4=E5=8D=95=E5=88=97 Ct</button>
+        <button id=3D"exampleDataBtn" class=3D"button button-ghost">=E9=9A=
+=8F=E6=9C=BA Ct =E6=B5=8B=E8=AF=95</button>
+        <button id=3D"clearDataBtn" class=3D"button button-danger">=E6=B8=
+=85=E7=A9=BA=E6=95=B0=E6=8D=AE</button>
+      </div>
+    </div>
+
+    <div id=3D"ctColumnPanel" class=3D"paste-panel hidden">
+      <div class=3D"paste-panel-heading">
+        <div>
+          <strong>=E7=BD=97=E6=B0=8F=E5=8D=95=E5=88=97 Ct / Cp =E7=B2=98=E8=
+=B4=B4</strong>
+          <p>=E4=BB=8E Excel =E6=88=96=E7=BD=97=E6=B0=8F=E5=AF=BC=E5=87=BA=
+=E8=A1=A8=E4=B8=AD=E5=A4=8D=E5=88=B6=E4=B8=80=E6=95=B4=E5=88=97 Ct/Cp=EF=BC=
+=8C=E7=B3=BB=E7=BB=9F=E4=BC=9A=E6=8C=89=E5=BD=93=E5=89=8D Ct =E6=95=B0=E6=
+=8D=AE=E8=A1=A8=E7=9A=84=E5=AD=94=E4=BD=8D=E9=A1=BA=E5=BA=8F=E4=BB=8E=E4=B8=
+=8A=E5=88=B0=E4=B8=8B=E4=BE=9D=E6=AC=A1=E5=A1=AB=E5=85=A5=E3=80=82</p>
+        </div>
+        <button id=3D"closeCtColumnBtn" class=3D"icon-button" title=3D"=E5=
+=85=B3=E9=97=AD">=C3=97</button>
+      </div>
+      <textarea id=3D"ctColumnArea" class=3D"paste-area" rows=3D"7" spellch=
+eck=3D"false" placeholder=3D"Cp
+25.12
+25.30
+25.21
+Undetermined
+19.91"></textarea>
+      <div class=3D"button-row">
+        <button id=3D"applyCtColumnBtn" class=3D"button button-primary">=E5=
+=A1=AB=E5=85=A5=E5=BD=93=E5=89=8D=E6=95=B0=E6=8D=AE=E8=A1=A8</button>
+        <span id=3D"ctPasteStatus" class=3D"paste-status">=E6=94=AF=E6=8C=
+=81 Ct=E3=80=81Cq=E3=80=81Cp =E8=A1=A8=E5=A4=B4=EF=BC=9BUndetermined=E3=80=
+=81No Ct=E3=80=81=E7=A9=BA=E8=A1=8C=E4=BC=9A=E4=BF=9D=E7=95=99=E4=B8=BA=E7=
+=A9=BA=E7=99=BD=E5=AD=94=E3=80=82</span>
+      </div>
+    </div>
+
+    <div class=3D"table-wrap">
+      <table id=3D"samplesTable">
+        <thead id=3D"samplesHead"><tr><th>=E5=AD=94=E4=BD=8D</th><th>=E6=A0=
+=B7=E6=9C=AC=E5=90=8D=E7=A7=B0</th><th>=E7=BB=84=E5=88=AB</th><th>=E5=9F=BA=
+=E5=9B=A0</th><th>Ct 1</th><th class=3D"action-col">=E6=93=8D=E4=BD=9C</th>=
+</tr></thead>
+        <tbody id=3D"samplesBody"><tr data-index=3D"0" data-group-id=3D"ex1=
+" data-gene-id=3D"etg3">
+      <td class=3D"readonly-cell">A1</td>
+      <td class=3D"readonly-cell">N1-BioRep1</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"1" data-group-id=3D"ex1" data-gene-id=3D"etg3">
+      <td class=3D"readonly-cell">A2</td>
+      <td class=3D"readonly-cell">N1-BioRep2</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"2" data-group-id=3D"ex1" data-gene-id=3D"etg3">
+      <td class=3D"readonly-cell">A3</td>
+      <td class=3D"readonly-cell">N1-BioRep3</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"3" data-group-id=3D"ex1" data-gene-id=3D"tgms8ih=
+hh66">
+      <td class=3D"readonly-cell">A4</td>
+      <td class=3D"readonly-cell">N1-BioRep1</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"4" data-group-id=3D"ex1" data-gene-id=3D"tgms8ih=
+hh66">
+      <td class=3D"readonly-cell">A5</td>
+      <td class=3D"readonly-cell">N1-BioRep2</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"5" data-group-id=3D"ex1" data-gene-id=3D"tgms8ih=
+hh66">
+      <td class=3D"readonly-cell">A6</td>
+      <td class=3D"readonly-cell">N1-BioRep3</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"6" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td class=3D"readonly-cell">A7</td>
+      <td class=3D"readonly-cell">N1-BioRep1</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"7" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td class=3D"readonly-cell">A8</td>
+      <td class=3D"readonly-cell">N1-BioRep2</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"8" data-group-id=3D"ex1" data-gene-id=3D"ref">
+      <td class=3D"readonly-cell">A9</td>
+      <td class=3D"readonly-cell">N1-BioRep3</td>
+      <td class=3D"readonly-cell">N1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"9" data-group-id=3D"gms8h98oy9" data-gene-id=3D"=
+etg3">
+      <td class=3D"readonly-cell">A10</td>
+      <td class=3D"readonly-cell">T1-BioRep1</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"10" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">A11</td>
+      <td class=3D"readonly-cell">T1-BioRep2</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"11" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">A12</td>
+      <td class=3D"readonly-cell">T1-BioRep3</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"12" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B1</td>
+      <td class=3D"readonly-cell">T1-BioRep1</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"13" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B2</td>
+      <td class=3D"readonly-cell">T1-BioRep2</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"14" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B3</td>
+      <td class=3D"readonly-cell">T1-BioRep3</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"15" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">B4</td>
+      <td class=3D"readonly-cell">T1-BioRep1</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"16" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">B5</td>
+      <td class=3D"readonly-cell">T1-BioRep2</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"17" data-group-id=3D"gms8h98oy9" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">B6</td>
+      <td class=3D"readonly-cell">T1-BioRep3</td>
+      <td class=3D"readonly-cell">T1</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"18" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">B7</td>
+      <td class=3D"readonly-cell">N2-BioRep1</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"19" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">B8</td>
+      <td class=3D"readonly-cell">N2-BioRep2</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"20" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">B9</td>
+      <td class=3D"readonly-cell">N2-BioRep3</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"21" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B10</td>
+      <td class=3D"readonly-cell">N2-BioRep1</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"22" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B11</td>
+      <td class=3D"readonly-cell">N2-BioRep2</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"23" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">B12</td>
+      <td class=3D"readonly-cell">N2-BioRep3</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"24" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C1</td>
+      <td class=3D"readonly-cell">N2-BioRep1</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"25" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C2</td>
+      <td class=3D"readonly-cell">N2-BioRep2</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"26" data-group-id=3D"gms8ih6505" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C3</td>
+      <td class=3D"readonly-cell">N2-BioRep3</td>
+      <td class=3D"readonly-cell">N2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"27" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">C4</td>
+      <td class=3D"readonly-cell">T2-BioRep1</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"28" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">C5</td>
+      <td class=3D"readonly-cell">T2-BioRep2</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"29" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"etg3">
+      <td class=3D"readonly-cell">C6</td>
+      <td class=3D"readonly-cell">T2-BioRep3</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">AADA</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"30" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">C7</td>
+      <td class=3D"readonly-cell">T2-BioRep1</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"31" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">C8</td>
+      <td class=3D"readonly-cell">T2-BioRep2</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"32" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"tgms8ihhh66">
+      <td class=3D"readonly-cell">C9</td>
+      <td class=3D"readonly-cell">T2-BioRep3</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">CCDC</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"33" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C10</td>
+      <td class=3D"readonly-cell">T2-BioRep1</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"34" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C11</td>
+      <td class=3D"readonly-cell">T2-BioRep2</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr><tr data-index=3D"35" data-group-id=3D"gms8h9tns4" data-gene-id=3D=
+"ref">
+      <td class=3D"readonly-cell">C12</td>
+      <td class=3D"readonly-cell">T2-BioRep3</td>
+      <td class=3D"readonly-cell">T2</td>
+      <td class=3D"readonly-cell">ACTB</td>
+      <td><input class=3D"ct-input" data-ct=3D"0" type=3D"number" step=3D"0=
+.01" min=3D"0.01" max=3D"50" value=3D"" title=3D""></td>
+      <td class=3D"action-col"><button class=3D"icon-button danger remove-r=
+ow" title=3D"=E5=88=A0=E9=99=A4">=C3=97</button></td>
+    </tr></tbody>
+      </table>
+    </div>
+    <p class=3D"help-text">=E5=8D=95=E5=88=97 Ct =E4=BC=9A=E4=B8=A5=E6=A0=
+=BC=E6=8C=89=E7=85=A7=E5=BD=93=E5=89=8D=E6=95=B0=E6=8D=AE=E8=A1=A8=E4=BB=8E=
+=E7=AC=AC=E4=B8=80=E8=A1=8C Ct1=E3=80=81Ct2=E3=80=81Ct3=E2=80=A6=E2=80=A6=
+=E5=88=B0=E4=B8=8B=E4=B8=80=E8=A1=8C=E7=BB=A7=E7=BB=AD=E5=A1=AB=E5=85=A5=E3=
+=80=82=E5=BB=BA=E8=AE=AE=E5=85=88"=E5=BA=94=E7=94=A8=E5=88=B0 Ct =E6=95=B0=
+=E6=8D=AE=E8=A1=A8"=EF=BC=8C=E5=86=8D=E7=B2=98=E8=B4=B4=E4=BB=AA=E5=99=A8=
+=E5=AF=BC=E5=87=BA=E7=9A=84=E5=8D=95=E5=88=97=E7=BB=93=E6=9E=9C=E3=80=82</p=
+>
+  </section>
+
+  <section class=3D"card results-card">
+    <div class=3D"section-heading">
+      <div><h2>=E7=AC=AC 5 =E6=AD=A5 =C2=B7 =E5=88=86=E6=9E=90=E7=BB=93=E6=
+=9E=9C</h2></div>
+      <div class=3D"button-row"><button id=3D"copyBtn" class=3D"button butt=
+on-ghost">=E5=A4=8D=E5=88=B6=E7=BB=93=E6=9E=9C</button><button id=3D"export=
+Btn" class=3D"button button-ghost">=E5=AF=BC=E5=87=BA CSV</button></div>
+    </div>
+    <div id=3D"summary" class=3D"summary-grid"><div class=3D"summary-item">=
+<span class=3D"summary-label">=E6=9C=89=E6=95=88=E7=BB=93=E6=9E=9C</span><s=
+pan class=3D"summary-value">0</span></div><div class=3D"summary-item"><span=
+ class=3D"summary-label">=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=9B=A0</span><span c=
+lass=3D"summary-value">0</span></div><div class=3D"summary-item"><span clas=
+s=3D"summary-label">=E9=9C=80=E5=A4=8D=E6=A0=B8</span><span class=3D"summar=
+y-value">0</span></div></div>
+    <div id=3D"alerts" class=3D"alerts"><div class=3D"alert alert-warning">=
+=E8=AF=B7=E5=BD=95=E5=85=A5=E6=88=90=E5=AF=B9=E7=9A=84=E7=9B=AE=E6=A0=87=E5=
+=9F=BA=E5=9B=A0=E4=B8=8E=E5=86=85=E5=8F=82=E5=9F=BA=E5=9B=A0 Ct =E6=95=B0=
+=E6=8D=AE=E3=80=82</div></div>
+    <div id=3D"resultsChart" class=3D"results-chart"></div>
+    <div id=3D"groupChart" class=3D"results-chart"></div>
+    <div class=3D"table-wrap">
+      <table><thead><tr><th>=E6=A0=B7=E6=9C=AC</th><th>=E7=BB=84=E5=88=AB</=
+th><th>=E7=9B=AE=E6=A0=87=E5=9F=BA=E5=9B=A0</th><th>=E6=AF=94=E8=BE=83=E5=
+=9F=BA=E5=87=86</th><th>=E7=9B=AE=E6=A0=87 Ct</th><th>=E5=86=85=E5=8F=82 Ct=
+</th><th>=CE=94Ct</th><th>=CE=94=CE=94Ct</th><th>=E7=9B=B8=E5=AF=B9=E8=A1=
+=A8=E8=BE=BE=E9=87=8F</th><th>=E8=B4=A8=E6=8E=A7</th></tr></thead><tbody id=
+=3D"resultsBody"><tr><td colspan=3D"10" style=3D"text-align:center;color:#6=
+4748b;padding:24px">=E6=9A=82=E6=97=A0=E5=8F=AF=E8=AE=A1=E7=AE=97=E7=BB=93=
+=E6=9E=9C</td></tr></tbody></table>
+    </div>
+  </section>
+
+  <section class=3D"card notes-card">
+    <h2>=E4=BD=BF=E7=94=A8=E8=AF=B4=E6=98=8E</h2>
+    <ul>
+      <li><strong>96 / 384 =E5=AD=94=E6=9D=BF=EF=BC=9A</strong>=E5=88=87=E6=
+=8D=A2=E8=A7=84=E6=A0=BC=E5=90=8E=EF=BC=8C=E8=B5=B7=E5=A7=8B=E8=A1=8C=E5=92=
+=8C=E5=88=97=E4=BC=9A=E8=87=AA=E5=8A=A8=E6=9B=B4=E6=96=B0=EF=BC=9B=E6=A8=A1=
+=E6=9D=BF=E5=8C=BA=E5=9D=97=E5=92=8C=E5=88=86=E6=9E=90=E6=95=B0=E6=8D=AE=E4=
+=B8=8D=E4=BC=9A=E4=B8=A2=E5=A4=B1=E3=80=82</li>
+      <li><strong>=E8=BF=9E=E7=BB=AD=E8=BF=BD=E5=8A=A0=E6=A8=A1=E6=9D=BF=EF=
+=BC=9A</strong>=E9=80=89=E6=8B=A9=E9=A2=84=E8=AE=BE=E4=B8=8E=E8=BF=BD=E5=8A=
+=A0=E4=BB=BD=E6=95=B0=E5=90=8E=E7=82=B9=E5=87=BB"=E8=BF=BD=E5=8A=A0=E6=A8=
+=A1=E6=9D=BF"=EF=BC=8C=E5=B7=B2=E6=9C=89=E5=B8=83=E5=B1=80=E4=B8=8D=E4=BC=
+=9A=E8=A2=AB=E8=A6=86=E7=9B=96=EF=BC=9B=E6=A0=B7=E6=9C=AC=E7=BC=96=E5=8F=B7=
+=E4=BC=9A=E8=87=AA=E5=8A=A8=E9=80=92=E5=A2=9E=E3=80=82</li>
+      <li><strong>=E7=BD=97=E6=B0=8F=E5=8D=95=E5=88=97=E7=BB=93=E6=9E=9C=EF=
+=BC=9A</strong>=E6=94=AF=E6=8C=81 Ct=E3=80=81Cq=E3=80=81Cp =E8=A1=A8=E5=A4=
+=B4=E5=8F=8A Undetermined =E7=AD=89=E7=BC=BA=E5=A4=B1=E5=80=BC=EF=BC=9B=E5=
+=A1=AB=E5=85=A5=E9=A1=BA=E5=BA=8F=E4=B8=8E=E5=BD=93=E5=89=8D Ct =E8=A1=A8=
+=E6=A0=BC=E4=B8=80=E8=87=B4=E3=80=82</li>
+      <li><strong>=E7=9B=B8=E5=AF=B9=E8=A1=A8=E8=BE=BE=E9=87=8F=EF=BC=9A</s=
+trong>=E5=85=88=E8=AE=A1=E7=AE=97 =CE=94Ct =3D =E7=9B=AE=E6=A0=87=E5=9F=BA=
+=E5=9B=A0 Ct =E2=88=92 =E5=86=85=E5=8F=82=E5=9F=BA=E5=9B=A0 Ct=EF=BC=8C=E5=
+=86=8D=E4=BB=A5=E8=AF=A5=E7=BB=84=E5=88=AB=E6=8C=87=E5=AE=9A=E7=9A=84=E6=AF=
+=94=E8=BE=83=E5=9F=BA=E5=87=86=E7=BB=84=E5=B9=B3=E5=9D=87 =CE=94Ct =E8=AE=
+=A1=E7=AE=97 =CE=94=CE=94Ct =E5=92=8C 2^-=CE=94=CE=94Ct=E3=80=82=E6=AF=8F=
+=E4=B8=AA=E5=88=86=E7=BB=84=E5=8F=AF=E9=80=9A=E8=BF=87=E8=8A=AF=E7=89=87=E4=
+=B8=8B=E6=8B=89=E6=A1=86=E9=80=89=E6=8B=A9=E6=AF=94=E8=BE=83=E5=9F=BA=E5=87=
+=86=E3=80=82</li>
+      <li><strong>=E6=8A=80=E6=9C=AF=E9=87=8D=E5=A4=8D=E8=B4=A8=E6=8E=A7=EF=
+=BC=9A</strong>=E5=90=8C=E4=B8=80=E8=A1=8C=E6=9C=89=E6=95=88 Ct =E7=9A=84=
+=E6=9C=80=E5=A4=A7=E5=80=BC=E4=B8=8E=E6=9C=80=E5=B0=8F=E5=80=BC=E4=B9=8B=E5=
+=B7=AE=E8=B6=85=E8=BF=87=E9=98=88=E5=80=BC=E6=97=B6=E4=BC=9A=E6=A0=87=E8=AE=
+=B0=E4=B8=BA=E9=9C=80=E5=A4=8D=E6=A0=B8=E3=80=82</li>
+      <li>=E6=9C=AC Demo =E4=B8=8D=E8=87=AA=E5=8A=A8=E5=89=94=E9=99=A4=E7=
+=A6=BB=E7=BE=A4=E5=AD=94=EF=BC=9B=E6=AD=A3=E5=BC=8F=E5=88=86=E6=9E=90=E5=89=
+=8D=E5=BA=94=E7=BB=93=E5=90=88=E6=89=A9=E5=A2=9E=E6=9B=B2=E7=BA=BF=E3=80=81=
+=E7=86=94=E8=A7=A3=E6=9B=B2=E7=BA=BF=E5=92=8C=E5=AE=9E=E9=AA=8C=E5=AE=A4 SO=
+P =E5=A4=8D=E6=A0=B8=E3=80=82</li>
+      <li>=E6=95=B0=E6=8D=AE=E4=BB=85=E4=BF=9D=E5=AD=98=E5=9C=A8=E5=BD=93=
+=E5=89=8D=E6=B5=8F=E8=A7=88=E5=99=A8=E7=9A=84 localStorage =E4=B8=AD=EF=BC=
+=8C=E4=B8=8D=E4=BC=9A=E4=B8=8A=E4=BC=A0=E5=88=B0=E6=9C=8D=E5=8A=A1=E5=99=A8=
+=E3=80=82</li>
+    </ul>
+  </section>
+</main>
+<footer class=3D"site-footer"><div class=3D"container">qPCR =E5=88=86=E6=9E=
+=90=E5=B7=A5=E5=85=B7 =C2=B7 =E6=95=B0=E6=8D=AE=E4=B8=8D=E4=BC=9A=E7=A6=BB=
+=E5=BC=80=E5=BD=93=E5=89=8D=E6=B5=8F=E8=A7=88=E5=99=A8</div></footer>
+
+
+
+</body></html>
+------MultipartBoundary--3TAiMKloevk6TahWy0AhIOTCTGkSGXQY5pUdbf2iwy----
+Content-Type: text/css
+Content-Transfer-Encoding: quoted-printable
+Content-Location: https://qpcr-tools.pages.dev/styles.css?v=11.1
+
+@charset "utf-8";
+
+:root { color-scheme: light; --bg: #F7F4EE; --surface: #fff; --surface-soft=
+: #f8fafc; --text: #1e293b; --muted: #64748b; --line: #e4e4e7; --primary: #=
+0d9488; --primary-hover: #0f766e; --primary-soft: #f0fdfa; --success: #0478=
+57; --success-soft: #ecfdf5; --warning: #b45309; --warning-soft: #fffbeb; -=
+-danger: #b91c1c; --danger-soft: #fef2f2; --shadow: 0 1px 2px rgba(0,0,0,.0=
+5); --radius: 14px; }
+
+* { box-sizing: border-box; }
+
+html { scroll-behavior: smooth; overflow-x: hidden; }
+
+body { margin: 0px; min-height: 100vh; font-family: ui-sans-serif, system-u=
+i, sans-serif, "Apple Color Emoji", "Segoe UI Emoji"; background: var(--bg)=
+; color: var(--text); line-height: 1.5; }
+
+button, input, select, textarea { font-style: inherit; font-variant: inheri=
+t; font-weight: inherit; font-stretch: inherit; line-height: inherit; font-=
+family: inherit; font-optical-sizing: inherit; font-size-adjust: inherit; f=
+ont-kerning: inherit; font-feature-settings: inherit; font-variation-settin=
+gs: inherit; font-language-override: inherit; font-size: 0.875rem; }
+
+button { cursor: pointer; }
+
+.container { width: min(1280px, 100%); margin: 0px auto; padding: 0px 16px;=
+ }
+
+.site-header { border-bottom: 1px solid rgba(226, 232, 240, 0.8); backgroun=
+d: rgba(255, 255, 255, 0.7); backdrop-filter: blur(12px); position: sticky;=
+ top: 0px; z-index: 10; padding: 16px 0px; }
+
+.header-inner { display: flex; align-items: center; gap: 16px; }
+
+.header-brand { display: flex; align-items: baseline; flex-shrink: 0; line-=
+height: 1; }
+
+.brand-bold { font-family: ui-serif, Georgia, serif; font-size: 1.25rem; fo=
+nt-weight: 600; color: rgb(15, 23, 42); letter-spacing: -0.025em; }
+
+.brand-light { font-size: 1.25rem; font-weight: 300; color: rgb(148, 163, 1=
+84); margin-left: 0.375rem; }
+
+.header-divider { width: 1px; height: 36px; background: rgba(203, 213, 225,=
+ 0.8); }
+
+.header-info { min-width: 0px; }
+
+h1 { margin: 0px; font-size: 1.125rem; line-height: 1.25; font-weight: 600;=
+ }
+
+h2 { margin: 0px; font-size: 1rem; line-height: 1.25; font-weight: 600; }
+
+h3 { margin: 0px; font-size: 0.9rem; font-weight: 600; }
+
+p { margin: 0px; }
+
+.subtitle { margin-top: 2px; color: var(--muted); font-size: 0.875rem; whit=
+e-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.main-grid { display: grid; gap: 24px; margin-top: 24px; padding-bottom: 44=
+px; }
+
+.card { background: var(--surface); border: 1px solid var(--line); border-r=
+adius: var(--radius); box-shadow: var(--shadow); padding: 24px; overflow: h=
+idden; }
+
+.section-heading { display: flex; align-items: center; justify-content: spa=
+ce-between; gap: 16px; margin-bottom: 24px; }
+
+.form-grid { display: grid; grid-template-columns: repeat(3, minmax(0px, 1f=
+r)); gap: 16px; }
+
+.field { display: grid; gap: 6px; min-width: 0px; }
+
+.field > span:first-child { font-size: 0.875rem; font-weight: 500; }
+
+input, select, textarea { width: 100%; min-height: 36px; border: 1px solid =
+var(--line); border-radius: 8px; background: var(--surface); color: var(--t=
+ext); padding: 4px 12px; outline: none; transition: 0.2s; }
+
+input:focus, select:focus, textarea:focus { border-color: var(--primary); b=
+ox-shadow: rgba(13, 148, 136, 0.15) 0px 0px 0px 3px; }
+
+.input-with-unit { position: relative; }
+
+.input-with-unit input { padding-right: 54px; }
+
+.input-with-unit > span { position: absolute; right: 12px; top: 50%; transf=
+orm: translateY(-50%); color: var(--muted); font-size: 0.8rem; }
+
+.mode-description { margin: 0px 0px 14px; color: var(--muted); font-size: 0=
+.875rem; }
+
+.formula-note { margin-top: 14px; padding: 12px 14px; border-radius: 8px; b=
+ackground: var(--primary-soft); color: rgb(17, 94, 89); font-size: 0.8rem; =
+}
+
+.button-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap=
+; }
+
+.button { min-height: 32px; border-radius: 8px; padding: 5px 12px; border: =
+1px solid transparent; font-size: 0.875rem; font-weight: 500; white-space: =
+nowrap; }
+
+.button-primary { background: var(--primary); color: rgb(255, 255, 255); }
+
+.button-primary:hover { background: var(--primary-hover); }
+
+.button-ghost { background: var(--surface); color: rgb(71, 85, 105); border=
+-color: var(--line); }
+
+.button-ghost:hover { background: rgb(244, 244, 245); }
+
+.button-danger { background: var(--danger); color: rgb(255, 255, 255); }
+
+.button-danger:hover { background: rgb(153, 27, 27); }
+
+.table-wrap { overflow-x: auto; max-width: 100%; }
+
+table { width: 100%; border-collapse: collapse; min-width: 900px; font-size=
+: 0.875rem; }
+
+th, td { text-align: left; vertical-align: middle; }
+
+th { padding: 8px 8px 8px 0px; border-bottom: 1px solid var(--line); color:=
+ var(--muted); font-weight: 500; white-space: nowrap; }
+
+td { padding: 5px 8px 5px 0px; border-bottom: 1px solid rgb(241, 245, 249);=
+ }
+
+td input, td select { min-width: 92px; min-height: 32px; }
+
+.action-col { width: 118px; text-align: center; }
+
+.icon-button { width: 30px; height: 30px; border: 1px solid transparent; bo=
+rder-radius: 8px; background: transparent; color: rgb(148, 163, 184); font-=
+size: 0.95rem; padding: 0px; }
+
+.icon-button:hover { background: rgb(244, 244, 245); color: rgb(71, 85, 105=
+); }
+
+.icon-button.danger:hover { color: rgb(239, 68, 68); }
+
+.help-text { margin: 8px 2px 0px; color: var(--muted); font-size: 0.75rem; =
+}
+
+.summary-grid { display: grid; grid-template-columns: repeat(4, minmax(0px,=
+ 1fr)); gap: 10px; margin-bottom: 14px; }
+
+.summary-item { padding: 12px 14px; border: 1px solid var(--line); border-r=
+adius: 8px; background: var(--surface-soft); }
+
+.summary-label { display: block; color: var(--muted); font-size: 0.7rem; fo=
+nt-weight: 600; }
+
+.summary-value { display: block; margin-top: 2px; font-size: 1rem; font-wei=
+ght: 700; }
+
+.alerts { display: grid; gap: 6px; margin-bottom: 14px; }
+
+.alert { padding: 10px 12px; border-radius: 8px; font-size: 0.8rem; }
+
+.alert-warning { background: var(--warning-soft); color: var(--warning); }
+
+.alert-danger { background: var(--danger-soft); color: var(--danger); }
+
+.alert-success { background: var(--success-soft); color: var(--success); }
+
+.status { display: inline-block; padding: 2px 8px; border-radius: 999px; fo=
+nt-size: 0.75rem; font-weight: 500; white-space: nowrap; }
+
+.status-ok { background: var(--primary); color: rgb(255, 255, 255); }
+
+.status-warning { background: rgb(254, 243, 199); color: rgb(180, 83, 9); }
+
+.paste-area { width: 100%; min-height: 72px; margin: 8px 0px; border: 1px s=
+olid var(--line); border-radius: 8px; padding: 8px 12px; font-family: inher=
+it; font-size: 0.8rem; resize: vertical; }
+
+.paste-panel { margin: 0px 0px 14px; padding: 14px; border: 1px solid var(-=
+-line); border-radius: 10px; background: var(--surface-soft); }
+
+.paste-panel-heading { display: flex; align-items: flex-start; justify-cont=
+ent: space-between; gap: 12px; }
+
+.paste-panel-heading strong { font-size: 0.875rem; }
+
+.paste-panel-heading p { margin-top: 3px; color: var(--muted); font-size: 0=
+.75rem; }
+
+.paste-panel .paste-area { margin: 10px 0px; }
+
+.paste-status { font-size: 0.75rem; color: var(--muted); }
+
+.paste-status-success { color: var(--success); }
+
+.paste-status-warning { color: var(--warning); }
+
+.hidden { display: none !important; }
+
+.results-chart { overflow-x: auto; margin: 16px 0px; }
+
+.results-chart svg { display: block; }
+
+.notes-card { box-shadow: none; }
+
+.notes-card ul { margin: 12px 0px 0px; padding-left: 1.25rem; color: var(--=
+muted); font-size: 0.8rem; }
+
+.notes-card li + li { margin-top: 5px; }
+
+.site-footer { padding: 24px 0px; color: rgb(148, 163, 184); text-align: ce=
+nter; font-size: 0.75rem; }
+
+.plate-settings-grid { display: grid; grid-template-columns: repeat(5, minm=
+ax(120px, 1fr)); gap: 12px; align-items: end; }
+
+.inline-control { display: flex; gap: 8px; }
+
+.inline-control select { min-width: 0px; }
+
+.template-control { flex-flow: column wrap; }
+
+.template-control select { flex: 1 1 220px; }
+
+.template-control .button { flex: 0 0 auto; }
+
+.field-wide { min-width: 240px; grid-column: 1 / -1; }
+
+.subsection-heading { display: flex; align-items: end; justify-content: spa=
+ce-between; gap: 16px; margin: 22px 0px 8px; }
+
+.subsection-heading p { margin-top: 3px; color: var(--muted); font-size: 0.=
+75rem; }
+
+.subsection-actions { display: flex; gap: 8px; }
+
+.block-table-wrap { border-top: 1px solid rgb(241, 245, 249); }
+
+.block-table { min-width: 860px; }
+
+.block-table td:first-child, .block-table th:first-child { text-align: cent=
+er; width: 76px; }
+
+.block-table .break-toggle { width: 18px; min-width: 18px; min-height: 18px=
+; accent-color: var(--primary); }
+
+.role-text { font-size: 0.78rem; font-weight: 500; color: var(--muted); }
+
+.block-table .repeat-input { min-width: 68px; width: 68px; }
+
+.block-actions { display: flex; justify-content: center; gap: 2px; }
+
+.plate-alert { margin-top: 14px; }
+
+.plate-scroll { overflow-x: auto; padding: 4px 0px 8px; }
+
+.plate-grid { --plate-cols: 12; --plate-rows: 8; --well-width: 68px; --well=
+-height: 56px; display: grid; grid-template-columns: 28px repeat(var(--plat=
+e-cols),var(--well-width)); grid-template-rows: 24px repeat(var(--plate-row=
+s),var(--well-height)); gap: 5px; width: max-content; min-width: 100%; alig=
+n-items: stretch; }
+
+.well-group { display: flex; gap: inherit; margin: -2px; padding: 0.5px; bo=
+rder: 1.5px solid rgba(100, 116, 139, 0.45); border-radius: 10px; backgroun=
+d: rgba(100, 116, 139, 0.05); position: relative; }
+
+.well-group.vertical { flex-direction: column; }
+
+.plate-separator { display: flex; align-items: center; height: 4px; align-s=
+elf: center; }
+
+.sep-line { display: block; width: 100%; height: 0px; border-top: 2px dashe=
+d var(--primary); }
+
+.well-group.cluster-split { border-left: 2px solid var(--primary); padding-=
+left: 3px; }
+
+.well-group.cluster-split::before { content: ""; position: absolute; top: 5=
+0%; left: -5px; width: 8px; height: 8px; border-top: 2px solid var(--primar=
+y); border-right: 2px solid var(--primary); transform: translateY(-50%) rot=
+ate(45deg); background: var(--surface); }
+
+.plate-grid.plate-384 { --well-width: 50px; --well-height: 44px; gap: 4px; =
+}
+
+.plate-corner, .plate-col-label, .plate-row-label { display: flex; align-it=
+ems: center; justify-content: center; color: var(--muted); font-size: 0.7re=
+m; font-weight: 600; }
+
+.plate-well { position: relative; border: 1px solid rgb(219, 227, 232); bor=
+der-radius: 9px; background: rgb(251, 252, 253); min-width: var(--well-widt=
+h); min-height: var(--well-height); padding: 5px 6px; text-align: left; col=
+or: var(--muted); overflow: hidden; }
+
+.plate-grid.plate-384 .plate-well { border-radius: 7px; padding: 4px; }
+
+.plate-grid.plate-384 .well-sample { margin-top: 3px; font-size: 0.58rem; }
+
+.plate-grid.plate-384 .well-gene { font-size: 0.55rem; }
+
+.plate-grid.plate-384 .well-role { font-size: 0.47rem; right: 3px; top: 3px=
+; }
+
+.plate-grid.plate-384 .well-id { font-size: 0.52rem; }
+
+.plate-well.empty { cursor: pointer; }
+
+.plate-well.empty:hover { border-color: rgb(153, 246, 228); background: var=
+(--primary-soft); }
+
+.well-id { display: block; font-size: 0.58rem; color: rgb(148, 163, 184); l=
+ine-height: 1; }
+
+.well-sample { display: block; margin-top: 5px; font-size: 0.68rem; font-we=
+ight: 650; color: rgb(51, 65, 85); white-space: nowrap; overflow: hidden; t=
+ext-overflow: ellipsis; }
+
+.well-gene { display: block; font-size: 0.62rem; color: rgb(100, 116, 139);=
+ white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+.plate-well.group-0 { background: rgb(248, 250, 252); border-color: rgb(203=
+, 213, 225); }
+
+.plate-well.group-1 { background: rgb(240, 253, 250); border-color: rgb(94,=
+ 234, 212); }
+
+.plate-well.group-2 { background: rgb(236, 253, 245); border-color: rgb(134=
+, 239, 172); }
+
+.plate-well.group-3 { background: rgb(245, 243, 255); border-color: rgb(196=
+, 181, 253); }
+
+.plate-well.group-4 { background: rgb(255, 247, 237); border-color: rgb(253=
+, 186, 116); }
+
+.plate-well.group-5 { background: rgb(253, 242, 248); border-color: rgb(249=
+, 168, 212); }
+
+.plate-well.reference { border-style: dashed; }
+
+.well-role { position: absolute; right: 4px; top: 4px; font-size: 0.52rem; =
+padding: 1px 4px; border-radius: 99px; background: rgba(255, 255, 255, 0.75=
+); color: rgb(100, 116, 139); }
+
+.plate-legend { display: flex; align-items: center; gap: 12px; flex-wrap: w=
+rap; margin-top: 3px; }
+
+.legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.7=
+rem; color: var(--muted); }
+
+.legend-dot { width: 12px; height: 12px; border: 1px solid rgb(203, 213, 22=
+5); border-radius: 4px; }
+
+.legend-dot.group-0 { background: rgb(248, 250, 252); }
+
+.legend-dot.group-1 { background: rgb(240, 253, 250); border-color: rgb(94,=
+ 234, 212); }
+
+.legend-dot.group-2 { background: rgb(236, 253, 245); border-color: rgb(134=
+, 239, 172); }
+
+.legend-dot.group-3 { background: rgb(245, 243, 255); border-color: rgb(196=
+, 181, 253); }
+
+.legend-dot.group-4 { background: rgb(255, 247, 237); border-color: rgb(253=
+, 186, 116); }
+
+.legend-dot.group-5 { background: rgb(253, 242, 248); border-color: rgb(249=
+, 168, 212); }
+
+.legend-line { width: 16px; border-top: 1px dashed rgb(100, 116, 139); }
+
+.legend-frame { width: 14px; height: 12px; border: 1.5px solid rgba(100, 11=
+6, 139, 0.45); border-radius: 5px; }
+
+.wells-input { min-width: 118px !important; }
+
+.ct-input { min-width: 76px !important; }
+
+.sample-row-warning td { background: rgb(255, 251, 235); }
+
+@media (max-width: 1100px) {
+  .plate-settings-grid { grid-template-columns: repeat(5, minmax(96px, 1fr)=
+); }
+  .field-wide { grid-column: 1 / -1; }
+  .plate-grid { min-width: auto; }
+}
+
+@media (max-width: 639px) {
+  .site-header { padding: 12px 0px; }
+  .header-inner { gap: 12px; }
+  .brand-bold, .brand-light { font-size: 1.125rem; }
+  .header-divider { height: 32px; }
+  .header-info h1 { font-size: 1rem; }
+  .subtitle { font-size: 0.75rem; }
+}
+
+@media (max-width: 768px) {
+  .form-grid { grid-template-columns: 1fr 1fr; }
+  .summary-grid { grid-template-columns: 1fr 1fr; }
+  .card { padding: 20px; }
+  .plate-settings-grid { grid-template-columns: 1fr 1fr; }
+  .subsection-heading { align-items: flex-start; flex-direction: column; }
+}
+
+@media (max-width: 480px) {
+  .container { padding: 0px 8px; }
+  .main-grid { gap: 16px; margin-top: 16px; }
+  .card { padding: 14px; }
+  .section-heading { align-items: flex-start; flex-direction: column; gap: =
+10px; }
+  .form-grid, .plate-settings-grid { grid-template-columns: 1fr; }
+  .field-wide { grid-column: auto; }
+  .subtitle { white-space: normal; }
+  .button-row { width: 100%; }
+  .button-row .button { flex: 1 1 auto; }
+  .inline-control { align-items: stretch; }
+  .inline-control .button { flex: 0 0 auto; }
+}
+
+.append-group { display: flex; align-items: center; gap: 8px; flex-wrap: wr=
+ap; border-left: 1px solid var(--line); padding-left: 12px; }
+
+.append-count-label { display: flex; align-items: center; gap: 4px; color: =
+var(--muted); font-size: 0.8rem; white-space: nowrap; }
+
+.append-count { text-align: center; padding-left: 6px; padding-right: 6px; =
+width: 58px !important; min-width: 58px !important; }
+
+.reps-global-label { display: flex; align-items: center; gap: 4px; color: v=
+ar(--muted); font-size: 0.8rem; white-space: nowrap; }
+
+.reps-global-input { text-align: center; padding-left: 2px; padding-right: =
+2px; width: 52px !important; min-width: 52px !important; }
+
+.gene-names-btn { min-height: 28px; padding: 2px 8px; border: 1px dashed va=
+r(--line); border-radius: 6px; background: var(--surface-soft); color: var(=
+--text); font-size: 0.78rem; cursor: pointer; white-space: nowrap; max-widt=
+h: 200px; overflow: hidden; text-overflow: ellipsis; }
+
+.gene-names-btn:hover { border-color: var(--primary); background: var(--pri=
+mary-soft); }
+
+.experiment-row { display: flex; align-items: center; gap: 8px; flex-wrap: =
+wrap; }
+
+.experiment-label { font-size: 0.8rem; font-weight: 500; color: var(--muted=
+); white-space: nowrap; }
+
+.group-chip-list { display: flex; align-items: center; gap: 6px; flex-wrap:=
+ wrap; }
+
+.chip-line-break { width: 100%; height: 0px; }
+
+.group-chip { display: inline-flex; align-items: center; gap: 4px; padding:=
+ 3px 8px; border: 1px solid var(--line); border-radius: 6px; background: va=
+r(--surface-soft); font-size: 0.78rem; user-select: none; transition: 0.15s=
+; flex-wrap: nowrap; }
+
+.group-chip:hover { border-color: var(--primary); }
+
+.group-chip.chip-baseline { border-color: var(--primary); background: var(-=
+-primary-soft); }
+
+.group-chip.ref-chip { border-style: dashed; border-color: var(--primary); =
+background: var(--primary-soft); }
+
+.chip-name { font-weight: 500; color: var(--text); }
+
+.chip-badge { font-size: 0.65rem; color: var(--primary); font-weight: 600; =
+}
+
+.chip-del { width: 16px; height: 16px; min-height: 16px; flex: 0 0 auto; bo=
+rder-width: medium; border-style: none; border-color: currentcolor; border-=
+image: none; border-radius: 50%; background: transparent; color: var(--mute=
+d); font-size: 0.85rem; line-height: 1; cursor: pointer; padding: 0px; disp=
+lay: inline-flex; align-items: center; justify-content: center; }
+
+.chip-del:hover { background: rgb(254, 226, 226); color: var(--danger); }
+
+.chip-compare { min-height: 22px; max-width: 110px; font-size: 0.68rem; pad=
+ding: 0px 4px; border: 1px solid var(--line); border-radius: 4px; backgroun=
+d: var(--surface); color: var(--text); cursor: pointer; }
+
+.chip-compare:focus { border-color: var(--primary); outline: none; }
+
+.chip-edit { width: 22px; height: 20px; min-width: 22px; min-height: 20px; =
+max-width: 22px; flex: 0 0 22px; border: 1px solid var(--line); border-radi=
+us: 4px; background: var(--surface); color: var(--muted); font-size: 0.68re=
+m; cursor: pointer; padding: 0px; line-height: 1; }
+
+.chip-edit:hover { background: rgb(226, 232, 240); color: var(--primary); b=
+order-color: var(--primary); }
+
+.button-sm { min-height: 28px; padding: 2px 10px; font-size: 0.78rem; }
+
+.paste-panel .button-row { align-items: center; }
+
+.paste-panel .paste-status { flex: 1 1 320px; }
+
+.plate-card .plate-scroll { scrollbar-gutter: stable; }
+
+@media (max-width: 720px) {
+  .template-control { flex-flow: column wrap; }
+  .template-control select { flex-basis: 100%; }
+  .append-group { margin-left: auto; border-left-width: medium; border-left=
+-style: none; border-left-color: currentcolor; padding-left: 0px; }
+}
+
+.append-line-label { display: flex; align-items: center; gap: 5px; color: v=
+ar(--muted); font-size: 0.78rem; white-space: nowrap; }
+
+.append-line-label input { accent-color: var(--primary); padding: 0px; widt=
+h: 16px !important; min-width: 16px !important; min-height: 16px !important=
+; }
+
+.ct-invalid { border-color: rgb(239, 68, 68) !important; background: rgb(25=
+4, 242, 242) !important; }
+
+.readonly-cell { color: var(--text); font-size: 0.875rem; padding: 5px 8px =
+5px 0px; white-space: nowrap; }
+------MultipartBoundary--3TAiMKloevk6TahWy0AhIOTCTGkSGXQY5pUdbf2iwy------

@@ -313,10 +313,10 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Find all rows where a cluster transition occurs (full-width separator)
-  // and same-row split points within a row
-  const clusterTransitionRows = new Set();
+  // Detect cluster transitions per segment
   const sameRowSplits = new Set();
+  // Track per-row cluster membership
+  const rowClusters = new Map(); // row → Set of clusterIds
   let prevCluster = null;
   let prevRow = -1;
   segments.forEach(s => {
@@ -324,18 +324,42 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     if (!first) return;
     const curCluster = first.clusterId;
     const curRow = s.row;
+    if (!rowClusters.has(curRow)) rowClusters.set(curRow, new Set());
+    rowClusters.get(curRow).add(curCluster);
     if (prevCluster !== null && curCluster !== prevCluster) {
-      if (curRow !== prevRow) {
-        // Cluster changed on a new row → full-width separator before this row
-        clusterTransitionRows.add(curRow);
-      } else {
-        // Same row → split marker
+      if (curRow === prevRow) {
         sameRowSplits.add(`${curRow},${s.col}`);
       }
     }
     prevCluster = curCluster;
     prevRow = curRow;
   });
+
+  // Rows that need separators:
+  // 1. Row where a new cluster first appears (different from previous row's last cluster)
+  // 2. Rows above/below shared rows
+  const clusterTransitionRows = new Set();
+  let lastRowCluster = null;
+  for (let r = 0; r < plate.rows.length; r++) {
+    const clusters = rowClusters.get(r);
+    if (!clusters) { lastRowCluster = null; continue; }
+    // If this row has multiple clusters (shared), separate above and below
+    if (clusters.size > 1) {
+      if (r > 0) clusterTransitionRows.add(r);     // separator above
+      if (r + 1 < plate.rows.length) clusterTransitionRows.add(r + 1); // separator below
+    }
+    // Cluster change from previous row
+    if (lastRowCluster !== null) {
+      const prevSet = new Set([lastRowCluster]);
+      const isNew = [...clusters].some(c => !prevSet.has(c));
+      const isOverlap = [...clusters].some(c => prevSet.has(c));
+      if (isNew && !isOverlap) {
+        clusterTransitionRows.add(r); // full-row separator
+      }
+    }
+    // Remember last cluster(s) of this row
+    lastRowCluster = [...clusters].pop();
+  }
 
   const numSeps = clusterTransitionRows.size;
   const sepRows = [...clusterTransitionRows].sort((a, b) => a - b);
