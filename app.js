@@ -1175,10 +1175,11 @@ function handleRenameRefGene(newName) {
 }
 
 function handleAddGroup() {
-  const name = (window.prompt('分组名称：') || '').trim();
-  if (!name) return;
-  if (experiment.groups.some(g => normalizeKey(g.name) === normalizeKey(name))) {
-    window.alert('分组名称不能重复。'); return;
+  let n = experiment.groups.length + 1;
+  let name = `Group-${n}`;
+  while (experiment.groups.some(g => normalizeKey(g.name) === normalizeKey(name))) {
+    n += 1;
+    name = `Group-${n}`;
   }
   experiment = expAddGroup(experiment, name);
   renderGroups(experiment, { groupsContainer: els.groupsContainer, bioRepsInput: els.bioRepsInput,
