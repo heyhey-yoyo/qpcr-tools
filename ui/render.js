@@ -346,18 +346,33 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const totalRows = plate.rows.length + sepRows.length;
   gridEl.style.setProperty('--plate-rows', String(totalRows));
 
-  // Z-split borders for same-row or mid-row transitions
+  // Z-split: collect all cluster-transition cells (from both sameRowSplits and mid-row newRowStarts)
+  const allSplits = new Set(sameRowSplits);
+  // Also add splits for new rows where cluster starts at non-zero col
+  segments.forEach(s => {
+    const first = s.items[0];
+    if (!first || !first.clusterChange) return;
+    if (s.col > 0) allSplits.add(`${s.row},${s.col}`);
+  });
+
   const zAbove = new Set();
   const zTop = new Set();
   const zLeft = new Set();
-  sameRowSplits.forEach(key => {
+  let lastSplitCol = -1; // track previous split column within the same row
+  allSplits.forEach(key => {
     const [r, c] = key.split(',').map(Number);
     zLeft.add(key);
+    // Cell above gets bottom border
     if (r > 0) {
       for (let rr = r - 1; rr >= 0; rr--) {
         const above = segmentStart.get(`${rr},${c}`);
         if (above) { zAbove.add(`${rr},${above.col}`); break; }
       }
+    }
+    // Top border if there's a cell on the row above (different cluster was there)
+    if (r > 0) {
+      const prevRowSegments = segments.filter(s => s.row === r - 1);
+      if (prevRowSegments.length) zTop.add(key);
     }
   });
 
