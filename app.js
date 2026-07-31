@@ -423,7 +423,8 @@ function generatePlacements() {
       if (row < 0 || col < 0 || row >= plate.rows.length || col >= plate.cols) { overflow = true; continue; }
       placements.push({ well: `${plate.rows[row]}${col + 1}`, row, col, blockIndex, rep: rep + 1,
         sample: block.sample || `Sample-${blockIndex + 1}`, group: block.group || '', groupId: block.groupId,
-        gene: block.gene || '', geneId: block.geneId, role: block.role || 'target' });
+        gene: block.gene || '', geneId: block.geneId, role: block.role || 'target',
+        breakBefore: rep === 0 && block.breakBefore });
       advance();
     }
     if (blockIndex < blocks.length - 1 && !blocks[blockIndex + 1].breakBefore) advanceGap();
@@ -679,6 +680,16 @@ function renderPlate() {
       els.startRow.value = parsed.row;
       els.startCol.value = String(parsed.col);
       syncPlateLayout();
+    },
+    onToggleBreakBefore: blockIndex => {
+      if (blockIndex >= 0 && blockIndex < blocks.length) {
+        blocks[blockIndex].breakBefore = false;
+        renderAllBlocks();
+        renderPlate();
+        syncRowsFromBlocks();
+        calculate();
+        save();
+      }
     }
   });
 

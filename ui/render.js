@@ -336,7 +336,12 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         const placement = segment.axis === 'v'
           ? `grid-row:${rowIndex + 2} / span ${segment.span};grid-column:${colIndex + 2}`
           : `grid-row:${rowIndex + 2};grid-column:${colIndex + 2} / span ${segment.span}`;
-        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
+        const isBreakStart = segment.items.some(item => item.breakBefore);
+        const breakCls = isBreakStart ? ' baseline-break' : '';
+        const breakBtn = isBreakStart && callbacks && callbacks.onToggleBreakBefore
+          ? `<button type="button" class="break-cancel" data-block-index="${segment.items[0].blockIndex}" title="取消另起一行">↩</button>`
+          : '';
+        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}${breakCls}" style="${placement}">${segment.items.map(wellHtml).join('')}${breakBtn}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
         html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${rowIndex + 2};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
@@ -349,6 +354,14 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   gridEl.querySelectorAll('.plate-well.empty').forEach(btn => {
     btn.addEventListener('click', () => {
       if (callbacks && callbacks.onSetStartWell) callbacks.onSetStartWell(btn.dataset.well);
+    });
+  });
+  gridEl.querySelectorAll('.break-cancel').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      if (callbacks && callbacks.onToggleBreakBefore) {
+        callbacks.onToggleBreakBefore(Number(btn.dataset.blockIndex));
+      }
     });
   });
 
