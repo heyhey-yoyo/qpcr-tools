@@ -240,10 +240,6 @@ function blankBlock() {
   return { sample: 'Sample-1', group: firstGroup.name, groupId: firstGroup.id, gene: firstGene.name, geneId: firstGene.id, role: 'target', reps: replicateCount, breakBefore: false };
 }
 
-function blankRow() {
-  return { wells: Array(replicateCount).fill(''), name: 'Sample-1', group: 'NC', groupId: null, gene: 'GAPDH', geneId: null, cts: Array(replicateCount).fill('') };
-}
-
 function normalizeBlock(block) {
   return {
     sample: block?.sample || 'Sample-1',
@@ -1274,7 +1270,6 @@ els.repsInput.addEventListener('change', () => {
   syncPlateLayout();
 });
 
-$('#addSampleBtn').addEventListener('click', () => { readRows(); rows.push(blankRow()); renderAllRows(); calculate(); });
 $('#exampleDataBtn').addEventListener('click', () => { readRows(); fillExampleCts(); renderAllRows(); calculate(); });
 $('#clearDataBtn').addEventListener('click', () => {
   readRows();
