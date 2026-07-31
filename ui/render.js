@@ -30,7 +30,36 @@ export function renderGroups(experiment, containers) {
 
   const isBaseline = g => !g.compareToGroupId || g.compareToGroupId === g.id;
 
+  // Order groups: each baseline followed by its dependents, then orphans
+  const baselines = experiment.groups.filter(g => isBaseline(g));
+  const byBaseline = new Map();
+  baselines.forEach(b => byBaseline.set(b.id, []));
+  const orphans = [];
   experiment.groups.forEach(g => {
+    if (isBaseline(g)) return;
+    const cid = g.compareToGroupId;
+    if (cid && byBaseline.has(cid)) byBaseline.get(cid).push(g);
+    else orphans.push(g);
+  });
+
+  const orderedGroups = [];
+  baselines.forEach(b => {
+    orderedGroups.push(b);
+    (byBaseline.get(b.id) || []).forEach(d => orderedGroups.push(d));
+  });
+  orphans.forEach(g => orderedGroups.push(g));
+
+  let first = true;
+  orderedGroups.forEach(g => {
+    // Line break before each baseline (except the first)
+    if (!first && isBaseline(g)) {
+      const br = document.createElement('span');
+      br.className = 'chip-line-break';
+      br.setAttribute('aria-hidden', 'true');
+      frag.appendChild(br);
+    }
+    first = false;
+
     const chip = document.createElement('span');
     chip.className = 'group-chip' + (isBaseline(g) ? ' chip-baseline' : '');
     chip.dataset.id = g.id;
@@ -57,7 +86,6 @@ export function renderGroups(experiment, containers) {
     if (experiment.groups.length > 1) {
       const sel = document.createElement('select');
       sel.className = 'chip-compare';
-      // Option: "作为基准" (value = own id → self-reference = baseline)
       const optBaseline = document.createElement('option');
       optBaseline.value = '';
       optBaseline.textContent = '作为基准';
