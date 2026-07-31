@@ -346,46 +346,41 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   // For each row, find cluster boundaries
   rowCells.forEach((cells, r) => {
     cells.sort((a, b) => a.col - b.col);
-    // Find transitions within the row
     for (let i = 0; i < cells.length - 1; i++) {
       if (cells[i].cluster !== cells[i + 1].cluster) {
-        // Boundary at cells[i+1].col: cells[i] is end of old cluster, cells[i+1] is start of new
-        zLeft.add(`${r},${cells[i + 1].col}`);
-        // Old cluster cells above get bottom border (if old cluster ends on this row)
-        if (r > 0) {
-          const aboveCells = rowCells.get(r - 1) || [];
-          aboveCells.forEach(ac => {
-            if (ac.cluster === cells[i].cluster) {
-              zBelow.add(`${r - 1},${ac.col}`);
+        const splitCol = cells[i + 1].col;
+        // z-left on this row AND all rows below where the new cluster continues
+        zLeft.add(`${r},${splitCol}`);
+        for (let rr = r + 1; rr < plate.rows.length; rr++) {
+          const rc = rowCells.get(rr) || [];
+          if (rc.some(c => c.col === splitCol && c.cluster === cells[i + 1].cluster)) {
+            zLeft.add(`${rr},${splitCol}`);
+          }
+          // Also add if first cell of this row belongs to new cluster
+          if (rc.length > 0 && rc[0].cluster === cells[i + 1].cluster) {
+            zLeft.add(`${rr},${rc[0].col}`);
+          }
+        }
+        // Cells of old cluster on preceding rows get bottom border
+        for (let rr = r; rr >= 0; rr--) {
+          const rc = rowCells.get(rr) || [];
+          rc.forEach(c => {
+            if (c.cluster === cells[i].cluster && c.end >= splitCol) {
+              zBelow.add(`${rr},${c.col}`);
             }
           });
         }
-        // New cluster cells get top border
-        zTop.add(`${r},${cells[i + 1].col}`);
+        // Cells of new cluster on this and subsequent rows get top border
+        zTop.add(`${r},${splitCol}`);
+        for (let rr = r; rr < plate.rows.length; rr++) {
+          const rc = rowCells.get(rr) || [];
+          rc.forEach(c => {
+            if (c.cluster === cells[i + 1].cluster && c.col >= splitCol) {
+              zTop.add(`${rr},${c.col}`);
+            }
+          });
+        }
       }
-    }
-    // Check: do cells of this row's cluster extend to the row below?
-    if (r + 1 < plate.rows.length) {
-      const nextCells = rowCells.get(r + 1) || [];
-      const thisClusters = new Set(cells.map(c => c.cluster));
-      const nextClusters = new Set(nextCells.map(c => c.cluster));
-      // For clusters that exist on this row but NOT on next row: bottom border
-      thisClusters.forEach(cid => {
-        if (!nextClusters.has(cid)) {
-          // All cells of this cluster on this row get bottom border
-          cells.filter(c => c.cluster === cid).forEach(c => {
-            zBelow.add(`${r},${c.col}`);
-          });
-        }
-      });
-      // For clusters that start on next row and NOT on this row: top border
-      nextClusters.forEach(cid => {
-        if (!thisClusters.has(cid)) {
-          nextCells.filter(c => c.cluster === cid).forEach(c => {
-            zTop.add(`${r + 1},${c.col}`);
-          });
-        }
-      });
     }
   });
 
