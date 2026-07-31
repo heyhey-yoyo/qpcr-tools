@@ -313,7 +313,7 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Build a map: row → [{col, end, cluster}] sorted by col
+  // Build row→cells map
   const rowCells = new Map();
   segments.forEach(s => {
     const r = s.row;
@@ -322,34 +322,19 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   });
   rowCells.forEach(cells => cells.sort((a, b) => a.col - b.col));
 
-  // ---- 1. Row separation: find rows where cluster differs from previous row ----
-  const rowBreaks = new Set(); // rows that need a separator above them
-  let lastRowClusters = null;
-  for (let r = 0; r < plate.rows.length; r++) {
-    const cells = rowCells.get(r);
-    if (!cells) { lastRowClusters = null; continue; }
-    const clusters = new Set(cells.map(c => c.cluster));
-    if (lastRowClusters !== null) {
-      const changed = clusters.size !== lastRowClusters.size || [...clusters].some(c => !lastRowClusters.has(c));
-      if (changed) rowBreaks.add(r);
+  // Collect all cluster transition points: (row, col, prevCluster, newCluster)
+  const transitions = [];
+  let prev = null;
+  segments.forEach(s => {
+    const cur = { row: s.row, col: s.col, cluster: s.items[0].clusterId };
+    if (prev && cur.cluster !== prev.cluster) {
+      transitions.push({ row: cur.row, col: cur.col, from: prev.cluster, to: cur.cluster });
     }
-    lastRowClusters = clusters;
-  }
-
-  // ---- 2. Column separation: find same-row cluster boundaries ----
-  const colSplits = new Set(); // (row, col) where a vertical split is needed
-  rowCells.forEach((cells, r) => {
-    for (let i = 0; i < cells.length - 1; i++) {
-      if (cells[i].cluster !== cells[i + 1].cluster) {
-        colSplits.add(`${r},${cells[i + 1].col}`);
-      }
-    }
+    prev = cur;
   });
 
-  // ---- Render ----
-  const sepRows = [...rowBreaks].sort((a, b) => a - b);
-  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
-  gridEl.style.setProperty('--plate-rows', String(plate.rows.length + sepRows.length));
+  // Simple: no separator rows, no cell classes — grid stays clean
+  gridEl.style.setProperty('--plate-rows', String(plate.rows.length));
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -362,40 +347,106 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     </div>`;
   };
 
+  const gr = r => r + 2;
   let html = '<div class="plate-corner" style="grid-row:1;grid-column:1"></div>';
   html += Array.from({ length: plate.cols }, (_, i) => i + 1)
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    const gr = rowShift(rowIndex);
-
-    // Full-row dashed separator between rows with different clusters
-    if (rowBreaks.has(rowIndex)) {
-      html += `<div class="plate-separator" style="grid-row:${gr - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
-    }
-
-    html += `<div class="plate-row-label" style="grid-row:${gr};grid-column:1">${row}</div>`;
+    html += `<div class="plate-row-label" style="grid-row:${gr(rowIndex)};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
       const key = `${rowIndex},${colIndex}`;
       const segment = segmentStart.get(key);
       if (segment) {
         const placement = segment.axis === 'v'
-          ? `grid-row:${gr} / span ${segment.span};grid-column:${colIndex + 2}`
-          : `grid-row:${gr};grid-column:${colIndex + 2} / span ${segment.span}`;
-        const isSplit = colSplits.has(key);
-        const cls = [
-          segment.axis === 'v' ? 'vertical' : '',
-          isSplit ? 'col-split' : ''
-        ].filter(Boolean).join(' ');
+          ? `grid-row:${gr(rowIndex)} / span ${segment.span};grid-column:${colIndex + 2}`
+          : `grid-row:${gr(rowIndex)};grid-column:${colIndex + 2} / span ${segment.span}`;
+        const cls = segment.axis === 'v' ? 'vertical' : '';
         html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
-        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gr};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
+        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gr(rowIndex)};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
       }
     }
   });
 
-  gridEl.innerHTML = html;
+  // ---- SVG overlay for cluster boundary dashes ----
+  const labelW = 28; // row label column width
+  const headerH = 24; // column header height
+  const gap = 5; // grid gap
+  const ww = plate.size === '384' ? 50 : 68; // well width
+  const wh = plate.size === '384' ? 44 : 56; // well height
+
+  // For each transition, find the boundary segment endpoints
+  const hLines = []; // {y, x1, x2}
+  const vLines = []; // {x, y1, y2}
+
+  transitions.forEach(t => {
+    // Vertical line at the transition column, from this row down to where the old cluster ends
+    // or where the new cluster started being contiguous above
+    const x = labelW + t.col * (ww + gap) - gap / 2;
+    const yTop = headerH + t.row * (wh + gap) - gap / 2;
+
+    // Find how far down the old cluster extends from above this transition row
+    let yBot = yTop;
+    for (let rr = t.row; rr < plate.rows.length; rr++) {
+      const cells = rowCells.get(rr) || [];
+      const hasOld = cells.some(c => c.cluster === t.from);
+      const hasNew = cells.some(c => c.cluster === t.to);
+      if (hasNew && !hasOld) {
+        yBot = headerH + (rr + 1) * (wh + gap) - gap / 2;
+      } else {
+        break;
+      }
+    }
+
+    if (yBot > yTop + wh / 2) {
+      vLines.push({ x, y1: yTop, y2: yBot });
+    }
+
+    // Horizontal line: above this transition row, across cols where old cluster was
+    // and below those cols where new cluster now is
+    const oldCells = (rowCells.get(t.row - 1) || []).filter(c => c.cluster === t.from && c.end >= t.col);
+    const newCells = (rowCells.get(t.row) || []).filter(c => c.cluster === t.to && c.col >= t.col);
+
+    // Above: last row of old cluster gets a bottom separator at the transition columns
+    if (t.row > 0 && oldCells.length) {
+      const x1 = labelW + t.col * (ww + gap) - gap / 2;
+      const x2 = labelW + plate.cols * (ww + gap) - gap / 2;
+      const y = headerH + t.row * (wh + gap) - gap / 2;
+      hLines.push({ y, x1, x2 });
+    }
+
+    // Below: new cluster cells below old cluster area
+    // Find rows below where old cluster doesn't exist but new does
+    for (let rr = t.row; rr < plate.rows.length; rr++) {
+      const cells = rowCells.get(rr) || [];
+      const hasOld = cells.some(c => c.cluster === t.from && c.col < t.col);
+      const hasNew = cells.some(c => c.cluster === t.to);
+      if (!hasOld && hasNew) {
+        const y = headerH + rr * (wh + gap) - gap / 2;
+        const x1 = labelW;
+        const x2 = labelW + t.col * (ww + gap) - gap / 2;
+        hLines.push({ y, x1, x2 });
+        break;
+      }
+    }
+  });
+
+  // Build SVG
+  const svgW = labelW + plate.cols * (ww + gap);
+  const svgH = headerH + plate.rows.length * (wh + gap);
+  let svgLines = '';
+  hLines.forEach(l => {
+    svgLines += `<line x1="${l.x1}" y1="${l.y}" x2="${l.x2}" y2="${l.y}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
+  });
+  vLines.forEach(l => {
+    svgLines += `<line x1="${l.x}" y1="${l.y1}" x2="${l.x}" y2="${l.y2}" stroke="var(--primary)" stroke-width="2" stroke-dasharray="6,4" />`;
+  });
+
+  const svgOverlay = svgLines ? `<svg class="plate-sep-overlay" style="position:absolute;top:0;left:0;width:${svgW}px;height:${svgH}px;pointer-events:none;z-index:1" xmlns="http://www.w3.org/2000/svg">${svgLines}</svg>` : '';
+
+  gridEl.innerHTML = html + svgOverlay;
 
   gridEl.querySelectorAll('.plate-well.empty').forEach(btn => {
     btn.addEventListener('click', () => {
