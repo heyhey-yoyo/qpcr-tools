@@ -313,61 +313,51 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Detect cluster transitions per segment
-  const sameRowSplits = new Set();
-  // Track per-row cluster membership
-  const rowClusters = new Map(); // row → Set of clusterIds
+  // Detect all cluster transition points: (row, col) where cluster changes
+  const splitCells = new Set(); // keys at (row, col) where a new cluster starts
   let prevCluster = null;
   let prevRow = -1;
+  let prevColEnd = -1; // column where previous segment ends
   segments.forEach(s => {
     const first = s.items[0];
     if (!first) return;
     const curCluster = first.clusterId;
     const curRow = s.row;
-    if (!rowClusters.has(curRow)) rowClusters.set(curRow, new Set());
-    rowClusters.get(curRow).add(curCluster);
     if (prevCluster !== null && curCluster !== prevCluster) {
-      if (curRow === prevRow) {
-        sameRowSplits.add(`${curRow},${s.col}`);
-      }
+      splitCells.add(`${curRow},${s.col}`);
     }
     prevCluster = curCluster;
     prevRow = curRow;
+    prevColEnd = s.col + s.span - 1;
   });
 
-  // Rows that need separators:
-  // 1. Row where a new cluster first appears (different from previous row's last cluster)
-  // 2. Rows above/below shared rows
-  const clusterTransitionRows = new Set();
-  let lastRowCluster = null;
-  for (let r = 0; r < plate.rows.length; r++) {
-    const clusters = rowClusters.get(r);
-    if (!clusters) { lastRowCluster = null; continue; }
-    // If this row has multiple clusters (shared), separate above and below
-    if (clusters.size > 1) {
-      if (r > 0) clusterTransitionRows.add(r);     // separator above
-      if (r + 1 < plate.rows.length) clusterTransitionRows.add(r + 1); // separator below
-    }
-    // Cluster change from previous row
-    if (lastRowCluster !== null) {
-      const prevSet = new Set([lastRowCluster]);
-      const isNew = [...clusters].some(c => !prevSet.has(c));
-      const isOverlap = [...clusters].some(c => prevSet.has(c));
-      if (isNew && !isOverlap) {
-        clusterTransitionRows.add(r); // full-row separator
+  // For each split cell, determine border classes:
+  // - 'z-top': dashed top border (separates from row above)
+  // - 'z-left': dashed left border (separates from left within row)
+  // - 'z-above': dashed bottom border on the cell directly above-left of the split
+  const zAbove = new Set(); // keys for cells that need bottom border
+  const zTop = new Set();   // keys for cells that need top border
+  const zLeft = new Set();  // keys for cells that need left border
+
+  splitCells.forEach(key => {
+    const [r, c] = key.split(',').map(Number);
+    zLeft.add(key);         // left border on the split-start cell
+    if (r > 0) {
+      // Find the cell above (row-1, same col) or nearest occupied cell above
+      for (let rr = r - 1; rr >= 0; rr--) {
+        const above = segmentStart.get(`${rr},${c}`);
+        if (above) {
+          zAbove.add(`${rr},${above.col}`); // bottom border on the cell above
+          break;
+        }
       }
     }
-    // Remember last cluster(s) of this row
-    lastRowCluster = [...clusters].pop();
-  }
+    // Top border on the split-start cell if previous cluster was on a different row
+    if (r > 0 && prevRow !== r) zTop.add(key);
+  });
 
-  const numSeps = clusterTransitionRows.size;
-  const sepRows = [...clusterTransitionRows].sort((a, b) => a - b);
-  // Each separator row pushes subsequent rows down by 1
-  const rowShift = r => r + 2 + sepRows.filter(sr => sr <= r).length;
-  const totalRows = plate.rows.length + numSeps;
-
-  gridEl.style.setProperty('--plate-rows', String(totalRows));
+  // No separator rows — use borders only, so --plate-rows stays unchanged
+  gridEl.style.setProperty('--plate-rows', String(plate.rows.length));
 
   const wellHtml = item => {
     const displayGroup = item.group || resolveGroupName(experiment, item.groupId) || '';
@@ -380,32 +370,31 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
     </div>`;
   };
 
+  const gridRow = r => r + 2; // simple: no separators added
+
   let html = '<div class="plate-corner" style="grid-row:1;grid-column:1"></div>';
   html += Array.from({ length: plate.cols }, (_, i) => i + 1)
     .map(col => `<div class="plate-col-label" style="grid-row:1;grid-column:${col + 1}">${col}</div>`).join('');
 
   plate.rows.forEach((row, rowIndex) => {
-    const gridRow = rowShift(rowIndex);
-
-    // Insert full-row dashed separator before a cluster-transition row
-    if (clusterTransitionRows.has(rowIndex)) {
-      html += `<div class="plate-separator" style="grid-row:${gridRow - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
-    }
-
-    html += `<div class="plate-row-label" style="grid-row:${gridRow};grid-column:1">${row}</div>`;
+    html += `<div class="plate-row-label" style="grid-row:${gridRow(rowIndex)};grid-column:1">${row}</div>`;
     for (let colIndex = 0; colIndex < plate.cols; colIndex += 1) {
       const key = `${rowIndex},${colIndex}`;
       const segment = segmentStart.get(key);
       if (segment) {
         const placement = segment.axis === 'v'
-          ? `grid-row:${gridRow} / span ${segment.span};grid-column:${colIndex + 2}`
-          : `grid-row:${gridRow};grid-column:${colIndex + 2} / span ${segment.span}`;
-        const isSplit = sameRowSplits.has(key);
-        const splitCls = isSplit ? ' cluster-split' : '';
-        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}${splitCls}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
+          ? `grid-row:${gridRow(rowIndex)} / span ${segment.span};grid-column:${colIndex + 2}`
+          : `grid-row:${gridRow(rowIndex)};grid-column:${colIndex + 2} / span ${segment.span}`;
+        const cls = [
+          segment.axis === 'v' ? 'vertical' : '',
+          zAbove.has(key) ? 'z-above' : '',
+          zTop.has(key) ? 'z-top' : '',
+          zLeft.has(key) ? 'z-left' : ''
+        ].filter(Boolean).join(' ');
+        html += `<div class="well-group${cls ? ' ' + cls : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
-        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gridRow};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
+        html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gridRow(rowIndex)};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
       }
     }
   });
