@@ -387,6 +387,23 @@ function load() {
 
 // ---- Plate layout ----
 
+/** Resolve which comparison cluster a block belongs to. */
+function resolveClusterId(block) {
+  const group = (experiment.groups || []).find(g => g.id === block.groupId);
+  if (!group) return block.groupId || 'unknown';
+  if (!group.compareToGroupId || group.compareToGroupId === group.id) return group.id;
+  // Follow chain to ultimate baseline
+  const visited = new Set();
+  let cursor = group;
+  while (cursor.compareToGroupId && cursor.compareToGroupId !== cursor.id && !visited.has(cursor.id)) {
+    visited.add(cursor.id);
+    const next = experiment.groups.find(g => g.id === cursor.compareToGroupId);
+    if (!next) break;
+    cursor = next;
+  }
+  return cursor.id;
+}
+
 function generatePlacements() {
   const plate = currentPlate();
   const direction = els.direction.value;
@@ -396,6 +413,7 @@ function generatePlacements() {
   let row = baseRow, col = baseCol;
   const placements = [];
   let overflow = false;
+  let lastCluster = null;
 
   const advance = () => {
     if (direction === 'horizontal') {
@@ -409,6 +427,7 @@ function generatePlacements() {
   const advanceGap = () => { for (let i = 0; i < gap; i += 1) advance(); };
 
   blocks.forEach((block, blockIndex) => {
+    const clusterId = resolveClusterId(block);
     if (block.breakBefore && blockIndex > 0) {
       const prev = placements[placements.length - 1];
       if (direction === 'horizontal') {
@@ -419,12 +438,14 @@ function generatePlacements() {
         row = baseRow;
       }
     }
+    const clusterChange = clusterId !== lastCluster && blockIndex > 0;
+    lastCluster = clusterId;
     for (let rep = 0; rep < replicateCount; rep += 1) {
       if (row < 0 || col < 0 || row >= plate.rows.length || col >= plate.cols) { overflow = true; continue; }
       placements.push({ well: `${plate.rows[row]}${col + 1}`, row, col, blockIndex, rep: rep + 1,
         sample: block.sample || `Sample-${blockIndex + 1}`, group: block.group || '', groupId: block.groupId,
         gene: block.gene || '', geneId: block.geneId, role: block.role || 'target',
-        breakBefore: rep === 0 && block.breakBefore });
+        clusterId, clusterChange: rep === 0 && clusterChange });
       advance();
     }
     if (blockIndex < blocks.length - 1 && !blocks[blockIndex + 1].breakBefore) advanceGap();
@@ -680,16 +701,6 @@ function renderPlate() {
       els.startRow.value = parsed.row;
       els.startCol.value = String(parsed.col);
       syncPlateLayout();
-    },
-    onToggleBreakBefore: blockIndex => {
-      if (blockIndex >= 0 && blockIndex < blocks.length) {
-        blocks[blockIndex].breakBefore = false;
-        renderAllBlocks();
-        renderPlate();
-        syncRowsFromBlocks();
-        calculate();
-        save();
-      }
     }
   });
 

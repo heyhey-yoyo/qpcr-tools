@@ -313,17 +313,25 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   const covered = new Set();
   segments.forEach(s => s.items.slice(1).forEach(item => covered.add(`${item.row},${item.col}`)));
 
-  // Find rows that start with a breakBefore block
-  const breakRows = new Set();
+  // Find rows where a new cluster starts AND it's on a different row from the previous cluster
+  const clusterRowStarts = new Set();
+  const sameRowSplits = new Set(); // keys where a new cluster starts on same row as previous
   segments.forEach(s => {
-    if (s.items.some(item => item.breakBefore)) breakRows.add(s.row);
+    const first = s.items[0];
+    if (!first || !first.clusterChange) return;
+    // Check if any previous segment is in the same row but different cluster
+    const prevSegments = segments.filter(ps => ps.row === s.row && ps.items[0] && ps.items[0].clusterId !== first.clusterId && ps.col < s.col);
+    if (prevSegments.length) {
+      sameRowSplits.add(`${s.row},${s.col}`);
+    } else {
+      clusterRowStarts.add(s.row);
+    }
   });
-  const numBreaks = breakRows.size;
-  const sepRows = [...breakRows].sort((a, b) => a - b);
-  // Map original row → display row (shifted by separators inserted before it)
+
+  const numSeps = clusterRowStarts.size;
+  const sepRows = [...clusterRowStarts].sort((a, b) => a - b);
   const rowShift = r => r + 2 + sepRows.filter(sr => sr < r).length;
-  // Total grid rows = plate rows + separators
-  const totalRows = plate.rows.length + numBreaks;
+  const totalRows = plate.rows.length + numSeps;
 
   gridEl.style.setProperty('--plate-rows', String(totalRows));
 
@@ -345,8 +353,8 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   plate.rows.forEach((row, rowIndex) => {
     const gridRow = rowShift(rowIndex);
 
-    // Insert separator row if this row starts a breakBefore baseline
-    if (breakRows.has(rowIndex)) {
+    // Full-row separator before a row where a new cluster starts
+    if (clusterRowStarts.has(rowIndex)) {
       html += `<div class="plate-separator" style="grid-row:${gridRow - 1};grid-column:2 / span ${plate.cols}" aria-hidden="true"><span class="sep-line"></span></div>`;
     }
 
@@ -358,11 +366,10 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
         const placement = segment.axis === 'v'
           ? `grid-row:${gridRow} / span ${segment.span};grid-column:${colIndex + 2}`
           : `grid-row:${gridRow};grid-column:${colIndex + 2} / span ${segment.span}`;
-        const isBreakStart = segment.items.some(item => item.breakBefore);
-        const breakBtn = isBreakStart && callbacks && callbacks.onToggleBreakBefore
-          ? `<button type="button" class="break-cancel" data-block-index="${segment.items[0].blockIndex}" title="取消另起一行">↩</button>`
-          : '';
-        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}" style="${placement}">${segment.items.map(wellHtml).join('')}${breakBtn}</div>`;
+        // Same-row cluster split: add visual divider
+        const isSplit = sameRowSplits.has(key);
+        const splitCls = isSplit ? ' cluster-split' : '';
+        html += `<div class="well-group${segment.axis === 'v' ? ' vertical' : ''}${splitCls}" style="${placement}">${segment.items.map(wellHtml).join('')}</div>`;
       } else if (!covered.has(key)) {
         const well = `${row}${colIndex + 1}`;
         html += `<button type="button" class="plate-well empty" data-well="${well}" style="grid-row:${gridRow};grid-column:${colIndex + 2}" title="点击将此孔设为模板起点"><span class="well-id">${well}</span></button>`;
@@ -375,14 +382,6 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   gridEl.querySelectorAll('.plate-well.empty').forEach(btn => {
     btn.addEventListener('click', () => {
       if (callbacks && callbacks.onSetStartWell) callbacks.onSetStartWell(btn.dataset.well);
-    });
-  });
-  gridEl.querySelectorAll('.break-cancel').forEach(btn => {
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      if (callbacks && callbacks.onToggleBreakBefore) {
-        callbacks.onToggleBreakBefore(Number(btn.dataset.blockIndex));
-      }
     });
   });
 
