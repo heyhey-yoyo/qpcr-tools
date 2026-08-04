@@ -6,7 +6,7 @@
 
 ## 文件结构
 
-```
+```text
 qpcr-tools/
 ├── index.html              # 页面结构，中文 UI，4 步卡片流程
 ├── app.js                  # 应用入口/协调器，ES module，全局事件绑定与状态管理
@@ -56,7 +56,7 @@ python -m http.server 8000
 # → http://localhost:8000
 ```
 
-> ⚠️ ES Module 需要 HTTP(S) 协议，`file://` 下无法使用。
+> ES Module 需要 HTTP(S) 协议，`file://` 下无法使用。
 
 ## 测试
 
@@ -68,7 +68,7 @@ node test/migration.mjs # 数据迁移测试
 
 测试直接 `import` 模块，无需正则提取或 `eval()`。
 
-## 数据模型（v6）
+## 数据模型（v7）
 
 ### 稳定 ID 体系
 
