@@ -1,0 +1,5 @@
+# Claude Code 本地配置（不提交）
+.claude/settings.local.json
+
+# 导出的模板测试文件（不提交）
+qpcr-plate-template*.json

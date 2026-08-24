@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="qPCR 96/384 孔板模板、罗氏单列 Ct 粘贴、技术重复质控、ΔCt、ΔΔCt 与相对表达分析工具。" />
+  <meta name="theme-color" content="#0d9488" />
+  <title>qPCR 分析工具</title>
+  <link rel="stylesheet" href="./styles.css?v=11.6" />
+</head>
+<body>
+<header class="site-header">
+  <div class="container header-inner">
+    <div class="header-brand"><span class="brand-bold">YDchen</span><span class="brand-light">Tools</span></div>
+    <div class="header-divider"></div>
+    <div class="header-info">
+      <h1>qPCR 分析工具</h1>
+      <p class="subtitle">96 / 384 孔板模板 · 罗氏单列 Ct 粘贴 · ΔCt / ΔΔCt。数据仅在浏览器本地计算。</p>
+    </div>
+  </div>
+</header>
+
+<main class="container main-grid">
+  <section class="card plate-card">
+    <div class="section-heading">
+      <div><h2>第 1 步 · 设计孔板模板</h2></div>
+      <div class="button-row">
+        <button id="exportTemplateBtn" class="button button-ghost">导出模板</button>
+        <button id="importTemplateBtn" class="button button-ghost">导入模板</button>
+        <button id="exampleTemplateBtn" class="button button-ghost">功能演示</button>
+      </div>
+      <input id="templateFileInput" type="file" accept=".json,application/json" class="hidden" />
+    </div>
+
+    <div class="plate-settings-grid">
+      <label class="field"><span>孔板规格</span><select id="plateSize"><option value="96" selected>96 孔板（8 × 12）</option><option value="384">384 孔板（16 × 24）</option></select></label>
+      <label class="field"><span>起始行</span><select id="startRow"></select></label>
+      <label class="field"><span>起始列</span><select id="startCol"></select></label>
+      <label class="field"><span>点板方向</span><select id="plateDirection"><option value="horizontal">横向连续</option><option value="vertical">纵向连续</option></select></label>
+      <label class="field"><span>区块间空孔</span><select id="blockGap"><option value="0">0</option><option value="1">1</option><option value="2">2</option></select></label>
+      <div class="field field-wide">
+        <span>点板预设</span>
+        <div class="inline-control template-control">
+          <div class="experiment-row">
+            <span class="experiment-label">分组</span>
+            <button id="addGroupBtn" class="button button-ghost button-sm">＋</button>
+            <div id="groupsContainer" class="group-chip-list"></div>
+          </div>
+          <input id="targetCount" type="hidden" value="1" />
+          <div class="experiment-row">
+            <span class="experiment-label">目标基因</span>
+            <button id="addTargetGeneBtn" class="button button-ghost button-sm" title="添加目标基因">＋</button>
+            <div id="targetGenesContainer" class="group-chip-list"></div>
+          </div>
+          <div class="experiment-row">
+            <span class="experiment-label">内参基因</span>
+            <div id="refGeneContainer" class="group-chip-list"></div>
+          </div>
+          <div class="experiment-row">
+            <label class="append-count-label" title="每个分组的独立生物学样本数量">
+              <span>生物学重复</span>
+              <input id="biologicalReplicates" class="append-count" type="number" min="1" max="24" step="1" value="1" />
+            </label>
+            <label class="reps-global-label" title="同一样本同一基因的技术重复孔数，全局统一设置；修改会影响已有 Ct 数据">
+              <span>复孔数</span>
+              <input id="replicateCount" class="reps-global-input" type="number" min="1" max="6" step="1" value="3" />
+            </label>
+          </div>
+          <div class="experiment-row" id="bioGroupRow" style="display:none">
+            <label class="append-line-label" title="复孔为 1 时，将同一基因的生物学重复排列在相邻孔位">
+              <input id="bioGroupReplicates" type="checkbox" /> 生物学重复相邻排列
+            </label>
+          </div>
+          <div class="experiment-row">
+            <button id="loadPresetBtn" class="button button-primary" title="按当前实验配置重新生成点板模板，覆盖所有区块">刷新点板信息</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="section-heading" style="margin-top:20px">
+      <div><h2>第 2 步 · 点板信息确认</h2></div>
+    </div>
+
+    <div class="subsection-heading">
+      <div>
+        <h3>点板区块</h3>
+        <p>一个区块代表同一样本、同一基因的一组技术重复。</p>
+      </div>
+      <div class="subsection-actions">
+        <button id="addBlockBtn" class="button button-ghost">＋ 添加样本</button>
+                <button id="clearBlocksBtn" class="button button-danger">清空全板</button>
+      </div>
+    </div>
+
+    <div class="table-wrap block-table-wrap">
+      <table class="block-table">
+        <thead><tr><th>另起一行</th><th>样本名称</th><th>组别</th><th>基因</th><th>类型</th><th class="action-col">排序 / 删除</th></tr></thead>
+        <tbody id="blocksBody"></tbody>
+      </table>
+    </div>
+
+    <div id="plateAlert" class="alerts plate-alert"></div>
+    <div style="margin-top:6px"><button id="exportPlateBtn" class="button button-ghost">导出点板清单</button></div>
+    <div class="plate-scroll">
+      <div id="plateGrid" class="plate-grid" aria-label="孔板预览"></div>
+    </div>
+    <div id="plateLegend" class="plate-legend"></div>
+    <p class="help-text">第一步中的设计参数（分组、目标基因、内参、复孔数、生物学重复、起始孔、方向、空孔等）修改后不会立即影响已生成的模板与数据：点击"刷新点板信息"才按当前设计重新生成模板并同步到后续步骤，空间不足会提醒且不生效，确认后会清除当前所有孔位与已录入的 Ct 数据。"功能演示"会载入一份当前孔板规格的演示模板；"清空全板"会移除所有区块。点击任意空孔可将它设为模板起点。预览图中同一区块（一组技术重复）会用浅色框圈出。"导出模板"会把当前点板区块保存为 JSON 文件，之后可用"导入模板"直接恢复。</p>
+  </section>
+
+  <section class="card settings-card">
+    <div class="section-heading">
+      <div><h2>第 3 步 · 选择分析模式并设置参数</h2></div>
+      <button id="resetBtn" class="button button-ghost">恢复默认</button>
+    </div>
+    <label class="field" style="margin-bottom:14px;">
+      <span>分析模式</span>
+      <select id="workflowSelect">
+        <option value="ddct" selected>相对表达量（2^-ΔΔCt）</option>
+        <option value="dct">归一化表达量（2^-ΔCt）</option>
+      </select>
+    </label>
+    <p id="modeDescription" class="mode-description"></p>
+    <div class="form-grid">
+      <label class="field"><span>技术重复 Ct 最大差值</span><div class="input-with-unit"><input id="maxSpread" type="number" min="0.1" step="0.1" value="0.5" /><span>Ct</span></div></label>
+    </div>
+    <div id="formulaNote" class="formula-note"></div>
+  </section>
+
+  <section class="card samples-card">
+    <div class="section-heading">
+      <div><h2>第 4 步 · 录入 Ct 数据</h2></div>
+      <div class="button-row">
+        <button id="pasteColumnBtn" class="button button-primary">粘贴单列 Ct</button>
+        <button id="exampleDataBtn" class="button button-ghost">随机 Ct 测试</button>
+        <button id="clearDataBtn" class="button button-danger">清空数据</button>
+      </div>
+    </div>
+
+    <div id="ctColumnPanel" class="paste-panel hidden">
+      <div class="paste-panel-heading">
+        <div>
+          <strong>罗氏单列 Ct / Cp 粘贴</strong>
+          <p>从 Excel 或罗氏导出表中复制一整列 Ct/Cp，系统会按当前 Ct 数据表的孔位顺序从上到下依次填入。</p>
+        </div>
+        <button id="closeCtColumnBtn" class="icon-button" title="关闭">×</button>
+      </div>
+      <textarea id="ctColumnArea" class="paste-area" rows="7" spellcheck="false" placeholder="Cp&#10;25.12&#10;25.30&#10;25.21&#10;Undetermined&#10;19.91"></textarea>
+      <div class="button-row">
+        <button id="applyCtColumnBtn" class="button button-primary">填入当前数据表</button>
+        <span id="ctPasteStatus" class="paste-status">支持 Ct、Cq、Cp 表头；Undetermined、No Ct、空行会保留为空白孔。</span>
+      </div>
+    </div>
+
+    <div class="table-wrap">
+      <table id="samplesTable">
+        <thead id="samplesHead"></thead>
+        <tbody id="samplesBody"></tbody>
+      </table>
+    </div>
+    <p class="help-text">单列 Ct 会严格按照当前数据表从第一行 Ct1、Ct2、Ct3……到下一行继续填入。建议先"应用到 Ct 数据表"，再粘贴仪器导出的单列结果。</p>
+  </section>
+
+  <section class="card results-card">
+    <div class="section-heading">
+      <div><h2>第 5 步 · 分析结果</h2></div>
+      <div class="button-row"><button id="copyBtn" class="button button-ghost">复制结果</button><button id="exportBtn" class="button button-ghost">导出 CSV</button></div>
+    </div>
+    <div id="summary" class="summary-grid"></div>
+    <div id="alerts" class="alerts"></div>
+    <div id="resultsChart" class="results-chart"></div>
+    <div id="groupChart" class="results-chart"></div>
+    <div class="table-wrap">
+      <table><thead><tr><th>样本</th><th>组别</th><th>目标基因</th><th>比较基准</th><th>目标 Ct</th><th>内参 Ct</th><th>ΔCt</th><th>ΔΔCt</th><th>相对表达量</th><th>质控</th></tr></thead><tbody id="resultsBody"></tbody></table>
+    </div>
+  </section>
+
+  <section class="card notes-card">
+    <h2>使用说明</h2>
+    <ul>
+      <li><strong>96 / 384 孔板：</strong>切换规格后，起始行和列会自动更新；模板区块和分析数据不会丢失。</li>
+      <li><strong>提交式设计：</strong>第一步的设计参数（分组、基因、复孔数、孔板设置等）修改后只暂存，点击"刷新点板信息"才应用到模板、孔位与 Ct 数据表；空间不足会提醒且不生效，刷新会清除当前所有孔位与已录入的 Ct 数据（点击时有确认提示）。</li>
+      <li><strong>区块表是唯一权威：</strong>在区块表中修改样本/组别/基因名称会实时同步到 Ct 数据表；Ct 数据表不支持删除行，删除请通过区块表的删除按钮（对应行会同步删除）。</li>
+      <li><strong>罗氏单列结果：</strong>支持 Ct、Cq、Cp 表头及 Undetermined 等缺失值；填入顺序与当前 Ct 表格一致。</li>
+      <li><strong>相对表达量：</strong>先计算 ΔCt = 目标基因 Ct − 内参基因 Ct，再以该组别指定的比较基准组平均 ΔCt 计算 ΔΔCt 和 2^-ΔΔCt。每个分组可通过芯片下拉框选择比较基准。</li>
+      <li><strong>技术重复质控：</strong>同一行有效 Ct 的最大值与最小值之差超过阈值时会标记为需复核。</li>
+      <li>本 Demo 不自动剔除离群孔；正式分析前应结合扩增曲线、熔解曲线和实验室 SOP 复核。</li>
+      <li>数据仅保存在当前浏览器的 localStorage 中，不会上传到服务器。</li>
+    </ul>
+  </section>
+</main>
+<footer class="site-footer"><div class="container">qPCR 分析工具 · 数据不会离开当前浏览器</div></footer>
+<script type="module" src="./app.js?v=11.12"></script>
+</body>
+</html>
