@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48">
+  <title>qPCR Tools</title><rect x="2" y="2" width="44" height="44" rx="4" fill="#24221f"/>
+  <path d="M9 36h30M11 38V10" stroke="#f3eee5" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M12 34c9 0 9-16 17-16 4 0 5-5 9-5M12 34c12 0 10-9 17-9 5 0 5-4 9-4" fill="none" stroke="#f3eee5" stroke-width="2.2" stroke-linecap="round"/>
+  <circle cx="29" cy="18" r="3" fill="#c15f3c"/>
+</svg>

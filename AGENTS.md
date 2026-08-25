@@ -237,3 +237,8 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 > - 新模块文件需在本文的文件结构中列出
 > - localStorage 键升级需在 migration.js 中处理
 > - 核心计算逻辑的修改需要更新 test/ddct.mjs
+
+
+## 标志维护约定
+
+`YDchen Tools` 文字页眉是受保护的品牌区域，必须保持原结构、尺寸与样式；项目专属统一标志仅用于 favicon 或现有非页眉标志，不得改变页面布局。
