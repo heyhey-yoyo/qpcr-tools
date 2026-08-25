@@ -211,6 +211,7 @@ parseCt('25.12') // → { valid: true, value: 25.12 }
 - UI 文案、CSV 表头为中文；标识符为英文
 - 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义
 - `styles.css` 为压缩风格（多规则单行），修改时保持该风格
+- 工具主体采用 `ydchen-portfolio` 的米白 / 浅灰 / 赤陶色视觉系统；`YDchen Tools` 页眉结构与样式保持不变
 - 修改 `app.js` 或 `styles.css` 后同步提升 `index.html` 中的 `?v=` 版本号
 
 ## 部署
