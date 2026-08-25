@@ -25,3 +25,17 @@
 .site-header .subtitle{color:#64748b}
 @media(max-width:768px){.main-grid{padding-inline:18px;margin-top:22px}}@media(max-width:480px){.main-grid{padding-inline:12px}.main-grid .card{padding:18px}}
 @media print{.main-grid{width:100%;padding:0;margin:0}.main-grid .card{padding:12px;border:1px solid #ccc;box-shadow:none}}
+
+/* Visual QA baseline. The protected YDchen Tools header remains unchanged. */
+.main-grid{font-size:15px}
+.main-grid .button,.main-grid input,.main-grid select,.main-grid textarea,.main-grid table{font-size:.9rem}
+.main-grid .help-text,.main-grid .summary-label,.main-grid .paste-status,.main-grid .subsection-heading p,.main-grid .role-text,.main-grid .experiment-label,.main-grid .append-line-label,.main-grid .append-count-label,.main-grid .reps-global-label,.main-grid .legend-item{font-size:.8rem}
+.main-grid .icon-button{color:#625d56}
+.main-grid .plate-col-label,.main-grid .plate-row-label{font-size:.8rem}
+.main-grid .well-id{font-size:.68rem;color:#6b655e}
+.main-grid .well-sample{font-size:.76rem}
+.main-grid .well-gene{font-size:.7rem;color:#5f5a53}
+.main-grid .well-role{font-size:.625rem;color:#5f5a53}
+.main-grid .plate-grid.plate-384 .well-sample{font-size:.7rem}
+.main-grid .plate-grid.plate-384 .well-gene{font-size:.66rem}
+.main-grid .plate-grid.plate-384 .well-role,.main-grid .plate-grid.plate-384 .well-id{font-size:.625rem}
