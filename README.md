@@ -85,11 +85,11 @@ python -m http.server 8000
 
 ## 部署
 
-静态资源直接上传：
+项目已接入 Cloudflare Pages Git 集成：推送 `main` 分支即自动构建部署（无构建步骤，输出目录为仓库根目录）。首次接入时在 Workers & Pages 创建 Pages 项目并连接 GitHub 仓库即可；也可用 Direct Upload 手动上传作为应急方式。
 
-1. 确保根目录包含 `index.html`、`styles.css`、`app.js`、`README.md`
-2. Cloudflare Pages：Workers & Pages → Create → Pages → Direct Upload
-3. Cloudflare Workers 静态资源也可运行（`workers.dev` 域名）
+## License
+
+MIT
 
 ---
 
@@ -102,7 +102,7 @@ python -m http.server 8000
 > **⚠️ 任何修改此项目的 AI 代理（Claude Code、Cursor、Copilot 等）都必须同步更新本文件与 AGENTS.md。**
 >
 > - 新增功能 → 在 README 的「主要功能」章节中添加说明
-> - 新增/删除文件 → 更新本文和 AGENTS.md 中的文件清单
+> - 新增/删除文件 → 更新 AGENTS.md 中的文件清单
 > - 修改架构 → 更新 AGENTS.md 的架构说明
 > - 部署方式变更 → 同步更新本文部署章节
 > - 保持 README 面向人类用户，AGENTS.md 面向 AI 代理，两份文件不可互相替代

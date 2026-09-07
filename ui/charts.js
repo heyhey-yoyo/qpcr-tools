@@ -51,14 +51,14 @@ export function resultsChartSvg(items) {
         + `<line x1="${cx - 6}" y1="${yHigh}" x2="${cx + 6}" y2="${yHigh}" stroke="#64748b" stroke-width="1.2"/>`
         + `<line x1="${cx - 6}" y1="${yLow}" x2="${cx + 6}" y2="${yLow}" stroke="#64748b" stroke-width="1.2"/>`
       : '';
-    const color = item.qc ? '#0d9488' : '#b45309';
+    const color = item.qc ? '#357b56' : '#b45309';
     const shortName = truncateLabel(item.name, 14);
     const shortGene = truncateLabel(item.gene, 12);
     return `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="4" fill="${color}"/>`
       + error
       + `<text x="${cx}" y="${Math.max(10, yHigh - 5)}" text-anchor="middle" font-size="10" fill="#334155">${fmt(item.fold)}</text>`
       + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b"><title>${escapeHtml(item.name)}</title>${escapeHtml(shortName)}</text>`
-      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#94a3b8"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
+      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#6f6a62"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
   }).join('');
 
   const axis = `<line x1="4" y1="${baseY}" x2="${width - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
@@ -90,7 +90,7 @@ export function groupChartSvg(items, geneOrder) {
     byKey.get(key).push(item.ddct);
   });
 
-  const colors = ['#0d9488', '#6366f1', '#d946ef', '#f59e0b', '#14b8a6', '#8b5cf6'];
+  const colors = ['#c15f3c', '#6366f1', '#d946ef', '#f59e0b', '#e5a189', '#8b5cf6'];
   const barW = 32;
   const barGap = 4;
   const clusterGap = 20;

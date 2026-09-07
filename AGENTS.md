@@ -1,4 +1,4 @@
-# qPCR 分析工具 — 项目说明（供 AI 编码代理阅读）
+# qPCR 孔板模板设计与 ΔΔCt 分析工具 — 项目说明（供 AI 编程代理阅读）
 
 ## 项目概览
 
@@ -20,6 +20,7 @@
 | `index.html` | 页面结构，中文 UI，4 步卡片流程 |
 | `app.js` | 应用入口/协调器，ES module，全局事件绑定与状态管理 |
 | `styles.css` | 全部样式（压缩风格，单行规则） |
+| `assets/project-mark.svg` | 项目专属标志（用于 favicon） |
 | `core/` | 纯计算模块（无 DOM、无 localStorage、无全局变量） |
 | `core/ct.js` | Ct 值校验：parseCt(), isValidCt(), filterValidCts() |
 | `core/statistics.js` | 统计函数：mean(), sd(), sem(), spread(), rowStats() |
@@ -41,6 +42,8 @@
 | `test/migration.mjs` | localStorage 迁移测试 |
 | `README.md` | 用户文档（中文） |
 | `AGENTS.md` | 本文件：AI 代理文档 |
+| `LICENSE` | MIT 许可证 |
+| `.gitignore` | Git 忽略规则 |
 
 ## 运行与构建
 
@@ -70,7 +73,7 @@ node test/migration.mjs # 数据迁移测试
 - 内部匹配使用 ID（对照组检测、内参检测、基因分组）
 - 名称用于显示，通过 `resolveGroupName()` / `resolveGeneName()` 解析
 - 改名时只更新 `name` 字段，ID 不变，已有数据关联不受影响
-- 旧数据迁移：`migration.js` 按名称匹配恢复 ID，兼容 v3/v4/v5 格式
+- 旧数据迁移：`migration.js` 按名称匹配恢复 ID，兼容 v3–v6 格式
 
 ### Ct 校验
 
@@ -159,11 +162,16 @@ node test/migration.mjs # 数据迁移测试
 
 ## 部署
 
-静态资源直接上传（Cloudflare Pages / Workers 等），无环境变量、无服务端代码。
+Cloudflare Pages Git 集成（推送 `main` 自动构建部署）或 Direct Upload 静态资源上传；无环境变量、无服务端代码。
+
+## 安全与数据注意事项
+
+- 所有数据仅在浏览器本地处理，无任何网络请求或远程依赖；状态仅存储在 `localStorage`（键 `qpcr-demo-v7`）。
+- 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义；Ct 数据导入按严格格式解析，非法值被拒绝并明确提示。
 
 ## 标志维护约定
 
-`YDchen Tools` 文字页眉是受保护的品牌区域，必须保持原结构、尺寸与样式；项目专属统一标志仅用于 favicon 或现有非页眉标志，不得改变页面布局。
+`YDchen Tools` 文字页眉是受保护的品牌区域，必须保持原结构、尺寸与样式；项目专属统一标志 `assets/project-mark.svg` 仅用于 favicon 或现有非页眉标志，不得改变页面布局。
 
 ---
 
