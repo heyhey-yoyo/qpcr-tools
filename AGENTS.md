@@ -145,7 +145,7 @@ node test/migration.mjs # 数据迁移测试
 ### 持久化
 
 - localStorage 键 `qpcr-demo-v7`（兼容 v3/v4/v5/v6 旧键的自动迁移）
-- `save()` 在每次操作后调用，保存 experiment、blocks、rows、replicateCount、plate 设置、mode、spread
+- `save()` 在每次操作后调用，保存 experiment、blocks、rows、replicateCount、plate 设置、mode、spread；写入失败（隐私模式、配额满）时捕获异常、保留内存态并弹窗提示用户备份（恢复成功前只提示一次）
 - `load()` 自动迁移旧格式数据（通过 `migrateState()`）
 - 「恢复默认」（`resetBtn`）：清除所有 localStorage 键，重置所有状态为默认值
 
@@ -168,12 +168,17 @@ Cloudflare Pages Git 集成（推送 `main` 自动构建部署）或 Direct Uplo
 
 - 所有数据仅在浏览器本地处理，无任何网络请求或远程依赖；状态仅存储在 `localStorage`（键 `qpcr-demo-v7`）。
 - 所有插入 `innerHTML` 的用户输入必须经 `escapeHtml()` 转义；Ct 数据导入按严格格式解析，非法值被拒绝并明确提示。
+- CSV 导出走 `csvCell()`：非数字文本以 `=`、`+`、`-`、`@`（或 Tab/CR）开头时前置单引号，防 Excel 公式注入；合法数字字符串（含负数）保持原样。
 
 ## 标志维护约定
 
 `YDchen Tools` 文字页眉是受保护的品牌区域，必须保持原结构、尺寸与样式；项目专属统一标志 `assets/project-mark.svg` 仅用于 favicon 或现有非页眉标志，不得改变页面布局。
 
 ---
+
+## 2026-09-13 维护补充
+
+SVG 分隔线从 .plate-grid 的 --plate-label-width、--plate-header-height、--plate-gap、--well-width 和 --well-height 读取几何尺寸；调整 CSS 时不要再添加第二套硬编码。index.html 资源查询版本已同步。
 
 ## AI 维护提醒
 

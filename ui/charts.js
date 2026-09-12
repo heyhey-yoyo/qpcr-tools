@@ -90,7 +90,7 @@ export function groupChartSvg(items, geneOrder) {
     byKey.get(key).push(item.ddct);
   });
 
-  const colors = ['#c15f3c', '#6366f1', '#d946ef', '#f59e0b', '#e5a189', '#8b5cf6'];
+  const colors = ['#c15f3c', '#6b8cae', '#a2678e', '#a57735', '#5f7d7c', '#8a8f5c'];
   const barW = 32;
   const barGap = 4;
   const clusterGap = 20;

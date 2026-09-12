@@ -293,19 +293,30 @@ function uniqueSampleName(original) {
 
 // ---- Persistence ----
 
+let storageWarned = false;
+
 function save() {
-  localStorage.setItem(KEY, JSON.stringify({
-    _version: CURRENT_VERSION,
-    blocks, rows, replicateCount, experiment,
-    plate: {
-      size: els.plateSize.value, startRow: els.startRow.value, startCol: els.startCol.value,
-      direction: els.direction.value, gap: els.gap.value,
-	      targets: els.targets.value,
-      bioGroupReplicates: els.bioGroupReplicates.checked
-    },
-    mode: els.mode.value,
-    spread: els.spread.value
-  }));
+  try {
+    localStorage.setItem(KEY, JSON.stringify({
+      _version: CURRENT_VERSION,
+      blocks, rows, replicateCount, experiment,
+      plate: {
+        size: els.plateSize.value, startRow: els.startRow.value, startCol: els.startCol.value,
+        direction: els.direction.value, gap: els.gap.value,
+        targets: els.targets.value,
+        bioGroupReplicates: els.bioGroupReplicates.checked
+      },
+      mode: els.mode.value,
+      spread: els.spread.value
+    }));
+    storageWarned = false;
+  } catch {
+    // 隐私模式或存储配额满时写入会抛异常：保留内存态继续操作，只提示一次
+    if (!storageWarned) {
+      storageWarned = true;
+      window.alert('本地保存失败：浏览器拒绝了本地存储写入（可能是隐私模式或存储空间不足）。当前数据仍保留在本页面内存中，请尽快使用"导出模板"或"导出 CSV"备份，关闭页面前不要刷新。');
+    }
+  }
 }
 
 function load() {

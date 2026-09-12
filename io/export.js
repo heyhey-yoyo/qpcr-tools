@@ -4,11 +4,16 @@ import { fmt } from '../ui/charts.js';
 
 /**
  * Quote a CSV cell value. Wraps in double quotes if the value contains
- * commas, double quotes, or newlines.
+ * commas, double quotes, or newlines. Guards against spreadsheet formula
+ * injection: non-numeric text starting with = + - @ (or tab/CR) is prefixed
+ * with a single quote so Excel treats it as text.
  */
 export function csvCell(value) {
   const text = String(value ?? '');
-  return /[",\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+  // 合法数字字符串（含负数如 "-2.35"）保持原样，不转文本
+  const isNumericString = /^[+-]?(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?$/.test(text);
+  const safe = !isNumericString && /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
+  return /[",\n\r]/.test(safe) ? `"${safe.replaceAll('"', '""')}"` : safe;
 }
 
 /**
@@ -71,7 +76,8 @@ export function downloadFile(filename, content, mimeType) {
   link.href = URL.createObjectURL(new Blob(['﻿' + content], { type: mimeType || 'text/csv;charset=utf-8' }));
   link.download = filename;
   link.click();
-  URL.revokeObjectURL(link.href);
+  // 延迟回收：click() 后立即 revoke 在 Firefox 下可能取消下载
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
 }
 
 /**

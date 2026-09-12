@@ -46,7 +46,7 @@ export function ensureExperiment(experiment) {
     typeof g === 'string' ? { id: 'tg' + (i + 1), name: g } : (g.id ? g : { ...g, id: 'tg' + (i + 1) })
   );
   if (!targetGenes.length) targetGenes = [{ id: 'tg1', name: 'IL6' }];
-  const groups = (experiment.groups || []).map(g => g.id ? g : { ...g, id: 'g' + Date.now() });
+  const groups = (experiment.groups || []).map(g => g.id ? g : { ...g, id: uid('g') });
   return { ...experiment, refGene, targetGenes, groups };
 }
 

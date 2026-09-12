@@ -348,11 +348,14 @@ export function renderPlateGrid(plate, placements, experiment, gridEl, alertEl, 
   });
 
   // ---- SVG overlay for cluster boundary dashes ----
-  const labelW = 28; // row label column width
-  const headerH = 24; // column header height
-  const gap = plate.size === '384' ? 8 : 10; // grid gap
-  const ww = plate.size === '384' ? 50 : 68; // well width
-  const wh = plate.size === '384' ? 44 : 56; // well height
+  // 与孔板网格共用 CSS 几何变量，调整孔格尺寸时边界线自动跟随。
+  const gridStyle = getComputedStyle(gridEl);
+  const readSize = name => Number.parseFloat(gridStyle.getPropertyValue(name));
+  const labelW = readSize('--plate-label-width');
+  const headerH = readSize('--plate-header-height');
+  const gap = readSize('--plate-gap');
+  const ww = readSize('--well-width');
+  const wh = readSize('--well-height');
   // CSS grid gap applies between ALL tracks (label col + header row too)
   const originX = labelW + gap;
   const originY = headerH + gap;
