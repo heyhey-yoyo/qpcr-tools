@@ -29,13 +29,13 @@ export function resultsChartSvg(items) {
   if (!filtered.length) return '';
   // 保持传入顺序（rows 顺序 = 区块表顺序），与孔板排版一致；不重新排序
 
-  const maxNameLen = Math.max(...filtered.map(item => String(item.name || '').length), 4);
-  const perItem = Math.max(76, Math.min(140, maxNameLen * 7 + 12));
+  const maxNameLen = Math.max(...filtered.flatMap(item => [String(item.name || '').length, String(item.gene || '').length]), 4);
+  const perItem = Math.max(112, Math.min(192, maxNameLen * 12 + 24));
   const barW = Math.max(40, perItem - 30);
   const width = Math.max(240, filtered.length * perItem + 16);
   const height = 210;
-  const baseY = height - 34;
-  const top = 14;
+  const baseY = height - 40;
+  const top = 20;
   const maxValue = Math.max(...filtered.map(item => (Number.isFinite(item.foldHigh) ? item.foldHigh : item.fold))) || 1;
   const scale = value => (baseY - top) * (value / maxValue);
 
@@ -47,21 +47,21 @@ export function resultsChartSvg(items) {
     const yHigh = hasError ? baseY - scale(item.foldHigh) : y;
     const yLow = hasError ? baseY - scale(item.foldLow) : y;
     const error = hasError
-      ? `<line x1="${cx}" y1="${yHigh}" x2="${cx}" y2="${yLow}" stroke="#64748b" stroke-width="1.2"/>`
-        + `<line x1="${cx - 6}" y1="${yHigh}" x2="${cx + 6}" y2="${yHigh}" stroke="#64748b" stroke-width="1.2"/>`
-        + `<line x1="${cx - 6}" y1="${yLow}" x2="${cx + 6}" y2="${yLow}" stroke="#64748b" stroke-width="1.2"/>`
+      ? `<line x1="${cx}" y1="${yHigh}" x2="${cx}" y2="${yLow}" stroke="var(--chart-muted)" stroke-width="1.2"/>`
+        + `<line x1="${cx - 6}" y1="${yHigh}" x2="${cx + 6}" y2="${yHigh}" stroke="var(--chart-muted)" stroke-width="1.2"/>`
+        + `<line x1="${cx - 6}" y1="${yLow}" x2="${cx + 6}" y2="${yLow}" stroke="var(--chart-muted)" stroke-width="1.2"/>`
       : '';
-    const color = item.qc ? '#357b56' : '#b45309';
+    const color = item.qc ? 'var(--chart-ok)' : 'var(--chart-warning)';
     const shortName = truncateLabel(item.name, 14);
     const shortGene = truncateLabel(item.gene, 12);
     return `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="4" fill="${color}"/>`
       + error
-      + `<text x="${cx}" y="${Math.max(10, yHigh - 5)}" text-anchor="middle" font-size="10" fill="#334155">${fmt(item.fold)}</text>`
-      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9.5" fill="#64748b"><title>${escapeHtml(item.name)}</title>${escapeHtml(shortName)}</text>`
-      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="9.5" fill="#6f6a62"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
+      + `<text x="${cx}" y="${Math.max(10, yHigh - 5)}" text-anchor="middle" font-size="12" fill="var(--chart-ink)">${fmt(item.fold)}</text>`
+      + `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="12" fill="var(--chart-muted)"><title>${escapeHtml(item.name)}</title>${escapeHtml(shortName)}</text>`
+      + `<text x="${cx}" y="${baseY + 26}" text-anchor="middle" font-size="12" fill="var(--chart-muted)"><title>${escapeHtml(item.gene)}</title>${escapeHtml(shortGene)}</text>`;
   }).join('');
 
-  const axis = `<line x1="4" y1="${baseY}" x2="${width - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
+  const axis = `<line x1="4" y1="${baseY}" x2="${width - 4}" y2="${baseY}" stroke="var(--chart-line)" stroke-width="1"/>`;
   return `<svg viewBox="0 0 ${width} ${height}" style="width:${width}px;max-width:none" role="img" aria-label="相对表达量柱状图（含误差棒）">${axis}${bars}</svg>`;
 }
 
@@ -90,13 +90,16 @@ export function groupChartSvg(items, geneOrder) {
     byKey.get(key).push(item.ddct);
   });
 
-  const colors = ['#c15f3c', '#6b8cae', '#a2678e', '#a57735', '#5f7d7c', '#8a8f5c'];
-  const barW = 32;
-  const barGap = 4;
+  // 同色系用明度和纹理共同区分，图例与柱体共享同一编码。
+  const colors = Array.from({ length: 6 }, (_, i) => `var(--chart-series-${i + 1})`);
+  const marks = ['', '<path d="M0 8 8 0"/>', '<path d="M0 4h8"/>', '<circle cx="4" cy="4" r="1"/>', '<path d="M4 0v8"/>', '<path d="M0 4h8M4 0v8"/>'];
+  const patterns = colors.map((color, i) => `<pattern id="qpcr-series-${i}" patternUnits="userSpaceOnUse" width="8" height="8"><rect width="8" height="8" fill="${color}"/><g stroke="var(--chart-ink)" fill="var(--chart-ink)" stroke-opacity=".35" fill-opacity=".35" stroke-width=".8">${marks[i]}</g></pattern>`).join('');
+  const barW = 44;
+  const barGap = 8;
   const clusterGap = 20;
   const barH = 136;
-  const topPad = 24;
-  const chartH = 200;
+  const topPad = 32;
+  const chartH = 208;
   const baseY = topPad + barH;
   let maxFold = 1;
   const allBars = [];
@@ -127,7 +130,8 @@ export function groupChartSvg(items, geneOrder) {
   const clusterW = nGenes * (barW + barGap) - barGap;
   const maxGroupLen = Math.max(...groupList.map(n => String(n).length), 4);
   const dynClusterGap = Math.max(clusterGap, maxGroupLen * 7 + 8);
-  const totalW = Math.max(280, groupList.length * (clusterW + dynClusterGap) + 20);
+  const legendWidths = geneList.map(g => Math.min(16, String(g).length) * 12 + 36);
+  const totalW = Math.max(280, groupList.length * (clusterW + dynClusterGap) + 20, legendWidths.reduce((a, b) => a + b, 16));
   const scale = v => (barH - 4) * (v / maxFold);
 
   let svgParts = '';
@@ -136,31 +140,35 @@ export function groupChartSvg(items, geneOrder) {
     const bars = allBars.filter(b => b.group === groupName);
     const cx = offset + clusterW / 2;
     const shortGroup = truncateLabel(groupName, 14);
-    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="9" fill="#475569" font-weight="600"><title>${escapeHtml(groupName)}</title>${escapeHtml(shortGroup)}</text>`;
+    svgParts += `<text x="${cx}" y="${baseY + 14}" text-anchor="middle" font-size="12" fill="var(--chart-muted)" font-weight="600"><title>${escapeHtml(groupName)}</title>${escapeHtml(shortGroup)}</text>`;
     bars.forEach(b => {
       const x = offset + b.gi * (barW + barGap);
       const y = baseY - scale(b.fold);
       const hasErr = b.foldHigh > b.foldLow;
       const yHi = hasErr ? baseY - scale(b.foldHigh) : y;
       const yLo = hasErr ? baseY - scale(b.foldLow) : y;
-      const color = colors[b.gi % colors.length];
-      svgParts += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="3" fill="${color}" fill-opacity="0.85"/>`;
+      const color = `url(#qpcr-series-${b.gi % colors.length})`;
+      svgParts += `<text x="${x + barW / 2}" y="${baseY + 29}" text-anchor="middle" font-size="12" fill="var(--chart-muted)"><title>${escapeHtml(b.gene)}</title>${escapeHtml(truncateLabel(b.gene, 4))}</text>`;
+      svgParts += `<rect x="${x}" y="${y}" width="${barW}" height="${Math.max(1, baseY - y)}" rx="0" fill="${color}"><title>${escapeHtml(b.group)} · ${escapeHtml(b.gene)}：${fmt(b.fold)}</title></rect>`;
       if (hasErr) {
         const mx = x + barW / 2;
-        svgParts += `<line x1="${mx}" y1="${yHi}" x2="${mx}" y2="${yLo}" stroke="#475569" stroke-width="1"/>`
-          + `<line x1="${mx - 4}" y1="${yHi}" x2="${mx + 4}" y2="${yHi}" stroke="#475569" stroke-width="1"/>`
-          + `<line x1="${mx - 4}" y1="${yLo}" x2="${mx + 4}" y2="${yLo}" stroke="#475569" stroke-width="1"/>`;
+        svgParts += `<line x1="${mx}" y1="${yHi}" x2="${mx}" y2="${yLo}" stroke="var(--chart-muted)" stroke-width="1"/>`
+          + `<line x1="${mx - 4}" y1="${yHi}" x2="${mx + 4}" y2="${yHi}" stroke="var(--chart-muted)" stroke-width="1"/>`
+          + `<line x1="${mx - 4}" y1="${yLo}" x2="${mx + 4}" y2="${yLo}" stroke="var(--chart-muted)" stroke-width="1"/>`;
       }
-      svgParts += `<text x="${x + barW / 2}" y="${Math.max(16, yHi - 3)}" text-anchor="middle" font-size="8.5" fill="#334155">${fmt(b.fold)}</text>`;
+      svgParts += `<text x="${x + barW / 2}" y="${Math.max(16, yHi - 3)}" text-anchor="middle" font-size="12" fill="var(--chart-ink)">${fmt(b.fold)}</text>`;
     });
     offset += clusterW + dynClusterGap;
   });
 
-  svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="#cbd5e1" stroke-width="1"/>`;
-  svgParts += geneList.map((g, i) =>
-    `<rect x="${8 + i * 80}" y="4" width="10" height="10" rx="2" fill="${colors[i % colors.length]}" fill-opacity="0.85"/>`
-    + `<text x="${22 + i * 80}" y="13" font-size="9" fill="#475569">${escapeHtml(g)}</text>`
-  ).join('');
+  svgParts += `<line x1="4" y1="${baseY}" x2="${totalW - 4}" y2="${baseY}" stroke="var(--chart-line)" stroke-width="1"/>`;
+  let legendX = 8;
+  svgParts += geneList.map((g, i) => {
+    const x = legendX;
+    legendX += legendWidths[i];
+    return `<rect x="${x}" y="4" width="14" height="14" fill="url(#qpcr-series-${i % colors.length})"/>`
+      + `<text x="${x + 20}" y="16" font-size="12" fill="var(--chart-muted)"><title>${escapeHtml(g)}</title>${escapeHtml(truncateLabel(g, 16))}</text>`;
+  }).join('');
 
-  return `<svg viewBox="0 0 ${totalW} ${chartH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图">${svgParts}</svg>`;
+  return `<svg viewBox="0 0 ${totalW} ${chartH}" style="width:${totalW}px;max-width:none" role="img" aria-label="分组汇总柱状图，基因用颜色、纹理和文字图例共同区分"><defs>${patterns}</defs>${svgParts}</svg>`;
 }
