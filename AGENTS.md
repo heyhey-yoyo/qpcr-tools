@@ -185,7 +185,7 @@ SVG 分隔线读取 plate-grid 的尺寸变量，与 96/384 孔板共享几何�
 
 ## 部署
 
-Cloudflare Pages Git 集成（推送 `main` 自动构建部署）或 Direct Upload 静态资源上传；无环境变量、无服务端代码。
+Cloudflare Pages 与 GitHub 仓库集成：推送 `main` 分支即自动构建部署；无环境变量、无服务端代码。
 
 ## 安全与数据注意事项
 
@@ -197,12 +197,14 @@ Cloudflare Pages Git 集成（推送 `main` 自动构建部署）或 Direct Uplo
 
 `YDchen Tools` 文字页眉是受保护的品牌区域，必须保持原结构、尺寸与样式；项目专属统一标志 `assets/project-mark.svg` 仅用于 favicon 或现有非页眉标志，不得改变页面布局。
 
+---
+
 ## AI 维护提醒
 
 > **⚠️ 任何修改此项目的 AI 代理都必须遵守：**
 >
-> - 修改代码后必须同步更新本文件与 README.md
-> - README.md 面向人类用户，AGENTS.md 面向 AI 代理，两份文件不可互相替代
+> - 修改代码后必须同步更新本文件与 [README.md](./README.md)
+> - [README.md](./README.md) 面向人类用户，AGENTS.md 面向 AI 代理，两份文件不可互相替代
 > - 新模块文件需在本文的文件结构中列出
 > - localStorage 键升级需在 migration.js 中处理
 > - 核心计算逻辑的修改需要更新 test/ddct.mjs

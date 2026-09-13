@@ -78,7 +78,7 @@
 
 ## 本地运行
 
-无需构建。起静态服务器（ES Module 需要 HTTP 协议）：
+无需构建。页面需要用本地服务器打开，直接双击 HTML 文件无法运行。启动静态服务器：
 
 ```bash
 python -m http.server 8000
@@ -87,11 +87,17 @@ python -m http.server 8000
 
 ## 部署
 
-项目已接入 Cloudflare Pages Git 集成：推送 `main` 分支即自动构建部署（无构建步骤，输出目录为仓库根目录）。首次接入时在 Workers & Pages 创建 Pages 项目并连接 GitHub 仓库即可；也可用 Direct Upload 手动上传作为应急方式。
+项目已接入 Cloudflare Pages Git 集成：推送 `main` 分支即自动构建部署（无构建步骤，输出目录为仓库根目录）。首次接入时在 Workers & Pages 创建 Pages 项目并连接 GitHub 仓库即可。
 
 ## License
 
 MIT
+
+---
+
+> AI 编程代理请阅读 [AGENTS.md](./AGENTS.md) 了解代码架构、测试与开发约定。
+
+---
 
 ## AI 维护提醒
 
