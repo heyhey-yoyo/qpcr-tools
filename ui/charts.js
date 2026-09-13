@@ -5,9 +5,9 @@
  * Pure functions: take data, return SVG string. No DOM access.
  */
 
-import { mean } from '../core/statistics.js';
-import { normalizeKey } from '../core/normalize.js';
-import { escapeHtml } from '../core/escape.js';
+import { mean } from '../core/statistics.js?v=d2a82a75a9b3';
+import { normalizeKey } from '../core/normalize.js?v=d2a82a75a9b3';
+import { escapeHtml } from '../core/escape.js?v=d2a82a75a9b3';
 
 export function fmt(value, digits = 3) {
   return Number.isFinite(value) ? value.toFixed(digits).replace(/0+$/, '').replace(/\.$/, '') : '—';

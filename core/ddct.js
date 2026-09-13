@@ -1,8 +1,8 @@
 'use strict';
 
-import { rowStats } from './statistics.js';
-import { mean } from './statistics.js';
-import { normalizeKey } from './normalize.js';
+import { rowStats } from './statistics.js?v=d2a82a75a9b3';
+import { mean } from './statistics.js?v=d2a82a75a9b3';
+import { normalizeKey } from './normalize.js?v=d2a82a75a9b3';
 
 /**
  * Pure-function qPCR analysis: ΔCt / ΔΔCt computation.

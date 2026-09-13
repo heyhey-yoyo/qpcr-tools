@@ -6,11 +6,11 @@
  * But they take all state as arguments — no hidden global access.
  */
 
-import { parseCt } from '../core/ct.js';
-import { escapeHtml } from '../core/escape.js';
-import { fmt } from './charts.js';
-import { normalizeKey } from '../core/normalize.js';
-import { resolveGeneName, resolveGroupName, resolveGroupId, resolveGeneId, getBaselineGroups } from '../state/experiment.js';
+import { parseCt } from '../core/ct.js?v=d2a82a75a9b3';
+import { escapeHtml } from '../core/escape.js?v=d2a82a75a9b3';
+import { fmt } from './charts.js?v=d2a82a75a9b3';
+import { normalizeKey } from '../core/normalize.js?v=d2a82a75a9b3';
+import { resolveGeneName, resolveGroupName, resolveGroupId, resolveGeneId, getBaselineGroups } from '../state/experiment.js?v=d2a82a75a9b3';
 
 // ---- Group chips ----
 

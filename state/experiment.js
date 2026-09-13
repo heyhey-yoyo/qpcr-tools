@@ -1,6 +1,6 @@
 'use strict';
 
-import { normalizeKey } from '../core/normalize.js';
+import { normalizeKey } from '../core/normalize.js?v=d2a82a75a9b3';
 
 let _idCounter = 0;
 function uid(prefix) {

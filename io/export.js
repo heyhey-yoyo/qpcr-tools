@@ -1,6 +1,6 @@
 'use strict';
 
-import { fmt } from '../ui/charts.js';
+import { fmt } from '../ui/charts.js?v=d2a82a75a9b3';
 
 /**
  * Quote a CSV cell value. Wraps in double quotes if the value contains

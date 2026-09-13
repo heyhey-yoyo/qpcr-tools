@@ -1,6 +1,6 @@
 'use strict';
 
-import { parseCt } from './ct.js';
+import { parseCt } from './ct.js?v=d2a82a75a9b3';
 
 /**
  * Arithmetic mean. Returns null for empty input.

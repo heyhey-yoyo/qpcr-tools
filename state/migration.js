@@ -1,7 +1,7 @@
 'use strict';
 
-import { normalizeKey } from '../core/normalize.js';
-import { createExperiment, createGroup, createTargetGene, ensureCompareAssignments } from './experiment.js';
+import { normalizeKey } from '../core/normalize.js?v=d2a82a75a9b3';
+import { createExperiment, createGroup, createTargetGene, ensureCompareAssignments } from './experiment.js?v=d2a82a75a9b3';
 
 export const CURRENT_VERSION = 7;
 

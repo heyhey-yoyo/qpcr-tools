@@ -1,9 +1,9 @@
 'use strict';
 
 // ---- Imports ----
-import { parseCt } from './core/ct.js';
-import { normalizeKey } from './core/normalize.js';
-import { computeAnalysis } from './core/ddct.js';
+import { parseCt } from './core/ct.js?v=d2a82a75a9b3';
+import { normalizeKey } from './core/normalize.js?v=d2a82a75a9b3';
+import { computeAnalysis } from './core/ddct.js?v=d2a82a75a9b3';
 import {
   createExperiment, addGroup as expAddGroup, addTargetGene as expAddTargetGene,
   renameGroup as expRenameGroup, renameTargetGene as expRenameTargetGene,
@@ -11,16 +11,16 @@ import {
   removeTargetGene as expRemoveTargetGene, setRefGeneName,
   getBaselineGroups, ensureExperiment,
   resolveGroupName, resolveGeneName
-} from './state/experiment.js';
-import { migrateState, CURRENT_VERSION } from './state/migration.js';
-import { resultsChartSvg, groupChartSvg } from './ui/charts.js';
+} from './state/experiment.js?v=d2a82a75a9b3';
+import { migrateState, CURRENT_VERSION } from './state/migration.js?v=d2a82a75a9b3';
+import { resultsChartSvg, groupChartSvg } from './ui/charts.js?v=d2a82a75a9b3';
 import {
   renderGroups, renderTargetGenes, renderRefGene,
   renderBlocks, readBlocksFromDom, renderPlateGrid,
   renderRows, readRowsFromDom, renderResults, buildAlertsHtml
-} from './ui/render.js';
-import { parseCtColumn } from './io/import.js';
-import { resultsCsv, plateCsv, downloadFile, exportTemplateJson } from './io/export.js';
+} from './ui/render.js?v=d2a82a75a9b3';
+import { parseCtColumn } from './io/import.js?v=d2a82a75a9b3';
+import { resultsCsv, plateCsv, downloadFile, exportTemplateJson } from './io/export.js?v=d2a82a75a9b3';
 
 // ---- Constants ----
 const KEY = 'qpcr-demo-v7';

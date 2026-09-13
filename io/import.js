@@ -1,6 +1,6 @@
 'use strict';
 
-import { parseCt } from '../core/ct.js';
+import { parseCt } from '../core/ct.js?v=d2a82a75a9b3';
 
 /**
  * Parse Roche single-column Ct/Cp/Cq output.
