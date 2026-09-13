@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#f3eee5" />
   <title>qPCR 分析工具</title>
   <link rel="icon" href="./assets/project-mark.svg" type="image/svg+xml" />
-  <link rel="stylesheet" href="./styles.css?v=20260913-closure" />
+  <link rel="stylesheet" href="./styles.css?v=2.2.1" />
 </head>
 <body>
 <header class="site-header">
@@ -142,14 +142,14 @@
       <div class="paste-panel-heading">
         <div>
           <strong>罗氏单列 Ct / Cp 粘贴</strong>
-          <p>从 Excel 或罗氏导出表中复制一整列 Ct/Cp，系统会按当前 Ct 数据表的孔位顺序从上到下依次填入。</p>
+          <p>从 Excel 或罗氏导出表中复制一整列 Ct/Cp，系统按已分配孔位的物理行序 A1、A2…B1…填入，与纵向/横向点板及表格行顺序无关；两列「孔号 + Ct」则按孔号匹配。</p>
         </div>
         <button id="closeCtColumnBtn" class="icon-button" title="关闭">×</button>
       </div>
       <textarea id="ctColumnArea" class="paste-area" rows="7" spellcheck="false" placeholder="Cp&#10;25.12&#10;25.30&#10;25.21&#10;Undetermined&#10;19.91"></textarea>
       <div class="button-row">
         <button id="applyCtColumnBtn" class="button button-primary">填入当前数据表</button>
-        <span id="ctPasteStatus" class="paste-status">支持 Ct、Cq、Cp 表头；Undetermined、No Ct、空行会保留为空白孔。</span>
+        <span id="ctPasteStatus" class="paste-status">支持 Ct、Cq、Cp 表头；Undetermined、No Ct 和内部空行保留为空白孔；首尾空行去掉。</span>
       </div>
     </div>
 
@@ -159,7 +159,7 @@
         <tbody id="samplesBody"></tbody>
       </table>
     </div>
-    <p class="help-text">单列 Ct 会严格按照当前数据表从第一行 Ct1、Ct2、Ct3……到下一行继续填入。建议先"应用到 Ct 数据表"，再粘贴仪器导出的单列结果。</p>
+    <p class="help-text">单列 Ct 按已分配孔位 A1、A2…B1…的物理行序填入，跳过模板未分配孔；先刷新点板信息，再核对仪器导出顺序。孔号 + Ct 两列数据按孔号匹配。</p>
   </section>
 
   <section class="card results-card">
@@ -172,7 +172,7 @@
     <div id="resultsChart" class="results-chart"></div>
     <div id="groupChart" class="results-chart"></div>
     <div class="table-wrap">
-      <table><thead><tr><th>样本</th><th>组别</th><th>目标基因</th><th>比较基准</th><th>目标 Ct</th><th>内参 Ct</th><th>ΔCt</th><th>ΔΔCt</th><th>相对表达量</th><th>质控</th></tr></thead><tbody id="resultsBody"></tbody></table>
+      <table><thead><tr><th>样本</th><th>组别</th><th>目标基因</th><th>比较基准</th><th>目标 Ct</th><th>内参 Ct</th><th>ΔCt</th><th>比较基准生物学 SEM（ΔCt）</th><th>ΔΔCt</th><th>相对表达量</th><th>质控</th></tr></thead><tbody id="resultsBody"></tbody></table>
     </div>
   </section>
 
@@ -182,7 +182,7 @@
       <li><strong>96 / 384 孔板：</strong>切换规格后，起始行和列会自动更新；模板区块和分析数据不会丢失。</li>
       <li><strong>提交式设计：</strong>第一步的设计参数（分组、基因、复孔数、孔板设置等）修改后只暂存，点击"刷新点板信息"才应用到模板、孔位与 Ct 数据表；空间不足会提醒且不生效，刷新会清除当前所有孔位与已录入的 Ct 数据（点击时有确认提示）。</li>
       <li><strong>区块表是唯一权威：</strong>在区块表中修改样本/组别/基因名称会实时同步到 Ct 数据表；Ct 数据表不支持删除行，删除请通过区块表的删除按钮（对应行会同步删除）。</li>
-      <li><strong>罗氏单列结果：</strong>支持 Ct、Cq、Cp 表头及 Undetermined 等缺失值；填入顺序与当前 Ct 表格一致。</li>
+      <li><strong>罗氏单列结果：</strong>支持 Ct、Cq、Cp 表头及 Undetermined 等缺失值；按已分配孔位的物理行序 A1、A2…B1…填入；缺失值和内部空行保留占位，首尾空行去掉，标题及独立孔号行跳过。</li>
       <li><strong>相对表达量：</strong>先计算 ΔCt = 目标基因 Ct − 内参基因 Ct，再以该组别指定的比较基准组平均 ΔCt 计算 ΔΔCt 和 2^-ΔΔCt。每个分组可通过芯片下拉框选择比较基准。</li>
       <li><strong>技术重复质控：</strong>同一行有效 Ct 的最大值与最小值之差超过阈值时会标记为需复核。</li>
       <li>本 Demo 不自动剔除离群孔；正式分析前应结合扩增曲线、熔解曲线和实验室 SOP 复核。</li>
@@ -191,6 +191,6 @@
   </section>
 </main>
 <footer class="site-footer"><div class="container">qPCR 分析工具 · 数据不会离开当前浏览器</div></footer>
-<script type="module" src="./app.js?v=20260913-closure"></script>
+<script type="module" src="./app.js?v=2.2.1"></script>
 </body>
 </html>

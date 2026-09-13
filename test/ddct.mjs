@@ -1,6 +1,8 @@
 // ΔCt / ΔΔCt calculation regression tests
 // Usage: node test/ddct.mjs
 
+import { resultsCsv } from '../io/export.js';
+import { renderResults } from '../ui/render.js';
 import { computeAnalysis } from '../core/ddct.js';
 
 let failures = 0;
@@ -404,6 +406,27 @@ const experiment = mkExperiment(
   check('T19 Middle isBaseline', middle.isBaseline, false);
   check('T19 Middle compareToGroupId', middle.compareToGroupId, 'g1');
   check('T19 Middle ddct', middle.ddct, 7 - 5);
+}
+
+// 生物学 SEM 贯穿计算、表格和 CSV，不被缺值伪装成 0。
+{
+  const rows = [...mkPair('NC1','NC','g1','IL6','tg1',4,'ref'), ...mkPair('NC2','NC','g1','IL6','tg1',6,'ref'), ...mkPair('T','Treatment','g2','IL6','tg1',3,'ref')];
+  const analysis = computeAnalysis({ rows, experiment, mode: 'ddct', maxSpread: 0.5 });
+  const result = analysis.results.find(x => x.name === 'T');
+  check('bio SEM 2 samples is 1', result.controlBioSem, 1);
+  const cells = resultsCsv([result], 'ddct').split('\n').map(line => line.split(','));
+  const column = cells[0].indexOf('比较基准生物学 SEM（ΔCt）');
+  check('bio SEM CSV column exists', column >= 0, true);
+  check('bio SEM CSV value', Number(cells[1][column]), 1);
+  for (const mode of ['ddct', 'dct']) {
+    const value = computeAnalysis({rows: rows.filter(x => x.name !== 'NC2'), experiment, mode, maxSpread:0.5});
+    const item = value.results.find(x => x.name === 'T');
+    check('single baseline/null CSV ' + mode, resultsCsv([item], mode).split('\n')[1].split(',')[column], '—');
+  }
+  const body = { innerHTML: '' };
+  renderResults([result], 'ddct', experiment, analysis.controlStatsByGene, { results: body });
+  check('bio SEM table has 11 columns', (body.innerHTML.match(/<td>/g) || []).length, 11);
+  check('bio SEM table matches its CSV column', [...body.innerHTML.matchAll(/<td>([\s\S]*?)<\/td>/g)][7][1], cells[1][column]);
 }
 
 console.log(failures ? `\n${failures} FAILED` : '\nALL PASS');

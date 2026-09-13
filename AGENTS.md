@@ -17,7 +17,7 @@
 
 | 文件 | 作用 |
 | --- | --- |
-| `index.html` | 页面结构，中文 UI，4 步卡片流程 |
+| `index.html` | 页面结构，中文 UI，5 步卡片流程（设计孔板模板 / 点板信息确认 / 选择分析模式并设置参数 / 录入 Ct 数据 / 分析结果） |
 | `app.js` | 应用入口/协调器，ES module，全局事件绑定与状态管理 |
 | `styles.css` | 全部样式（压缩风格，单行规则） |
 | `assets/project-mark.svg` | 项目专属标志（用于 favicon） |
@@ -37,9 +37,10 @@
 | `io/import.js` | 数据导入：parseCtColumn()（罗氏单列 Ct 解析） |
 | `io/export.js` | 数据导出：resultsCsv(), plateCsv(), downloadFile(), exportTemplateJson() |
 | `test/` | 单元测试（Node.js ES module, .mjs） |
-| `test/ct.mjs` | Ct 校验测试 |
-| `test/ddct.mjs` | ΔΔCt 计算回归测试 |
+| `test/ct.mjs` | Ct 校验与导入缺失占位测试 |
+| `test/ddct.mjs` | ΔΔCt 计算、基准生物学 SEM 表格/CSV 回归测试 |
 | `test/migration.mjs` | localStorage 迁移测试 |
+| `test/charts.mjs` | 图表文字、纹理和系列编码回归测试 |
 | `README.md` | 用户文档（中文） |
 | `AGENTS.md` | 本文件：AI 代理文档 |
 | `LICENSE` | MIT 许可证 |
@@ -60,6 +61,7 @@ python -m http.server 8000
 node test/ct.mjs        # Ct 校验测试
 node test/ddct.mjs      # ΔΔCt 计算回归测试
 node test/migration.mjs # 数据迁移测试
+node test/charts.mjs    # 图表编码测试
 ```
 
 测试直接 `import` 模块，无需正则提取或 `eval()`。
@@ -74,6 +76,8 @@ node test/charts.mjs
 ```
 
 ## 代码组织与风格约定
+
+对外版本以 GitHub Release 为准；项目没有独立的应用版本常量，发布不更改本地存储格式。 页面资源查询串用于刷新缓存；模板 JSON 与状态迁移版本独立维护。
 
 ### 数据模型（v7）
 
@@ -92,8 +96,9 @@ node test/charts.mjs
 
 - `techSem`：样本技术重复 SEM（ΔCt 层面，由目标+内参独立孔的 SD 传播）
 - `bioSem`：对照组生物学重复 SEM，仅当对照组有 ≥2 个生物学样本时计算；单样本时 `bioSem = null`
-- 图表误差棒 = `techSem`；对照组无误差棒
-- `bioSem === null` 时 CSV 和界面显示为空或「—」，不显示为 0
+- 个体图：ΔCt 模式含基准样本，使用 `techSem` 换算 2^−(ΔCt±SEM)；ΔΔCt 模式非基准个体使用 2^−(ΔΔCt±techSem)，基准组个体 `error = null`，不画误差棒。两种模式的个体区间均不含基准均值误差。
+- 分组图：按组和基因汇总生物学样本 ΔΔCt，柱高 2^−mean(ΔΔCt)，区间 2^−(mean±组内生物学 SEM)；基准组同样参与，n=1 无误差棒。
+- `controlStatsByGene.bioSem` 以 `controlBioSem` 字段进入结果；在 ΔΔCt 结果表及 CSV 的「比较基准生物学 SEM（ΔCt）」独立展示。单基准样本、缺基准、ΔCt 模式均显示「—」，不显示为 0。
 
 ### 两种分析模式
 
@@ -130,7 +135,7 @@ node test/charts.mjs
 
 ### Ct 数据导入
 
-罗氏单列 Ct 粘贴（`parseCtColumn`）：检测并跳过标题行、缺失值行、孔位 ID 行，严格按孔位顺序填入，显示详细状态消息。
+罗氏单列 Ct 粘贴（`parseCtColumn`）：跳过标题、独立孔号及未识别的非 Ct 行；缺失值、越界数字和内部空行以 `null` 占位，首尾空行去掉。`buildWellSortedSlots` 按已分配孔位的物理行序 A1、A2…B1…（列号按数值排序）填入，与横向/纵向布局及 Ct 表行顺序无关。两列「孔号 + Ct」优先按孔号匹配，未匹配位置清空并提示；界面显示导入状态。
 
 ### 分析计算流程
 
@@ -144,8 +149,8 @@ node test/charts.mjs
 
 ### 图表
 
-- `resultsChartSvg`：逐样本柱状图，保持传入顺序（rows 顺序 = 区块表顺序）。绿柱=通过，橙柱=需复核，误差棒为 techSem 换算的倍数区间
-- `groupChartSvg`：分组汇总图（仅 ΔΔCt 模式 + 多基因时），按分组聚类，基因作为簇内彩色柱，单基因时自动隐藏
+- `resultsChartSvg`：逐样本柱状图，保持传入顺序（rows 顺序 = 区块表顺序）。`--chart-ok` 表示通过、`--chart-warning` 表示需复核，颜色以当前样式令牌为准，误差棒按上文两种个体模式的 techSem 规则换算
+- `groupChartSvg`：分组汇总图（仅 ΔΔCt 模式 + 多基因时），按分组聚类，基因以簇内不同明度和纹理柱区分，同时提供基因文字和完整名称提示，单基因时自动隐藏；组内生物学样本 ΔΔCt 的 SEM 决定误差区间，不能将其标为技术 SEM
 
 ### QC 告警层级
 
@@ -156,7 +161,7 @@ node test/charts.mjs
 - localStorage 键 `qpcr-demo-v7`（兼容 v3/v4/v5/v6 旧键的自动迁移）
 - `save()` 在每次操作后调用，保存 experiment、blocks、rows、replicateCount、plate 设置、mode、spread；写入失败（隐私模式、配额满）时捕获异常、保留内存态并弹窗提示用户备份（恢复成功前只提示一次）
 - `load()` 自动迁移旧格式数据（通过 `migrateState()`）
-- 「恢复默认」（`resetBtn`）：清除所有 localStorage 键，重置所有状态为默认值
+- 「恢复默认」（`resetBtn`）：仅清除 `qpcr-demo-v7` 与 v3/v4/v5/v6 旧版工具键，重置所有状态为默认值
 
 ### 代码风格
 

@@ -1,6 +1,7 @@
 // Ct validation unit tests
 // Usage: node test/ct.mjs
 
+import { parseCtColumn } from '../io/import.js';
 import { parseCt, isValidCt, filterValidCts, CT_MIN, CT_MAX } from '../core/ct.js';
 
 let failures = 0;
@@ -86,6 +87,10 @@ check('T10 valid stays valid', v1.valid, true);
 check('T10 invalid detected', v2.valid, false);
 check('T10 valid again after correction', v3.valid, true);
 check('T10 same value returned after correction', v3.value, 25.5);
+
+check('import internal blanks and missing preserve slots', parseCtColumn('\nCt\n20\nUndetermined\n\n22\n').values, [20, null, null, 22]);
+check('import only header skipped', parseCtColumn('Ct\n20\nUndetermined\n\n22').skipped, 1);
+check('import independent well ID skipped', parseCtColumn('A1\n20\nA2\n22').values, [20, 22]);
 
 console.log(failures ? `\n${failures} FAILED` : '\nALL PASS');
 process.exit(failures ? 1 : 0);

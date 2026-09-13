@@ -20,7 +20,7 @@ import { parseCt } from '../core/ct.js';
  * @returns {{ values: Array<number|null>, numeric: number, skipped: number }}
  *   values: array where valid Ct numbers are stored, null for invalid/missing
  *   numeric: count of valid Ct values found
- *   skipped: count of skipped (header/missing/non-Ct) lines
+ *   skipped: count of skipped header/well-ID/unrecognized lines; missing values retain null slots
  */
 export function parseCtColumn(text) {
   const lines = String(text ?? '').replaceAll('﻿', '').replaceAll('\r', '').split('\n');

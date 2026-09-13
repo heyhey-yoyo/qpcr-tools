@@ -550,8 +550,8 @@ export function renderResults(results, mode, experiment, controlStatsByGene, con
   // Formula note
   if (containers.formula) {
     containers.formula.innerHTML = mode === 'ddct'
-      ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 所属组别指定比较基准组的同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。误差棒仅为该样本技术重复的 SEM（ΔCt 层面），基准组样本不画误差棒。'
-      : '<strong>归一化表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；归一化表达量 = 2<sup>−ΔCt</sup>。误差棒为 ΔCt 的 SEM，仅反映技术重复层面。';
+      ? '<strong>相对表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；ΔΔCt = ΔCt(样本) − 所属组别指定比较基准组的同基因平均 ΔCt；相对表达量 = 2<sup>−ΔΔCt</sup>。个体图误差棒由该样本技术重复 SEM（ΔCt 层面）换算，不含基准均值误差，基准组个体不画误差棒。分组图柱高为 2<sup>−组内平均ΔΔCt</sup>，区间由该组同基因生物学样本 ΔΔCt 的 SEM 换算；基准组同样参与，n=1 无误差棒。表中比较基准生物学 SEM 单独报告，不混入个体误差。'
+      : '<strong>归一化表达：</strong>ΔCt = Ct(目标基因) − Ct(内参基因)；归一化表达量 = 2<sup>−ΔCt</sup>。所有具备技术重复的样本（含基准组）均用 ΔCt 的技术 SEM 换算误差区间，单孔不画误差棒。';
   }
 
   // Summary
@@ -585,9 +585,10 @@ export function renderResults(results, mode, experiment, controlStatsByGene, con
       <td>${escapeHtml(item.name)}</td><td>${escapeHtml(item.group)}</td><td>${escapeHtml(item.gene)}</td>
       <td>${mode === 'ddct' ? escapeHtml(item.compareToGroup || '—') : '—'}</td>
       <td>${fmt(item.targetCt)}</td><td>${fmt(item.referenceCt)}</td><td>${fmt(item.dct)}</td>
+      <td>${mode === 'ddct' ? fmt(item.controlBioSem) : '—'}</td>
       <td>${mode === 'ddct' ? fmt(item.ddct) : '—'}</td><td>${fmt(item.fold)}</td>
       <td><span class="status ${item.missingControl || !item.qc ? 'status-warning' : 'status-ok'}">${item.missingControl ? '缺对照' : item.n < 2 ? '单孔' : item.qc ? '通过' : '需复核'}</span></td>
-    </tr>`).join('') || '<tr><td colspan="10" style="text-align:center;color:#64748b;padding:24px">暂无可计算结果</td></tr>';
+    </tr>`).join('') || '<tr><td colspan="11" style="text-align:center;color:#64748b;padding:24px">暂无可计算结果</td></tr>';
   }
 }
 
